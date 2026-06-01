@@ -583,6 +583,7 @@ var EMAIL_TEMPLATE = "Hello,\nCan you please respond with our B2B credentials?\n
 /* ── Meetings render ── */
 function renderMeetings() {
   var card = document.getElementById('meetings-card');
+  if (!card) return; // replaced by HubSpot meeting cards
   var body = document.getElementById('meetings-body');
   var sub  = document.getElementById('meetings-subtitle');
   var meetings = STATE.meetings || [];

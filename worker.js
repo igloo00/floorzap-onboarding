@@ -60,6 +60,10 @@ export default {
     // 2. Fetch ticket properties from HubSpot
     const PROPS = [
       'floorzap_url',
+      'initial_onboarding_meeting',
+      'n2_week_check_in_meeting',
+      'integrations_meeting',
+      'graduation_meeting',
     ].join(',');
 
     let p;
@@ -84,6 +88,12 @@ export default {
     return new Response(
       JSON.stringify({
         floorzap_url: p.floorzap_url ?? null,
+        meetings: [
+          { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null },
+          { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null },
+          { title: 'Integrations',       date: p.integrations_meeting        ? fmtDate(p.integrations_meeting)        : null },
+          { title: 'Graduation Meeting', date: p.graduation_meeting          ? fmtDate(p.graduation_meeting)          : null },
+        ],
       }),
       { headers: CORS }
     );

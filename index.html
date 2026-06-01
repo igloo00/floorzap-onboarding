@@ -47,6 +47,37 @@ body {
 .header-help:hover { color: #fff; }
 .header-help svg { flex-shrink: 0; }
 
+/* ── Meeting cards grid ── */
+.meeting-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.meeting-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.meeting-card-title {
+  font-size: 11px; font-weight: 700; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.3;
+}
+.meeting-card-date {
+  font-size: 13.5px; font-weight: 600; color: #111827; line-height: 1.3;
+}
+.meeting-card-date.tbd {
+  color: #d1d5db; font-weight: 500; font-style: italic;
+}
+@media (max-width: 540px) {
+  .meeting-cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .meeting-card { padding: 12px 14px; }
+  .meeting-card-title { font-size: 10px; }
+  .meeting-card-date { font-size: 12.5px; }
+}
+
 /* ── Meetings ── */
 .floorzap-url-card {
   background: #eff6ff;
@@ -340,18 +371,24 @@ body {
     <a class="fz-open-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener">Open ↗</a>
   </div>
 
-  <!-- Meetings -->
-  <div class="meetings-card" id="meetings-card">
-    <div class="meetings-header">
-      <div class="meetings-icon">
-        <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#1d4ed8" stroke-width="1.5"/><path d="M2 6h12" stroke="#1d4ed8" stroke-width="1.5"/><path d="M5 1v2M11 1v2" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </div>
-      <div>
-        <div class="meetings-title">Upcoming meetings</div>
-        <div class="meetings-subtitle" id="meetings-subtitle"></div>
-      </div>
+  <!-- Meeting cards (shown only when ?c= param is present) -->
+  <div class="meeting-cards-grid" id="meeting-cards-grid" style="display:none">
+    <div class="meeting-card">
+      <div class="meeting-card-title">Kickoff Meeting</div>
+      <div class="meeting-card-date tbd" id="mtg-kickoff">—</div>
     </div>
-    <div class="meetings-body" id="meetings-body"></div>
+    <div class="meeting-card">
+      <div class="meeting-card-title">2-Week Check-in</div>
+      <div class="meeting-card-date tbd" id="mtg-checkin">—</div>
+    </div>
+    <div class="meeting-card">
+      <div class="meeting-card-title">Integrations</div>
+      <div class="meeting-card-date tbd" id="mtg-integrations">—</div>
+    </div>
+    <div class="meeting-card">
+      <div class="meeting-card-title">Graduation Meeting</div>
+      <div class="meeting-card-date tbd" id="mtg-graduation">—</div>
+    </div>
   </div>
 
   <!-- System Configuration -->
@@ -681,8 +718,10 @@ function applyClientName() {
   var wrap = document.getElementById('client-greeting');
   var nameEl = document.getElementById('greeting-name');
   var prog = document.getElementById('overall-progress');
+  var grid = document.getElementById('meeting-cards-grid');
   if (nameEl) nameEl.textContent = CLIENT_NAME;
   if (wrap) wrap.style.display = '';
+  if (grid) grid.style.display = '';
   if (prog) prog.style.display = '';
   updateOverallProgress();
 }
@@ -728,6 +767,21 @@ async function loadHubSpotMeetings() {
     if (data.floorzap_url) {
       FLOORZAP_URL = data.floorzap_url;
       applyFloorzapUrl();
+    }
+    if (data.meetings) {
+      var ids = ['mtg-kickoff', 'mtg-checkin', 'mtg-integrations', 'mtg-graduation'];
+      data.meetings.forEach(function(m, i) {
+        var el = document.getElementById(ids[i]);
+        if (!el) return;
+        if (m.date) {
+          el.textContent = m.date;
+          el.classList.remove('tbd');
+        } else {
+          el.textContent = 'Not scheduled';
+          el.classList.add('tbd');
+        }
+      });
+      document.getElementById('meeting-cards-grid').style.display = '';
     }
   } catch(e) {}
 }

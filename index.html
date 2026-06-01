@@ -71,6 +71,24 @@ body {
 .meeting-card-date.tbd {
   color: #d1d5db; font-weight: 500; font-style: italic;
 }
+.meeting-card.complete {
+  background: #f0fdf4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 0 0 1px rgba(22,163,74,0.2);
+}
+.meeting-card-badge {
+  display: none; font-size: 11px; font-weight: 700; color: #16a34a;
+  margin-top: 4px;
+}
+.meeting-card.complete .meeting-card-badge { display: block; }
+.meeting-card-zoom {
+  display: none; margin-top: 6px;
+}
+.meeting-card-zoom a {
+  font-size: 12px; font-weight: 600; color: #1566C0;
+  text-decoration: none; background: #eff6ff; border-radius: 6px;
+  padding: 4px 10px; display: inline-block; transition: background 0.12s;
+}
+.meeting-card-zoom a:hover { background: #dbeafe; }
 @media (max-width: 540px) {
   .meeting-cards-grid { grid-template-columns: repeat(2, 1fr); }
   .meeting-card { padding: 12px 14px; }
@@ -373,21 +391,29 @@ body {
 
   <!-- Meeting cards (shown only when ?c= param is present) -->
   <div class="meeting-cards-grid" id="meeting-cards-grid" style="display:none">
-    <div class="meeting-card">
+    <div class="meeting-card" id="mtg-card-kickoff">
       <div class="meeting-card-title">Kickoff Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-kickoff">—</div>
+      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-zoom" id="mtg-kickoff-zoom"><a href="#" target="_blank" id="mtg-kickoff-zoom-link">Join Zoom ↗</a></div>
     </div>
-    <div class="meeting-card">
+    <div class="meeting-card" id="mtg-card-checkin">
       <div class="meeting-card-title">2-Week Check-in</div>
       <div class="meeting-card-date tbd" id="mtg-checkin">—</div>
+      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-zoom" id="mtg-checkin-zoom"><a href="#" target="_blank" id="mtg-checkin-zoom-link">Join Zoom ↗</a></div>
     </div>
-    <div class="meeting-card">
+    <div class="meeting-card" id="mtg-card-integrations">
       <div class="meeting-card-title">Integrations</div>
       <div class="meeting-card-date tbd" id="mtg-integrations">—</div>
+      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-zoom" id="mtg-integrations-zoom"><a href="#" target="_blank" id="mtg-integrations-zoom-link">Join Zoom ↗</a></div>
     </div>
-    <div class="meeting-card">
+    <div class="meeting-card" id="mtg-card-graduation">
       <div class="meeting-card-title">Graduation Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-graduation">—</div>
+      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-zoom" id="mtg-graduation-zoom"><a href="#" target="_blank" id="mtg-graduation-zoom-link">Join Zoom ↗</a></div>
     </div>
   </div>
 
@@ -574,7 +600,7 @@ var _sb = null;
 try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
 
 var TOTALS = { sys: 8, b2b: 4, mig: 4, qs: 4 };
-var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [] };
+var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [], hs_meetings: {} };
 var CLIENT_NAME = null;
 var FLOORZAP_URL = null;
 
@@ -694,8 +720,9 @@ async function loadState() {
           STATE.b2b      = Array.isArray(s.b2b)      ? s.b2b      : [];
           STATE.mig      = Array.isArray(s.mig)      ? s.mig      : [];
           STATE.qs       = Array.isArray(s.qs)       ? s.qs       : [];
-          STATE.custom   = Array.isArray(s.custom)   ? s.custom   : [];
-          STATE.meetings = Array.isArray(s.meetings) ? s.meetings : [];
+          STATE.custom      = Array.isArray(s.custom)   ? s.custom   : [];
+          STATE.meetings    = Array.isArray(s.meetings) ? s.meetings : [];
+          STATE.hs_meetings = (s.hs_meetings && typeof s.hs_meetings === 'object') ? s.hs_meetings : {};
           applyState();
           try { localStorage.setItem(LS_KEY, JSON.stringify(STATE)); } catch(e) {}
         }
@@ -770,16 +797,25 @@ async function loadHubSpotMeetings() {
       applyFloorzapUrl();
     }
     if (data.meetings) {
-      var ids = ['mtg-kickoff', 'mtg-checkin', 'mtg-integrations', 'mtg-graduation'];
+      var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
       data.meetings.forEach(function(m, i) {
-        var el = document.getElementById(ids[i]);
-        if (!el) return;
-        if (m.date) {
-          el.textContent = m.date;
-          el.classList.remove('tbd');
-        } else {
-          el.textContent = 'Not scheduled';
-          el.classList.add('tbd');
+        var key = keys[i];
+        var dateEl = document.getElementById('mtg-' + key);
+        var card   = document.getElementById('mtg-card-' + key);
+        var hs     = STATE.hs_meetings[key] || {};
+        if (dateEl) {
+          if (m.date) { dateEl.textContent = m.date; dateEl.classList.remove('tbd'); }
+          else { dateEl.textContent = 'Not scheduled'; dateEl.classList.add('tbd'); }
+        }
+        if (card) {
+          if (hs.done) card.classList.add('complete');
+          else card.classList.remove('complete');
+        }
+        var zoomWrap = document.getElementById('mtg-' + key + '-zoom');
+        var zoomLink = document.getElementById('mtg-' + key + '-zoom-link');
+        if (zoomWrap && zoomLink && hs.zoom) {
+          zoomLink.href = hs.zoom;
+          zoomWrap.style.display = '';
         }
       });
       document.getElementById('meeting-cards-grid').style.display = '';

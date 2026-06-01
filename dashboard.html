@@ -405,6 +405,8 @@ body {
              placeholder="Company name" maxlength="80" onkeydown="modalKey(event)">
       <input class="modal-input" id="floorzap-url-input" type="text"
              placeholder="Floorzap URL (e.g. acme.floorzap.com)" maxlength="100" onkeydown="modalKey(event)">
+      <input class="modal-input" id="hubspot-ticket-input" type="text"
+             placeholder="HubSpot Ticket ID (optional — paste Record ID)" maxlength="30" onkeydown="modalKey(event)">
       <select class="modal-select" id="onboarder-select">
         <option value="">Assign to onboarder…</option>
         <option value="David">David</option>
@@ -445,6 +447,34 @@ body {
   </div>
 </div>
 
+<!-- Manage Meetings modal -->
+<div class="modal-backdrop" id="meetings-backdrop" onclick="meetingsBackdropClick(event)">
+  <div class="modal" style="max-width:500px;">
+    <h3 style="color:#111827;">Manage meetings</h3>
+    <p id="meetings-modal-subtitle" style="margin-bottom:16px;"></p>
+
+    <!-- Existing meetings list -->
+    <div id="meetings-list" style="margin-bottom:16px;"></div>
+
+    <!-- Add meeting form -->
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Add meeting</div>
+      <input class="modal-input" id="mtg-name" type="text" placeholder="Meeting name (e.g. 2-Week Check-in)" maxlength="80" style="margin-bottom:10px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input class="modal-input" id="mtg-date" type="text" placeholder="Date (e.g. June 3, 2026)" style="flex:1;margin-bottom:0;">
+        <input class="modal-input" id="mtg-time" type="text" placeholder="Time (e.g. 2:00 PM CT)" style="flex:1;margin-bottom:0;">
+      </div>
+      <input class="modal-input" id="mtg-zoom" type="text" placeholder="Zoom join URL (optional)" style="margin-bottom:10px;">
+      <input class="modal-input" id="mtg-reschedule" type="text" placeholder="Reschedule URL — Calendly link (optional)" style="margin-bottom:10px;">
+      <button class="btn-submit" onclick="addMeeting()" style="width:100%;">Add meeting</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMeetingsModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- Set Floorzap URL modal -->
 <div class="modal-backdrop" id="set-url-backdrop" onclick="setUrlBackdropClick(event)">
   <div class="modal">
@@ -456,6 +486,21 @@ body {
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSetUrlModal()">Cancel</button>
       <button class="btn-submit" id="set-url-submit-btn" onclick="confirmSetUrl()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set HubSpot Ticket ID modal -->
+<div class="modal-backdrop" id="set-hs-backdrop" onclick="setHsBackdropClick(event)">
+  <div class="modal">
+    <h3 style="color:#111827;">Set HubSpot Ticket ID</h3>
+    <p id="set-hs-modal-text" style="margin-bottom:16px;"></p>
+    <input class="modal-input" id="set-hs-input" type="text"
+           placeholder="e.g. 45235717524" maxlength="30"
+           onkeydown="if(event.key==='Enter')confirmSetHubSpot()">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSetHubSpotModal()">Cancel</button>
+      <button class="btn-submit" id="set-hs-submit-btn" onclick="confirmSetHubSpot()">Save</button>
     </div>
   </div>
 </div>
@@ -669,12 +714,26 @@ function buildCard(row, showOnboarder) {
     +         '</svg>'
     +       '</button>'
     +       '<div class="card-menu-dropdown" id="menu-' + safeId + '">'
+    +         '<button class="card-menu-item" id="mtgbtn-' + safeId + '">'
+    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+    +           '<rect x="1" y="2" width="11" height="10" rx="1.5"/>'
+    +           '<path d="M1 5.5h11M4 1v2M9 1v2"/>'
+    +           '</svg>'
+    +           'Manage meetings'
+    +         '</button>'
     +         '<button class="card-menu-item" id="fzbtn-' + safeId + '">'
     +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
     +           '<path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V8"/>'
     +           '<path d="M8 1h4v4"/><path d="M13 1L6.5 7.5"/>'
     +           '</svg>'
     +           'Set Floorzap URL'
+    +         '</button>'
+    +         '<button class="card-menu-item" id="hsbtn-' + safeId + '">'
+    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+    +           '<circle cx="6.5" cy="6.5" r="5"/>'
+    +           '<path d="M6.5 4v2.5l1.5 1.5"/>'
+    +           '</svg>'
+    +           'Set HubSpot ID'
     +         '</button>'
     +         '<button class="card-menu-item danger" id="delbtn-' + safeId + '">'
     +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">'
@@ -698,9 +757,17 @@ function buildCard(row, showOnboarder) {
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
     toggleCardMenu(row.id, e);
   });
+  card.querySelector('#mtgbtn-' + row.id).addEventListener('click', function() {
+    closeAllMenus();
+    openMeetingsModal(row.id, row.name);
+  });
   card.querySelector('#fzbtn-' + row.id).addEventListener('click', function() {
     closeAllMenus();
     openSetUrlModal(row.id, row.name, row.floorzap_url || '');
+  });
+  card.querySelector('#hsbtn-' + row.id).addEventListener('click', function() {
+    closeAllMenus();
+    openSetHubSpotModal(row.id, row.name, row.hubspot_ticket_id || '');
   });
   card.querySelector('#delbtn-' + row.id).addEventListener('click', function() {
     closeAllMenus();
@@ -719,6 +786,7 @@ function openModal() {
   document.getElementById('modal-success').classList.remove('show');
   document.getElementById('company-input').value = '';
   document.getElementById('floorzap-url-input').value = '';
+  document.getElementById('hubspot-ticket-input').value = '';
   document.getElementById('onboarder-select').value = '';
   document.getElementById('modal-backdrop').classList.add('open');
   setTimeout(function() { document.getElementById('company-input').focus(); }, 50);
@@ -739,11 +807,13 @@ async function submitClient() {
   var btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Creating…';
 
+  var hubspotTicketId = document.getElementById('hubspot-ticket-input').value.trim();
   var id = slugify(name) + '-' + randomSuffix();
   var res = await _sb.from('clients').insert({
     id: id, name: name, onboarder: onboarder,
     floorzap_url: floorzapUrl || null,
-    state: { sys: [], b2b: [], mig: [], qs: [], custom: [] }
+    hubspot_ticket_id: hubspotTicketId || null,
+    state: { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [] }
   }).select().single();
 
   btn.disabled = false; btn.textContent = 'Create link';
@@ -888,6 +958,147 @@ async function confirmSetUrl() {
 
   if (_clients[_setUrlClientId]) _clients[_setUrlClientId].floorzap_url = val || null;
   closeSetUrlModal();
+}
+
+/* ── Set HubSpot Ticket ID ── */
+var _setHsClientId = null;
+
+function openSetHubSpotModal(id, name, currentVal) {
+  _setHsClientId = id;
+  document.getElementById('set-hs-modal-text').textContent =
+    'Paste the HubSpot Record ID for "' + name + '". Meeting dates will be pulled automatically.';
+  document.getElementById('set-hs-input').value = currentVal;
+  document.getElementById('set-hs-submit-btn').disabled = false;
+  document.getElementById('set-hs-submit-btn').textContent = 'Save';
+  document.getElementById('set-hs-backdrop').classList.add('open');
+  setTimeout(function() { document.getElementById('set-hs-input').focus(); }, 50);
+}
+function closeSetHubSpotModal() {
+  document.getElementById('set-hs-backdrop').classList.remove('open');
+  _setHsClientId = null;
+}
+function setHsBackdropClick(e) { if (e.target === e.currentTarget) closeSetHubSpotModal(); }
+
+async function confirmSetHubSpot() {
+  if (!_setHsClientId) return;
+  var val = document.getElementById('set-hs-input').value.trim();
+  var btn = document.getElementById('set-hs-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  var res = await _sb.from('clients')
+    .update({ hubspot_ticket_id: val || null, updated_at: new Date().toISOString() })
+    .eq('id', _setHsClientId);
+
+  btn.disabled = false; btn.textContent = 'Save';
+  if (res.error) { alert('Error: ' + res.error.message); return; }
+
+  if (_clients[_setHsClientId]) _clients[_setHsClientId].hubspot_ticket_id = val || null;
+  closeSetHubSpotModal();
+}
+
+/* ── Manage Meetings ── */
+var _meetingsClientId = null;
+
+function openMeetingsModal(id, name) {
+  _meetingsClientId = id;
+  document.getElementById('meetings-modal-subtitle').textContent =
+    'Add or remove scheduled meetings for "' + name + '". Changes save instantly.';
+  renderMeetingsList();
+  document.getElementById('mtg-name').value = '';
+  document.getElementById('mtg-date').value = '';
+  document.getElementById('mtg-time').value = '';
+  document.getElementById('mtg-zoom').value = '';
+  document.getElementById('mtg-reschedule').value = '';
+  document.getElementById('meetings-backdrop').classList.add('open');
+}
+
+function closeMeetingsModal() {
+  document.getElementById('meetings-backdrop').classList.remove('open');
+  _meetingsClientId = null;
+}
+
+function meetingsBackdropClick(e) { if (e.target === e.currentTarget) closeMeetingsModal(); }
+
+function getMeetings() {
+  var client = _clients[_meetingsClientId];
+  if (!client) return [];
+  var state = client.state || {};
+  return Array.isArray(state.meetings) ? state.meetings : [];
+}
+
+function renderMeetingsList() {
+  var list = document.getElementById('meetings-list');
+  var meetings = getMeetings();
+  if (!meetings.length) {
+    list.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:13px;padding:12px 0;">No meetings scheduled yet.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  meetings.forEach(function(m, idx) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;';
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    var nameLine = '<div style="font-size:13.5px;font-weight:600;color:#111827;">' + escHtml(m.name) + '</div>';
+    var dateLine = '<div style="font-size:12px;color:#6b7280;margin-top:2px;">' + escHtml(m.date) + (m.time ? ' · ' + escHtml(m.time) : '') + '</div>';
+    var links = '';
+    if (m.zoom) links += '<a href="' + escHtml(m.zoom) + '" target="_blank" style="font-size:11.5px;color:#116FEA;font-weight:600;text-decoration:none;margin-right:10px;">Zoom ↗</a>';
+    if (m.reschedule) links += '<a href="' + escHtml(m.reschedule) + '" target="_blank" style="font-size:11.5px;color:#6b7280;font-weight:600;text-decoration:none;">Reschedule ↗</a>';
+    info.innerHTML = nameLine + dateLine + (links ? '<div style="margin-top:4px;">' + links + '</div>' : '');
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:#d1d5db;padding:2px 4px;border-radius:5px;flex-shrink:0;transition:color 0.12s,background 0.12s;';
+    delBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    delBtn.onmouseover = function() { this.style.color='#ef4444'; this.style.background='#fff1f2'; };
+    delBtn.onmouseout  = function() { this.style.color='#d1d5db'; this.style.background='none'; };
+    delBtn.onclick = (function(i) { return function() { deleteMeeting(i); }; })(idx);
+    row.appendChild(info);
+    row.appendChild(delBtn);
+    list.appendChild(row);
+  });
+}
+
+async function addMeeting() {
+  var name = document.getElementById('mtg-name').value.trim();
+  var date = document.getElementById('mtg-date').value.trim();
+  if (!name || !date) {
+    document.getElementById('mtg-name').focus();
+    return;
+  }
+  var meeting = {
+    name: name,
+    date: date,
+    time: document.getElementById('mtg-time').value.trim(),
+    zoom: document.getElementById('mtg-zoom').value.trim(),
+    reschedule: document.getElementById('mtg-reschedule').value.trim()
+  };
+  var meetings = getMeetings().slice();
+  meetings.push(meeting);
+  await saveMeetings(meetings);
+  document.getElementById('mtg-name').value = '';
+  document.getElementById('mtg-date').value = '';
+  document.getElementById('mtg-time').value = '';
+  document.getElementById('mtg-zoom').value = '';
+  document.getElementById('mtg-reschedule').value = '';
+  document.getElementById('mtg-name').focus();
+}
+
+async function deleteMeeting(idx) {
+  var meetings = getMeetings().slice();
+  meetings.splice(idx, 1);
+  await saveMeetings(meetings);
+}
+
+async function saveMeetings(meetings) {
+  if (!_meetingsClientId) return;
+  var client = _clients[_meetingsClientId];
+  var state = Object.assign({}, client.state || {});
+  state.meetings = meetings;
+  var res = await _sb.from('clients')
+    .update({ state: state, updated_at: new Date().toISOString() })
+    .eq('id', _meetingsClientId);
+  if (res.error) { alert('Error saving: ' + res.error.message); return; }
+  if (_clients[_meetingsClientId]) _clients[_meetingsClientId].state = state;
+  renderMeetingsList();
 }
 
 // Auto-start if already authenticated

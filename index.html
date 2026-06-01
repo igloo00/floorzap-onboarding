@@ -61,13 +61,13 @@ body {
   letter-spacing: -0.2px; flex: 1; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.fz-copy-btn {
+.fz-open-btn {
   flex-shrink: 0; font-size: 12px; font-weight: 600; color: #1d4ed8;
   background: #fff; border: 1px solid #bfdbfe; border-radius: 7px; padding: 6px 14px;
-  cursor: pointer; font-family: inherit; transition: background 0.12s, border-color 0.12s;
+  text-decoration: none; transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
 }
-.fz-copy-btn:hover { background: #dbeafe; border-color: #93c5fd; }
-.fz-copy-btn.copied { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.fz-open-btn:hover { background: #dbeafe; border-color: #93c5fd; }
 
 .meetings-card {
   background: #fff;
@@ -337,7 +337,7 @@ body {
   <!-- Floorzap URL (shown only when floorzap_url is set on the client) -->
   <div class="floorzap-url-card" id="floorzap-url-card" style="display:none">
     <span class="fz-url-text" id="fz-url-text"></span>
-    <button class="fz-copy-btn" id="fz-copy-btn" onclick="copyFloorzapUrl()">Copy</button>
+    <a class="fz-open-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener">Open ↗</a>
   </div>
 
   <!-- Meetings -->
@@ -521,20 +521,13 @@ Regards,</div>
 </div>
 
 <script>
-/* ─────────────────────────────────────────────────────────────
-   UPCOMING MEETINGS — fill these in before sharing with the customer.
-   Leave the array empty ([]) to hide the section entirely.
+// Meetings are now loaded dynamically from Supabase (stored in STATE.meetings)
+// OSs manage meetings from the dashboard — no need to edit this file.
 
-   Fields:
-     name  – meeting title shown to the customer
-     date  – display date, e.g. "June 3, 2026"
-     time  – display time, e.g. "2:00 PM CT"
-     zoom  – full Zoom join URL (leave "" to omit the Join button)
-───────────────────────────────────────────────────────────── */
-var MEETINGS = [
-  // { name: "2-Week Check-in",  date: "June 3, 2026",  time: "2:00 PM CT",  zoom: "https://zoom.us/j/..." },
-  // { name: "Go-Live Review",   date: "June 17, 2026", time: "10:00 AM CT", zoom: "" },
-];
+/* ── Config ── */
+// After deploying worker.js to Cloudflare, paste the worker URL here (no trailing slash).
+// Example: 'https://fz-hubspot.yourname.workers.dev'
+var WORKER_URL = 'https://fz-hubspot.valentinfernandez1994.workers.dev';
 
 /* ── Supabase config ── */
 var SUPABASE_URL = 'https://abszmmrjaxqpnjomfbxd.supabase.co';
@@ -544,7 +537,7 @@ var _sb = null;
 try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
 
 var TOTALS = { sys: 8, b2b: 4, mig: 4, qs: 4 };
-var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [] };
+var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [] };
 var CLIENT_NAME = null;
 var FLOORZAP_URL = null;
 
@@ -555,10 +548,12 @@ function renderMeetings() {
   var card = document.getElementById('meetings-card');
   var body = document.getElementById('meetings-body');
   var sub  = document.getElementById('meetings-subtitle');
-  if (!MEETINGS.length) { card.style.display = 'none'; return; }
-  sub.textContent = MEETINGS.length === 1 ? '1 meeting scheduled' : MEETINGS.length + ' meetings scheduled';
+  var meetings = STATE.meetings || [];
+  if (!meetings.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  sub.textContent = meetings.length === 1 ? '1 meeting scheduled' : meetings.length + ' meetings scheduled';
   body.innerHTML = '';
-  MEETINGS.forEach(function(m) {
+  meetings.forEach(function(m) {
     var row = document.createElement('div');
     row.className = 'meeting-row';
     var info = document.createElement('div');
@@ -566,14 +561,26 @@ function renderMeetings() {
     info.innerHTML = '<div class="meeting-name">' + escHtml(m.name) + '</div>'
       + '<div class="meeting-datetime">' + escHtml(m.date) + (m.time ? ' &nbsp;·&nbsp; ' + escHtml(m.time) : '') + '</div>';
     row.appendChild(info);
-    if (m.zoom) {
-      var btn = document.createElement('a');
-      btn.className = 'join-btn';
-      btn.href = m.zoom;
-      btn.target = '_blank';
-      btn.textContent = 'Join Zoom ↗';
-      row.appendChild(btn);
+    var btns = document.createElement('div');
+    btns.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
+    if (m.reschedule) {
+      var rBtn = document.createElement('a');
+      rBtn.className = 'join-btn';
+      rBtn.style.cssText = 'background:#f3f4f6;color:#374151;';
+      rBtn.href = m.reschedule;
+      rBtn.target = '_blank';
+      rBtn.textContent = 'Reschedule ↗';
+      btns.appendChild(rBtn);
     }
+    if (m.zoom) {
+      var zBtn = document.createElement('a');
+      zBtn.className = 'join-btn';
+      zBtn.href = m.zoom;
+      zBtn.target = '_blank';
+      zBtn.textContent = 'Join Zoom ↗';
+      btns.appendChild(zBtn);
+    }
+    if (btns.children.length) row.appendChild(btns);
     body.appendChild(row);
   });
 }
@@ -627,11 +634,12 @@ async function loadState() {
     if (raw) {
       var parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        STATE.sys    = Array.isArray(parsed.sys)    ? parsed.sys    : [];
-        STATE.b2b    = Array.isArray(parsed.b2b)    ? parsed.b2b    : [];
-        STATE.mig    = Array.isArray(parsed.mig)    ? parsed.mig    : [];
-        STATE.qs     = Array.isArray(parsed.qs)     ? parsed.qs     : [];
-        STATE.custom = Array.isArray(parsed.custom) ? parsed.custom : [];
+        STATE.sys      = Array.isArray(parsed.sys)      ? parsed.sys      : [];
+        STATE.b2b      = Array.isArray(parsed.b2b)      ? parsed.b2b      : [];
+        STATE.mig      = Array.isArray(parsed.mig)      ? parsed.mig      : [];
+        STATE.qs       = Array.isArray(parsed.qs)       ? parsed.qs       : [];
+        STATE.custom   = Array.isArray(parsed.custom)   ? parsed.custom   : [];
+        STATE.meetings = Array.isArray(parsed.meetings) ? parsed.meetings : [];
       }
     }
   } catch(e) {}
@@ -644,11 +652,12 @@ async function loadState() {
       if (res.data) {
         if (res.data.state) {
           var s = res.data.state;
-          STATE.sys    = Array.isArray(s.sys)    ? s.sys    : [];
-          STATE.b2b    = Array.isArray(s.b2b)    ? s.b2b    : [];
-          STATE.mig    = Array.isArray(s.mig)    ? s.mig    : [];
-          STATE.qs     = Array.isArray(s.qs)     ? s.qs     : [];
-          STATE.custom = Array.isArray(s.custom) ? s.custom : [];
+          STATE.sys      = Array.isArray(s.sys)      ? s.sys      : [];
+          STATE.b2b      = Array.isArray(s.b2b)      ? s.b2b      : [];
+          STATE.mig      = Array.isArray(s.mig)      ? s.mig      : [];
+          STATE.qs       = Array.isArray(s.qs)       ? s.qs       : [];
+          STATE.custom   = Array.isArray(s.custom)   ? s.custom   : [];
+          STATE.meetings = Array.isArray(s.meetings) ? s.meetings : [];
           applyState();
           try { localStorage.setItem(LS_KEY, JSON.stringify(STATE)); } catch(e) {}
         }
@@ -662,6 +671,7 @@ async function loadState() {
         }
       }
     } catch(e) {}
+    loadHubSpotMeetings();
   }
 }
 
@@ -702,23 +712,24 @@ function applyFloorzapUrl() {
   if (!FLOORZAP_URL || !CLIENT_ID) return;
   var card = document.getElementById('floorzap-url-card');
   var text = document.getElementById('fz-url-text');
+  var link = document.getElementById('fz-open-btn');
   if (card) card.style.display = '';
   if (text) text.textContent = FLOORZAP_URL;
+  if (link) link.href = 'https://' + FLOORZAP_URL;
 }
 
-function copyFloorzapUrl() {
-  var url = 'https://' + FLOORZAP_URL;
-  var btn = document.getElementById('fz-copy-btn');
-  navigator.clipboard.writeText(url).then(function() {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  }).catch(function() {
-    var ta = document.createElement('textarea');
-    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
+/* ── HubSpot meeting sync ── */
+async function loadHubSpotMeetings() {
+  if (!CLIENT_ID || !WORKER_URL) return;
+  try {
+    var res = await fetch(WORKER_URL + '?c=' + encodeURIComponent(CLIENT_ID));
+    if (!res.ok) return;
+    var data = await res.json();
+    if (data.floorzap_url) {
+      FLOORZAP_URL = data.floorzap_url;
+      applyFloorzapUrl();
+    }
+  } catch(e) {}
 }
 
 /* ── Fixed tasks ── */

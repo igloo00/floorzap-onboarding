@@ -116,10 +116,11 @@ body {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .fz-open-btn {
-  flex-shrink: 0; font-size: 12px; font-weight: 600; color: #1d4ed8;
-  background: #fff; border: 1px solid #bfdbfe; border-radius: 7px; padding: 6px 14px;
-  text-decoration: none; transition: background 0.12s, border-color 0.12s;
-  white-space: nowrap;
+  flex-shrink: 0; color: #1d4ed8;
+  background: #fff; border: 1px solid #bfdbfe; border-radius: 8px;
+  padding: 7px 9px; text-decoration: none;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex; align-items: center; justify-content: center;
 }
 .fz-open-btn:hover { background: #dbeafe; border-color: #93c5fd; }
 
@@ -382,7 +383,12 @@ body {
   <!-- Floorzap URL (shown only when floorzap_url is set on the client) -->
   <div class="floorzap-url-card" id="floorzap-url-card" style="display:none">
     <span class="fz-url-text" id="fz-url-text"></span>
-    <a class="fz-open-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener">Open ↗</a>
+    <a class="fz-open-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener" title="Open Floorzap">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M6.5 2.5H3a1 1 0 00-1 1v8.5a1 1 0 001 1h8.5a1 1 0 001-1V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M9 1.5h4.5V6M13.5 1.5L7.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
   </div>
 
   <!-- Meeting cards (shown only when ?c= param is present) -->

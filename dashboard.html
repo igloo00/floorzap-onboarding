@@ -169,7 +169,7 @@ body {
   display: flex; flex-direction: column;
 }
 .client-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09), 0 0 0 1px rgba(0,0,0,0.05); }
-.card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-width: 0; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-width: 0; }
 .client-name {
   font-size: 15px; font-weight: 700; color: #111827; letter-spacing: -0.2px; line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
@@ -663,6 +663,20 @@ function renderCardGrid(ids, showOnboarder) {
   ids.forEach(function(id) { grid.appendChild(buildCard(_clients[id], showOnboarder)); });
 }
 
+function getClientStage(row) {
+  if (!row.hubspot_ticket_id) return null;
+  var hm = (row.state || {}).hs_meetings || {};
+  var k = (hm.kickoff      || {}).done;
+  var c = (hm.checkin      || {}).done;
+  var i = (hm.integrations || {}).done;
+  var g = (hm.graduation   || {}).done;
+  if (g) return { label: '✓ Graduated',  color: '#16a34a', bg: '#f0fdf4' };
+  if (i) return { label: 'Graduation',   color: '#d97706', bg: '#fffbeb' };
+  if (c) return { label: 'Integrations', color: '#7c3aed', bg: '#f5f3ff' };
+  if (k) return { label: '2-Week',       color: '#0891b2', bg: '#ecfeff' };
+  return   { label: 'Kickoff',           color: '#116FEA', bg: '#eff6ff' };
+}
+
 function buildCard(row, showOnboarder) {
   var state = row.state || {};
   var done = (state.sys   ? state.sys.length   : 0)
@@ -679,6 +693,11 @@ function buildCard(row, showOnboarder) {
     obPill = '<span class="onboarder-pill" style="background:' + obColor + '18;color:' + obColor + '">' + escHtml(row.onboarder) + '</span>';
   }
 
+  var stage = getClientStage(row);
+  var stagePill = stage
+    ? '<span style="font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:' + stage.bg + ';color:' + stage.color + ';white-space:nowrap;">' + stage.label + '</span>'
+    : '';
+
   var card = document.createElement('div');
   card.className = 'client-card';
   card.id = 'card-' + row.id;
@@ -687,8 +706,11 @@ function buildCard(row, showOnboarder) {
   var safeUrl  = escHtml(clientUrl);
   card.innerHTML =
     '<div class="card-top">'
-    +   '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
-    +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+    +   '<div style="min-width:0;">'
+    +     '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
+    +     (stagePill ? '<div style="margin-top:5px;">' + stagePill + '</div>' : '')
+    +   '</div>'
+    +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;align-self:flex-start;">'
     +     obPill
     +     '<div class="last-active">' + relativeTime(row.updated_at) + '</div>'
     +     '<div class="card-menu-wrap">'

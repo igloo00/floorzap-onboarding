@@ -94,6 +94,10 @@ body {
   padding: 4px 10px; display: inline-block; transition: background 0.12s;
 }
 .meeting-card-zoom a:hover { background: #dbeafe; }
+.meeting-card-relative {
+  font-size: 11.5px; font-weight: 600; color: #6b7280; margin-top: 2px;
+}
+.meeting-card.upcoming .meeting-card-relative { color: #1d4ed8; }
 @media (max-width: 540px) {
   .meeting-cards-grid { grid-template-columns: repeat(2, 1fr); }
   .meeting-card { padding: 12px 14px; }
@@ -396,24 +400,28 @@ body {
     <div class="meeting-card" id="mtg-card-kickoff">
       <div class="meeting-card-title">Kickoff Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-kickoff">—</div>
+      <div class="meeting-card-relative" id="mtg-kickoff-rel"></div>
       <div class="meeting-card-badge" id="mtg-kickoff-badge"></div>
       <div class="meeting-card-zoom" id="mtg-kickoff-zoom"><a href="#" target="_blank" id="mtg-kickoff-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-checkin">
       <div class="meeting-card-title">2-Week Check-in</div>
       <div class="meeting-card-date tbd" id="mtg-checkin">—</div>
+      <div class="meeting-card-relative" id="mtg-checkin-rel"></div>
       <div class="meeting-card-badge" id="mtg-checkin-badge"></div>
       <div class="meeting-card-zoom" id="mtg-checkin-zoom"><a href="#" target="_blank" id="mtg-checkin-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-integrations">
       <div class="meeting-card-title">Integrations</div>
       <div class="meeting-card-date tbd" id="mtg-integrations">—</div>
+      <div class="meeting-card-relative" id="mtg-integrations-rel"></div>
       <div class="meeting-card-badge" id="mtg-integrations-badge"></div>
       <div class="meeting-card-zoom" id="mtg-integrations-zoom"><a href="#" target="_blank" id="mtg-integrations-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-graduation">
       <div class="meeting-card-title">Graduation Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-graduation">—</div>
+      <div class="meeting-card-relative" id="mtg-graduation-rel"></div>
       <div class="meeting-card-badge" id="mtg-graduation-badge"></div>
       <div class="meeting-card-zoom" id="mtg-graduation-zoom"><a href="#" target="_blank" id="mtg-graduation-zoom-link">Join Zoom ↗</a></div>
     </div>
@@ -796,6 +804,20 @@ function applyFloorzapUrl() {
   if (link) link.href = 'https://' + FLOORZAP_URL;
 }
 
+/* ── Meeting relative time ── */
+function relMeetingTime(isoDate) {
+  if (!isoDate) return '';
+  var d = new Date(isoDate); d.setHours(0,0,0,0);
+  var now = new Date(); now.setHours(0,0,0,0);
+  var diff = Math.round((d - now) / 86400000);
+  if (diff < 0)  return '';
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff < 7)  return 'In ' + diff + ' days';
+  if (diff < 14) return 'Next week';
+  return 'In ' + Math.round(diff / 7) + ' weeks';
+}
+
 /* ── HubSpot meeting sync ── */
 async function loadHubSpotMeetings() {
   if (!CLIENT_ID || !WORKER_URL) return;
@@ -811,35 +833,38 @@ async function loadHubSpotMeetings() {
       var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
       var today = new Date(); today.setHours(0,0,0,0);
 
-      // Find the first non-complete future meeting to mark as upcoming
+      // Auto-complete past meetings; find first future non-complete for "upcoming"
       var upcomingIdx = -1;
       data.meetings.forEach(function(m, i) {
         var hs = STATE.hs_meetings[keys[i]] || {};
-        if (upcomingIdx === -1 && !hs.done && m.isoDate) {
-          var d = new Date(m.isoDate); d.setHours(0,0,0,0);
-          if (d >= today) upcomingIdx = i;
-        }
+        var isPast = m.isoDate && new Date(m.isoDate) < today;
+        var isDone = hs.done || isPast;
+        if (upcomingIdx === -1 && !isDone && m.isoDate) upcomingIdx = i;
       });
 
       data.meetings.forEach(function(m, i) {
         var key    = keys[i];
         var dateEl = document.getElementById('mtg-' + key);
+        var relEl  = document.getElementById('mtg-' + key + '-rel');
         var card   = document.getElementById('mtg-card-' + key);
         var badge  = document.getElementById('mtg-' + key + '-badge');
         var hs     = STATE.hs_meetings[key] || {};
+        var isPast = m.isoDate && new Date(m.isoDate) < today;
+        var isDone = hs.done || isPast;
 
         if (dateEl) {
           if (m.date) { dateEl.textContent = m.date; dateEl.classList.remove('tbd'); }
           else { dateEl.textContent = 'Not scheduled'; dateEl.classList.add('tbd'); }
         }
+        if (relEl) relEl.textContent = relMeetingTime(m.isoDate);
         if (card) {
           card.classList.remove('complete', 'upcoming');
-          if (hs.done) {
+          if (isDone) {
             card.classList.add('complete');
             if (badge) badge.textContent = '✓ Complete';
           } else if (i === upcomingIdx) {
             card.classList.add('upcoming');
-            if (badge) badge.textContent = '⬆ Upcoming';
+            if (badge) badge.textContent = '↑ Upcoming';
           } else {
             if (badge) badge.textContent = '';
           }

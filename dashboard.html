@@ -805,10 +805,7 @@ function buildCard(row, showOnboarder) {
     closeAllMenus();
     openReassignModal(row.id, row.name, row.onboarder || '');
   });
-  card.querySelector('#delbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openDeleteModal(row.id, row.name);
-  });
+
   card.querySelector('#copybtn-' + row.id).addEventListener('click', function() {
     copyCardUrl(this, clientUrl);
   });

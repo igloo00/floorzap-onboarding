@@ -458,6 +458,26 @@ body {
 </div>
 
 
+<!-- Reassign onboarder modal -->
+<div class="modal-backdrop" id="reassign-backdrop" onclick="reassignBackdropClick(event)">
+  <div class="modal">
+    <h3 style="color:#111827;">Reassign onboarder</h3>
+    <p id="reassign-modal-text" style="margin-bottom:16px;"></p>
+    <select class="modal-select" id="reassign-select">
+      <option value="">Select onboarder…</option>
+      <option value="David">David</option>
+      <option value="JB">JB</option>
+      <option value="Maddi">Maddi</option>
+      <option value="Valentin">Valentin</option>
+      <option value="Amber">Amber</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeReassignModal()">Cancel</button>
+      <button class="btn-submit" id="reassign-submit-btn" onclick="confirmReassign()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Set HubSpot Ticket ID modal -->
 <div class="modal-backdrop" id="set-hs-backdrop" onclick="setHsBackdropClick(event)">
   <div class="modal">
@@ -749,6 +769,14 @@ function buildCard(row, showOnboarder) {
     +           '</svg>'
     +           'Set HubSpot ID'
     +         '</button>'
+    +         '<button class="card-menu-item" id="reassignbtn-' + safeId + '">'
+    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+    +           '<circle cx="5" cy="4" r="2.5"/>'
+    +           '<path d="M1 11.5c0-2 1.8-3.5 4-3.5"/>'
+    +           '<path d="M9.5 8v4M7.5 10h4"/>'
+    +           '</svg>'
+    +           'Reassign onboarder'
+    +         '</button>'
     +         '<button class="card-menu-item danger" id="delbtn-' + safeId + '">'
     +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">'
     +           '<polyline points="1,3 12,3"/><path d="M3 3V11a1 1 0 001 1h5a1 1 0 001-1V3"/><path d="M4.5 3V2a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1"/>'
@@ -778,6 +806,10 @@ function buildCard(row, showOnboarder) {
   card.querySelector('#hsbtn-' + row.id).addEventListener('click', function() {
     closeAllMenus();
     openSetHubSpotModal(row.id, row.name, row.hubspot_ticket_id || '');
+  });
+  card.querySelector('#reassignbtn-' + row.id).addEventListener('click', function() {
+    closeAllMenus();
+    openReassignModal(row.id, row.name, row.onboarder || '');
   });
   card.querySelector('#delbtn-' + row.id).addEventListener('click', function() {
     closeAllMenus();
@@ -932,6 +964,44 @@ async function confirmDelete() {
   closeDeleteModal();
 }
 
+
+/* ── Reassign onboarder ── */
+var _reassignClientId = null;
+
+function openReassignModal(id, name, currentOnboarder) {
+  _reassignClientId = id;
+  document.getElementById('reassign-modal-text').textContent =
+    'Reassign "' + name + '" to a different onboarder.';
+  document.getElementById('reassign-select').value = currentOnboarder;
+  document.getElementById('reassign-submit-btn').disabled = false;
+  document.getElementById('reassign-submit-btn').textContent = 'Save';
+  document.getElementById('reassign-backdrop').classList.add('open');
+  setTimeout(function() { document.getElementById('reassign-select').focus(); }, 50);
+}
+function closeReassignModal() {
+  document.getElementById('reassign-backdrop').classList.remove('open');
+  _reassignClientId = null;
+}
+function reassignBackdropClick(e) { if (e.target === e.currentTarget) closeReassignModal(); }
+
+async function confirmReassign() {
+  if (!_reassignClientId) return;
+  var val = document.getElementById('reassign-select').value;
+  if (!val) { document.getElementById('reassign-select').focus(); return; }
+  var btn = document.getElementById('reassign-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  var res = await _sb.from('clients')
+    .update({ onboarder: val, updated_at: new Date().toISOString() })
+    .eq('id', _reassignClientId);
+
+  btn.disabled = false; btn.textContent = 'Save';
+  if (res.error) { alert('Error: ' + res.error.message); return; }
+
+  if (_clients[_reassignClientId]) _clients[_reassignClientId].onboarder = val;
+  renderMain();
+  closeReassignModal();
+}
 
 /* ── Set HubSpot Ticket ID ── */
 var _setHsClientId = null;

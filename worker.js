@@ -60,6 +60,7 @@ export default {
     // 2. Fetch ticket properties from HubSpot
     const PROPS = [
       'floorzap_url',
+      'subject',
       'initial_onboarding_meeting',
       'n2_week_check_in_meeting',
       'integrations_meeting',
@@ -85,9 +86,14 @@ export default {
       });
     }
 
+    // Extract company name from "Onboarding | Company Name" format
+    var rawSubject = p.subject || null;
+    var clientName = rawSubject ? rawSubject.replace(/^[^|]+\|\s*/, '').trim() : null;
+
     return new Response(
       JSON.stringify({
         floorzap_url: p.floorzap_url ?? null,
+        client_name: clientName,
         meetings: [
           { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null, isoDate: p.initial_onboarding_meeting  || null },
           { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null, isoDate: p.n2_week_check_in_meeting    || null },

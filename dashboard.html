@@ -403,8 +403,6 @@ body {
       <p>Enter the company name and assign an onboarding specialist.</p>
       <input class="modal-input" id="company-input" type="text"
              placeholder="Company name" maxlength="80" onkeydown="modalKey(event)">
-      <input class="modal-input" id="floorzap-url-input" type="text"
-             placeholder="Floorzap URL (e.g. acme.floorzap.com)" maxlength="100" onkeydown="modalKey(event)">
       <input class="modal-input" id="hubspot-ticket-input" type="text"
              placeholder="HubSpot Ticket ID (optional — paste Record ID)" maxlength="30" onkeydown="modalKey(event)">
       <select class="modal-select" id="onboarder-select">
@@ -459,20 +457,6 @@ body {
   </div>
 </div>
 
-<!-- Set Floorzap URL modal -->
-<div class="modal-backdrop" id="set-url-backdrop" onclick="setUrlBackdropClick(event)">
-  <div class="modal">
-    <h3 style="color:#111827;">Set Floorzap URL</h3>
-    <p id="set-url-modal-text" style="margin-bottom:16px;"></p>
-    <input class="modal-input" id="set-url-input" type="text"
-           placeholder="e.g. acme.floorzap.com" maxlength="100"
-           onkeydown="if(event.key==='Enter')confirmSetUrl()">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeSetUrlModal()">Cancel</button>
-      <button class="btn-submit" id="set-url-submit-btn" onclick="confirmSetUrl()">Save</button>
-    </div>
-  </div>
-</div>
 
 <!-- Set HubSpot Ticket ID modal -->
 <div class="modal-backdrop" id="set-hs-backdrop" onclick="setHsBackdropClick(event)">
@@ -491,6 +475,7 @@ body {
 
 <script>
 /* ── Config ── */
+var WORKER_URL = 'https://fz-hubspot.valentinfernandez1994.workers.dev';
 var SUPABASE_URL = 'https://abszmmrjaxqpnjomfbxd.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFic3ptbXJqYXhxcG5qb21mYnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzUxMTYsImV4cCI6MjA5NDk1MTExNn0.5aPz4IHoINh1sgRixDwI4S5-KykJCuYMQOiONYVqkC4';
 var DASHBOARD_PASSWORD = 'floorzap2026'; // Change this to your preferred password
@@ -663,18 +648,51 @@ function renderCardGrid(ids, showOnboarder) {
   ids.forEach(function(id) { grid.appendChild(buildCard(_clients[id], showOnboarder)); });
 }
 
-function getClientStage(row) {
-  if (!row.hubspot_ticket_id) return null;
-  var hm = (row.state || {}).hs_meetings || {};
-  var k = (hm.kickoff      || {}).done;
-  var c = (hm.checkin      || {}).done;
-  var i = (hm.integrations || {}).done;
-  var g = (hm.graduation   || {}).done;
-  if (g) return { label: '✓ Graduated',  color: '#16a34a', bg: '#f0fdf4' };
-  if (i) return { label: 'Graduation',   color: '#d97706', bg: '#fffbeb' };
-  if (c) return { label: 'Integrations', color: '#7c3aed', bg: '#f5f3ff' };
-  if (k) return { label: '2-Week',       color: '#0891b2', bg: '#ecfeff' };
-  return   { label: 'Kickoff',           color: '#116FEA', bg: '#eff6ff' };
+var HS_PILL_DEFS = [
+  { key: 'kickoff',      label: 'Kickoff'      },
+  { key: 'checkin',      label: '2-Week'       },
+  { key: 'integrations', label: 'Integrations' },
+  { key: 'graduation',   label: 'Graduation'   }
+];
+
+function buildMeetingPills(row) {
+  if (!row.hubspot_ticket_id) return '';
+  var hm    = (row.state || {}).hs_meetings    || {};
+  var dates = (row.state || {}).hs_meeting_dates || {};
+  var today = new Date(); today.setHours(0,0,0,0);
+
+  // Determine each meeting's status
+  var statuses = HS_PILL_DEFS.map(function(m) {
+    var done   = (hm[m.key] || {}).done;
+    var iso    = dates[m.key];
+    var isPast = iso && new Date(iso) < today;
+    return { key: m.key, label: m.label, done: done || isPast, iso: iso };
+  });
+
+  // First non-complete = upcoming
+  var upcomingKey = null;
+  for (var i = 0; i < statuses.length; i++) {
+    if (!statuses[i].done) { upcomingKey = statuses[i].key; break; }
+  }
+
+  return statuses.map(function(s) {
+    var fmtDate = '';
+    if (s.iso) {
+      var d = new Date(s.iso);
+      fmtDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    }
+    var title = fmtDate ? ' title="' + fmtDate + '"' : '';
+    var style;
+    if (s.done) {
+      style = 'background:#f0fdf4;color:#16a34a;';
+    } else if (s.key === upcomingKey) {
+      style = 'background:#eff6ff;color:#116FEA;font-weight:700;';
+    } else {
+      style = 'background:#f3f4f6;color:#9ca3af;';
+    }
+    return '<span' + title + ' style="font-size:10.5px;font-weight:600;border-radius:20px;padding:2px 8px;cursor:default;' + style + '">'
+      + (s.done ? '✓ ' : '') + escHtml(s.label) + '</span>';
+  }).join('');
 }
 
 function buildCard(row, showOnboarder) {
@@ -693,10 +711,7 @@ function buildCard(row, showOnboarder) {
     obPill = '<span class="onboarder-pill" style="background:' + obColor + '18;color:' + obColor + '">' + escHtml(row.onboarder) + '</span>';
   }
 
-  var stage = getClientStage(row);
-  var stagePill = stage
-    ? '<span style="font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:' + stage.bg + ';color:' + stage.color + ';white-space:nowrap;">' + stage.label + '</span>'
-    : '';
+  var meetingPills = buildMeetingPills(row);
 
   var card = document.createElement('div');
   card.className = 'client-card';
@@ -708,7 +723,7 @@ function buildCard(row, showOnboarder) {
     '<div class="card-top">'
     +   '<div style="min-width:0;">'
     +     '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
-    +     (stagePill ? '<div style="margin-top:5px;">' + stagePill + '</div>' : '')
+    +     (meetingPills ? '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">' + meetingPills + '</div>' : '')
     +   '</div>'
     +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;align-self:flex-start;">'
     +     obPill
@@ -726,13 +741,6 @@ function buildCard(row, showOnboarder) {
     +           '<path d="M1 5.5h11M4 1v2M9 1v2"/>'
     +           '</svg>'
     +           'Manage meetings'
-    +         '</button>'
-    +         '<button class="card-menu-item" id="fzbtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
-    +           '<path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V8"/>'
-    +           '<path d="M8 1h4v4"/><path d="M13 1L6.5 7.5"/>'
-    +           '</svg>'
-    +           'Set Floorzap URL'
     +         '</button>'
     +         '<button class="card-menu-item" id="hsbtn-' + safeId + '">'
     +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
@@ -767,10 +775,6 @@ function buildCard(row, showOnboarder) {
     closeAllMenus();
     openMeetingsModal(row.id, row.name);
   });
-  card.querySelector('#fzbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openSetUrlModal(row.id, row.name, row.floorzap_url || '');
-  });
   card.querySelector('#hsbtn-' + row.id).addEventListener('click', function() {
     closeAllMenus();
     openSetHubSpotModal(row.id, row.name, row.hubspot_ticket_id || '');
@@ -791,7 +795,6 @@ function openModal() {
   document.getElementById('modal-form').classList.remove('hide');
   document.getElementById('modal-success').classList.remove('show');
   document.getElementById('company-input').value = '';
-  document.getElementById('floorzap-url-input').value = '';
   document.getElementById('hubspot-ticket-input').value = '';
   document.getElementById('onboarder-select').value = '';
   document.getElementById('modal-backdrop').classList.add('open');
@@ -817,7 +820,6 @@ async function submitClient() {
   var id = slugify(name) + '-' + randomSuffix();
   var res = await _sb.from('clients').insert({
     id: id, name: name, onboarder: onboarder,
-    floorzap_url: floorzapUrl || null,
     hubspot_ticket_id: hubspotTicketId || null,
     state: { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [] }
   }).select().single();
@@ -930,41 +932,6 @@ async function confirmDelete() {
   closeDeleteModal();
 }
 
-/* ── Set Floorzap URL ── */
-var _setUrlClientId = null;
-
-function openSetUrlModal(id, name, currentUrl) {
-  _setUrlClientId = id;
-  document.getElementById('set-url-modal-text').textContent =
-    'Enter the Floorzap URL for "' + name + '".';
-  document.getElementById('set-url-input').value = currentUrl;
-  document.getElementById('set-url-submit-btn').disabled = false;
-  document.getElementById('set-url-submit-btn').textContent = 'Save';
-  document.getElementById('set-url-backdrop').classList.add('open');
-  setTimeout(function() { document.getElementById('set-url-input').focus(); }, 50);
-}
-function closeSetUrlModal() {
-  document.getElementById('set-url-backdrop').classList.remove('open');
-  _setUrlClientId = null;
-}
-function setUrlBackdropClick(e) { if (e.target === e.currentTarget) closeSetUrlModal(); }
-
-async function confirmSetUrl() {
-  if (!_setUrlClientId) return;
-  var val = document.getElementById('set-url-input').value.trim();
-  var btn = document.getElementById('set-url-submit-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-
-  var res = await _sb.from('clients')
-    .update({ floorzap_url: val || null, updated_at: new Date().toISOString() })
-    .eq('id', _setUrlClientId);
-
-  btn.disabled = false; btn.textContent = 'Save';
-  if (res.error) { alert('Error: ' + res.error.message); return; }
-
-  if (_clients[_setUrlClientId]) _clients[_setUrlClientId].floorzap_url = val || null;
-  closeSetUrlModal();
-}
 
 /* ── Set HubSpot Ticket ID ── */
 var _setHsClientId = null;
@@ -991,14 +958,47 @@ async function confirmSetHubSpot() {
   var btn = document.getElementById('set-hs-submit-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
 
+  // Save the HubSpot ticket ID first
   var res = await _sb.from('clients')
     .update({ hubspot_ticket_id: val || null, updated_at: new Date().toISOString() })
     .eq('id', _setHsClientId);
+  if (res.error) { btn.disabled = false; btn.textContent = 'Save'; alert('Error: ' + res.error.message); return; }
+  if (_clients[_setHsClientId]) _clients[_setHsClientId].hubspot_ticket_id = val || null;
+
+  // If a Record ID was set, pull data from HubSpot via worker
+  if (val && WORKER_URL) {
+    btn.textContent = 'Pulling HubSpot data…';
+    try {
+      var workerRes = await fetch(WORKER_URL + '?c=' + encodeURIComponent(_setHsClientId));
+      if (workerRes.ok) {
+        var data = await workerRes.json();
+        var updates = { updated_at: new Date().toISOString() };
+        var client = _clients[_setHsClientId];
+
+        // Auto-populate name from HubSpot (only if ticket ID was just set)
+        if (data.client_name) updates.name = data.client_name;
+
+        // Auto-populate Floorzap URL
+        if (data.floorzap_url) updates.floorzap_url = data.floorzap_url;
+
+        // Store meeting dates for dashboard pills
+        if (data.meetings) {
+          var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
+          var dates = {};
+          data.meetings.forEach(function(m, i) { dates[keys[i]] = m.isoDate || null; });
+          var state = Object.assign({}, (client.state || {}));
+          state.hs_meeting_dates = dates;
+          updates.state = state;
+        }
+
+        await _sb.from('clients').update(updates).eq('id', _setHsClientId);
+        if (_clients[_setHsClientId]) Object.assign(_clients[_setHsClientId], updates);
+      }
+    } catch(e) {}
+  }
 
   btn.disabled = false; btn.textContent = 'Save';
-  if (res.error) { alert('Error: ' + res.error.message); return; }
-
-  if (_clients[_setHsClientId]) _clients[_setHsClientId].hubspot_ticket_id = val || null;
+  renderMain();
   closeSetHubSpotModal();
 }
 

@@ -76,10 +76,15 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 0 0 1px rgba(22,163,74,0.2);
 }
 .meeting-card-badge {
-  display: none; font-size: 11px; font-weight: 700; color: #16a34a;
-  margin-top: 4px;
+  display: none; font-size: 11px; font-weight: 700;
+  margin-top: 5px;
 }
-.meeting-card.complete .meeting-card-badge { display: block; }
+.meeting-card.complete .meeting-card-badge { display: block; color: #16a34a; }
+.meeting-card.upcoming {
+  background: #eff6ff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1.5px #93c5fd;
+}
+.meeting-card.upcoming .meeting-card-badge { display: block; color: #1d4ed8; }
 .meeting-card-zoom {
   display: none; margin-top: 6px;
 }
@@ -374,15 +379,6 @@ body {
     <div class="client-greeting">Hello, <span id="greeting-name"></span> 👋</div>
   </div>
 
-  <!-- Overall progress bar (shown only when ?c= param is present) -->
-  <div class="overall-progress" id="overall-progress" style="display:none">
-    <div class="op-header">
-      <span class="op-title">Onboarding progress</span>
-      <span class="op-text" id="op-text">0 of 20 tasks complete</span>
-    </div>
-    <div class="op-track"><div class="op-fill" id="op-fill" style="width:0%"></div></div>
-  </div>
-
   <!-- Floorzap URL (shown only when floorzap_url is set on the client) -->
   <div class="floorzap-url-card" id="floorzap-url-card" style="display:none">
     <span class="fz-url-text" id="fz-url-text"></span>
@@ -394,27 +390,36 @@ body {
     <div class="meeting-card" id="mtg-card-kickoff">
       <div class="meeting-card-title">Kickoff Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-kickoff">—</div>
-      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-badge" id="mtg-kickoff-badge"></div>
       <div class="meeting-card-zoom" id="mtg-kickoff-zoom"><a href="#" target="_blank" id="mtg-kickoff-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-checkin">
       <div class="meeting-card-title">2-Week Check-in</div>
       <div class="meeting-card-date tbd" id="mtg-checkin">—</div>
-      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-badge" id="mtg-checkin-badge"></div>
       <div class="meeting-card-zoom" id="mtg-checkin-zoom"><a href="#" target="_blank" id="mtg-checkin-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-integrations">
       <div class="meeting-card-title">Integrations</div>
       <div class="meeting-card-date tbd" id="mtg-integrations">—</div>
-      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-badge" id="mtg-integrations-badge"></div>
       <div class="meeting-card-zoom" id="mtg-integrations-zoom"><a href="#" target="_blank" id="mtg-integrations-zoom-link">Join Zoom ↗</a></div>
     </div>
     <div class="meeting-card" id="mtg-card-graduation">
       <div class="meeting-card-title">Graduation Meeting</div>
       <div class="meeting-card-date tbd" id="mtg-graduation">—</div>
-      <div class="meeting-card-badge">✓ Complete</div>
+      <div class="meeting-card-badge" id="mtg-graduation-badge"></div>
       <div class="meeting-card-zoom" id="mtg-graduation-zoom"><a href="#" target="_blank" id="mtg-graduation-zoom-link">Join Zoom ↗</a></div>
     </div>
+  </div>
+
+  <!-- Overall progress bar (shown only when ?c= param is present) -->
+  <div class="overall-progress" id="overall-progress" style="display:none">
+    <div class="op-header">
+      <span class="op-title">Onboarding progress</span>
+      <span class="op-text" id="op-text">0 of 20 tasks complete</span>
+    </div>
+    <div class="op-track"><div class="op-fill" id="op-fill" style="width:0%"></div></div>
   </div>
 
   <!-- System Configuration -->
@@ -798,18 +803,40 @@ async function loadHubSpotMeetings() {
     }
     if (data.meetings) {
       var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
+      var today = new Date(); today.setHours(0,0,0,0);
+
+      // Find the first non-complete future meeting to mark as upcoming
+      var upcomingIdx = -1;
       data.meetings.forEach(function(m, i) {
-        var key = keys[i];
+        var hs = STATE.hs_meetings[keys[i]] || {};
+        if (upcomingIdx === -1 && !hs.done && m.isoDate) {
+          var d = new Date(m.isoDate); d.setHours(0,0,0,0);
+          if (d >= today) upcomingIdx = i;
+        }
+      });
+
+      data.meetings.forEach(function(m, i) {
+        var key    = keys[i];
         var dateEl = document.getElementById('mtg-' + key);
         var card   = document.getElementById('mtg-card-' + key);
+        var badge  = document.getElementById('mtg-' + key + '-badge');
         var hs     = STATE.hs_meetings[key] || {};
+
         if (dateEl) {
           if (m.date) { dateEl.textContent = m.date; dateEl.classList.remove('tbd'); }
           else { dateEl.textContent = 'Not scheduled'; dateEl.classList.add('tbd'); }
         }
         if (card) {
-          if (hs.done) card.classList.add('complete');
-          else card.classList.remove('complete');
+          card.classList.remove('complete', 'upcoming');
+          if (hs.done) {
+            card.classList.add('complete');
+            if (badge) badge.textContent = '✓ Complete';
+          } else if (i === upcomingIdx) {
+            card.classList.add('upcoming');
+            if (badge) badge.textContent = '⬆ Upcoming';
+          } else {
+            if (badge) badge.textContent = '';
+          }
         }
         var zoomWrap = document.getElementById('mtg-' + key + '-zoom');
         var zoomLink = document.getElementById('mtg-' + key + '-zoom-link');

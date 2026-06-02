@@ -608,8 +608,7 @@ function renderSidebar() {
     item.className = 'nav-item' + (isActive ? ' active' : '');
     item.onclick = (function(n) { return function() { setNav(n); }; })(name);
     item.innerHTML =
-      '<span class="nav-dot" style="background:' + OS_COLOR + ';color:#fff;border-radius:20px;width:auto;padding:1px 5px;font-size:10px;font-weight:700;letter-spacing:0.02em;">' + initials + '</span>'
-      + escHtml(name)
+      escHtml(name)
       + '<span class="nav-count">' + count + '</span>';
     container.appendChild(item);
   });

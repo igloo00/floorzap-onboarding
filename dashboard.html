@@ -507,13 +507,14 @@ var _activeNav = 'recent';
 var FIXED_TOTAL = 20;
 
 var ONBOARDERS = ['David', 'JB', 'Maddi', 'Valentin', 'Amber'];
-var ONBOARDER_COLORS = {
-  'David':    '#116FEA',
-  'JB':       '#7c3aed',
-  'Maddi':    '#db2777',
-  'Valentin': '#059669',
-  'Amber':    '#d97706'
+var ONBOARDER_INITIALS = {
+  'David':    'DB',
+  'JB':       'JB',
+  'Maddi':    'MB',
+  'Valentin': 'VF',
+  'Amber':    'AS'
 };
+var OS_COLOR = '#475569';
 
 /* ── Password gate ── */
 function logout() {
@@ -601,13 +602,13 @@ function renderSidebar() {
     var count = Object.values(_clients).filter(function(c) {
       return (c.onboarder || 'Unassigned') === name;
     }).length;
-    var color = ONBOARDER_COLORS[name] || '#116FEA';
+    var initials = ONBOARDER_INITIALS[name] || name.slice(0,2).toUpperCase();
     var isActive = _activeNav === name;
     var item = document.createElement('div');
     item.className = 'nav-item' + (isActive ? ' active' : '');
     item.onclick = (function(n) { return function() { setNav(n); }; })(name);
     item.innerHTML =
-      '<span class="nav-dot" style="background:' + color + '"></span>'
+      '<span class="nav-dot" style="background:' + OS_COLOR + ';color:#fff;border-radius:20px;width:auto;padding:1px 5px;font-size:10px;font-weight:700;letter-spacing:0.02em;">' + initials + '</span>'
       + escHtml(name)
       + '<span class="nav-count">' + count + '</span>';
     container.appendChild(item);
@@ -751,8 +752,8 @@ function buildCard(row, showOnboarder) {
 
   var obPill = '';
   if (showOnboarder && row.onboarder && row.onboarder !== 'Unassigned') {
-    var obColor = ONBOARDER_COLORS[row.onboarder] || '#6b7280';
-    obPill = '<span class="onboarder-pill" style="background:' + obColor + '18;color:' + obColor + '">' + escHtml(row.onboarder) + '</span>';
+    var initials = ONBOARDER_INITIALS[row.onboarder] || row.onboarder.slice(0,2).toUpperCase();
+    obPill = '<span class="onboarder-pill" style="background:' + OS_COLOR + '18;color:' + OS_COLOR + '">' + initials + '</span>';
   }
 
   var meetingPills = buildMeetingBar(row);

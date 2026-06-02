@@ -691,33 +691,50 @@ function buildMeetingBar(row) {
   if (!row.hubspot_ticket_id) return '';
   var statuses = getMeetingStatuses(row);
 
+  var completedCount = 0;
   var upcomingIdx = -1;
   for (var i = 0; i < statuses.length; i++) {
-    if (!statuses[i].done) { upcomingIdx = i; break; }
+    if (statuses[i].done) completedCount++;
+    else if (upcomingIdx === -1) upcomingIdx = i;
   }
 
-  var segs = statuses.map(function(s, i) {
-    var isFirst = i === 0, isLast = i === statuses.length - 1;
-    var rTL = isFirst ? '5px' : '0', rBL = isFirst ? '5px' : '0';
-    var rTR = isLast  ? '5px' : '0', rBR = isLast  ? '5px' : '0';
-    var radius = 'border-radius:' + rTL + ' ' + rTR + ' ' + rBR + ' ' + rBL + ';';
+  // Each node center is at 12.5%, 37.5%, 62.5%, 87.5% of the container
+  // Fill goes from first node center → completed node center: width = completedCount * 25%
+  var fillPct = Math.min(completedCount, 3) * 25;
 
-    var bg, textColor, border;
+  var nodes = statuses.map(function(s, i) {
+    var isUpcoming = i === upcomingIdx;
+    var bg, borderColor, textColor, labelColor, labelWeight, content;
     if (s.done) {
-      bg = '#1e293b'; textColor = '#fff'; border = 'border:1.5px solid #1e293b;';
-    } else if (i === upcomingIdx) {
-      bg = '#eff6ff'; textColor = '#116FEA'; border = 'border:1.5px solid #116FEA;';
+      bg = '#16a34a'; borderColor = '#16a34a'; textColor = '#fff';
+      labelColor = '#9ca3af'; labelWeight = '500';
+      content = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    } else if (isUpcoming) {
+      bg = '#116FEA'; borderColor = '#116FEA'; textColor = '#fff';
+      labelColor = '#111827'; labelWeight = '700';
+      content = String(i + 1);
     } else {
-      bg = '#f3f4f6'; textColor = '#9ca3af'; border = 'border:1.5px solid #e5e7eb;';
+      bg = '#fff'; borderColor = '#d1d5db'; textColor = '#9ca3af';
+      labelColor = '#9ca3af'; labelWeight = '400';
+      content = String(i + 1);
     }
-
-    return '<div title="' + escHtml(s.label) + '" style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;cursor:default;font-size:10px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;' + radius + 'background:' + bg + ';color:' + textColor + ';' + border + '">'
-      + (s.done ? '<svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
-      + escHtml(s.label)
+    var caret = isUpcoming
+      ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#116FEA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '';
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">'
+      + '<div style="height:12px;display:flex;align-items:center;justify-content:center;">' + caret + '</div>'
+      + '<div style="width:22px;height:22px;border-radius:50%;background:' + bg + ';border:2px solid ' + borderColor + ';display:flex;align-items:center;justify-content:center;color:' + textColor + ';font-size:10px;font-weight:700;position:relative;z-index:1;flex-shrink:0;">' + content + '</div>'
+      + '<div style="font-size:10px;font-weight:' + labelWeight + ';color:' + labelColor + ';text-align:center;line-height:1.3;margin-top:3px;white-space:nowrap;">' + escHtml(s.label) + '</div>'
       + '</div>';
-  }).join('<div style="width:3px;flex-shrink:0;"></div>');
+  }).join('');
 
-  return '<div style="display:flex;margin-top:12px;">' + segs + '</div>';
+  return '<div style="margin:14px -20px 0;padding:0 20px 14px;border-top:1px solid #f3f4f6;">'
+    + '<div style="position:relative;padding-top:4px;">'
+    + '<div style="position:absolute;top:27px;left:12.5%;right:12.5%;height:2px;background:#e5e7eb;z-index:0;border-radius:2px;"></div>'
+    + (fillPct > 0 ? '<div style="position:absolute;top:27px;left:12.5%;width:' + fillPct + '%;height:2px;background:#16a34a;z-index:0;border-radius:2px;transition:width 0.3s;"></div>' : '')
+    + '<div style="display:flex;position:relative;">' + nodes + '</div>'
+    + '</div>'
+    + '</div>';
 }
 
 function buildNextMeeting(row) {
@@ -764,7 +781,6 @@ function buildCard(row, showOnboarder) {
     '<div class="card-top">'
     +   '<div style="min-width:0;">'
     +     '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
-    +     meetingPills
     +   '</div>'
     +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;align-self:flex-start;">'
     +     obPill
@@ -808,6 +824,7 @@ function buildCard(row, showOnboarder) {
     +     '</div>'
     +   '</div>'
     + '</div>'
+    + meetingPills
     + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
     +   '<div class="task-count' + (complete ? ' complete' : '') + '" style="margin-bottom:0;">'

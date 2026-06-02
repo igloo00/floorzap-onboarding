@@ -165,10 +165,21 @@ body {
 .client-card {
   background: #fff; border-radius: 14px; padding: 20px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
-  transition: box-shadow 0.2s;
+  transition: background 0.15s, box-shadow 0.15s;
   display: flex; flex-direction: column;
+  cursor: pointer; position: relative;
 }
-.client-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09), 0 0 0 1px rgba(0,0,0,0.05); }
+.client-card:hover { background: #fafbff; box-shadow: 0 4px 16px rgba(0,0,0,0.09), 0 0 0 1px #bfdbfe; }
+.btn-copy {
+  position: absolute; top: 14px; right: 44px;
+  background: none; border: none; cursor: pointer;
+  color: #9ca3af; padding: 5px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s, background 0.12s, color 0.12s;
+}
+.client-card:hover .btn-copy { opacity: 1; }
+.btn-copy:hover { background: #f3f4f6; color: #374151; }
+.btn-copy.copied { color: #16a34a; opacity: 1; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-width: 0; }
 .client-name {
   font-size: 15px; font-weight: 700; color: #111827; letter-spacing: -0.2px; line-height: 1.3;
@@ -182,22 +193,6 @@ body {
 .task-count { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 16px; }
 .task-count.complete { color: #16a34a; font-weight: 600; }
 
-.card-actions { display: flex; margin-top: auto; padding-top: 16px; }
-.btn-open {
-  flex: 1; background: #116FEA; color: #fff; border: none; border-radius: 8px 0 0 8px;
-  padding: 8px 14px; font-size: 12.5px; font-weight: 600; font-family: inherit;
-  cursor: pointer; transition: background 0.12s; text-align: center; text-decoration: none;
-  display: flex; align-items: center; justify-content: center;
-}
-.btn-open:hover { background: #0f5fd4; }
-.btn-copy {
-  background: #0f5fd4; color: #fff; border: none; border-radius: 0 8px 8px 0;
-  border-left: 1px solid rgba(255,255,255,0.2);
-  padding: 8px 11px; font-size: 12.5px; font-weight: 600; font-family: inherit;
-  cursor: pointer; transition: background 0.12s; display: flex; align-items: center; justify-content: center;
-}
-.btn-copy:hover { background: #0d53bb; }
-.btn-copy.copied { background: #16a34a; border-left-color: rgba(255,255,255,0.2); }
 .card-menu-wrap { position: relative; flex-shrink: 0; }
 .card-menu-btn {
   background: none; border: none; cursor: pointer; color: #9ca3af;
@@ -812,13 +807,10 @@ function buildCard(row, showOnboarder) {
     +   '</div>'
     + '</div>'
     + meetingPills
+    + '<button class="btn-copy" id="copybtn-' + safeId + '" title="Copy link"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg></button>'
     + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
     + '<div class="task-count' + (complete ? ' complete' : '') + '">'
     +   (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
-    + '</div>'
-    + '<div class="card-actions">'
-    +   '<a class="btn-open" href="' + safeUrl + '" target="_blank">Checklist</a>'
-    +   '<button class="btn-copy" id="copybtn-' + safeId + '" title="Copy link"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg></button>'
     + '</div>';
 
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
@@ -841,8 +833,14 @@ function buildCard(row, showOnboarder) {
     openDeleteModal(row.id, row.name);
   });
 
-  card.querySelector('#copybtn-' + row.id).addEventListener('click', function() {
+  card.querySelector('#copybtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation();
     copyCardUrl(this, clientUrl);
+  });
+
+  card.addEventListener('click', function(e) {
+    if (e.target.closest('.card-menu-wrap') || e.target.closest('#copybtn-' + row.id)) return;
+    window.open(clientUrl, '_blank');
   });
 
   return card;

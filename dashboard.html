@@ -669,56 +669,71 @@ function renderCardGrid(ids, showOnboarder) {
 }
 
 var HS_PILL_DEFS = [
-  { key: 'kickoff',      label: 'Kickoff',      color: '#7c3aed' },
-  { key: 'checkin',      label: '2-Week',        color: '#0891b2' },
-  { key: 'integrations', label: 'Integrations',  color: '#d97706' },
-  { key: 'graduation',   label: 'Graduation',    color: '#16a34a' }
+  { key: 'kickoff',      label: 'Kickoff'      },
+  { key: 'checkin',      label: '2-Week'       },
+  { key: 'integrations', label: 'Integrations' },
+  { key: 'graduation',   label: 'Graduation'   }
 ];
 
-function buildMeetingBar(row) {
-  if (!row.hubspot_ticket_id) return '';
+function getMeetingStatuses(row) {
   var hm    = (row.state || {}).hs_meetings    || {};
   var dates = (row.state || {}).hs_meeting_dates || {};
   var today = new Date(); today.setHours(0,0,0,0);
-
-  var statuses = HS_PILL_DEFS.map(function(m) {
+  return HS_PILL_DEFS.map(function(m) {
     var done   = (hm[m.key] || {}).done;
     var iso    = dates[m.key];
     var isPast = iso && new Date(iso) < today;
-    return { key: m.key, label: m.label, color: m.color, done: done || isPast, iso: iso };
+    return { key: m.key, label: m.label, done: done || isPast, iso: iso };
   });
+}
 
-  var upcomingKey = null;
+function buildMeetingBar(row) {
+  if (!row.hubspot_ticket_id) return '';
+  var statuses = getMeetingStatuses(row);
+
+  var upcomingIdx = -1;
   for (var i = 0; i < statuses.length; i++) {
-    if (!statuses[i].done) { upcomingKey = statuses[i].key; break; }
+    if (!statuses[i].done) { upcomingIdx = i; break; }
   }
 
   var segs = statuses.map(function(s, i) {
-    var fmtDate = '';
-    if (s.iso) {
-      var d = new Date(s.iso + 'T00:00:00');
-      fmtDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    var tooltip = fmtDate ? ' title="' + s.label + ': ' + fmtDate + '"' : ' title="' + s.label + '"';
     var isFirst = i === 0, isLast = i === statuses.length - 1;
-    var radius = 'border-radius:' + (isFirst ? '6px' : '0') + ' ' + (isLast ? '6px' : '0') + ' ' + (isLast ? '6px' : '0') + ' ' + (isFirst ? '6px' : '0') + ';';
+    var rTL = isFirst ? '5px' : '0', rBL = isFirst ? '5px' : '0';
+    var rTR = isLast  ? '5px' : '0', rBR = isLast  ? '5px' : '0';
+    var radius = 'border-radius:' + rTL + ' ' + rTR + ' ' + rBR + ' ' + rBL + ';';
 
     var bg, textColor, border;
     if (s.done) {
-      bg = s.color; textColor = '#fff'; border = 'border:1.5px solid ' + s.color + ';';
-    } else if (s.key === upcomingKey) {
-      bg = s.color + '18'; textColor = s.color; border = 'border:1.5px solid ' + s.color + ';';
+      bg = '#1e293b'; textColor = '#fff'; border = 'border:1.5px solid #1e293b;';
+    } else if (i === upcomingIdx) {
+      bg = '#eff6ff'; textColor = '#116FEA'; border = 'border:1.5px solid #116FEA;';
     } else {
       bg = '#f3f4f6'; textColor = '#9ca3af'; border = 'border:1.5px solid #e5e7eb;';
     }
 
-    return '<div' + tooltip + ' style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;cursor:default;font-size:10px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;' + radius + 'background:' + bg + ';color:' + textColor + ';' + border + '">'
+    return '<div title="' + escHtml(s.label) + '" style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;cursor:default;font-size:10px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;' + radius + 'background:' + bg + ';color:' + textColor + ';' + border + '">'
       + (s.done ? '<svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
       + escHtml(s.label)
       + '</div>';
   }).join('<div style="width:3px;flex-shrink:0;"></div>');
 
-  return '<div style="display:flex;gap:0;margin-top:12px;">' + segs + '</div>';
+  return '<div style="display:flex;margin-top:12px;">' + segs + '</div>';
+}
+
+function buildNextMeeting(row) {
+  if (!row.hubspot_ticket_id) return '';
+  var statuses = getMeetingStatuses(row);
+  var next = null;
+  for (var i = 0; i < statuses.length; i++) {
+    if (!statuses[i].done) { next = statuses[i]; break; }
+  }
+  if (!next) return '<div style="font-size:11.5px;color:#16a34a;font-weight:600;margin-top:6px;">✓ All meetings complete</div>';
+  var dateStr = '';
+  if (next.iso) {
+    var d = new Date(next.iso + 'T00:00:00');
+    dateStr = ' · ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  return '<div style="font-size:11.5px;color:#6b7280;margin-top:6px;">Next: <span style="color:#111827;font-weight:600;">' + escHtml(next.label) + '</span>' + escHtml(dateStr) + '</div>';
 }
 
 function buildCard(row, showOnboarder) {
@@ -794,8 +809,11 @@ function buildCard(row, showOnboarder) {
     +   '</div>'
     + '</div>'
     + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
-    + '<div class="task-count' + (complete ? ' complete' : '') + '">'
-    +   (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
+    +   '<div class="task-count' + (complete ? ' complete' : '') + '" style="margin-bottom:0;">'
+    +     (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
+    +   '</div>'
+    +   buildNextMeeting(row)
     + '</div>'
     + '<div class="card-actions">'
     +   '<a class="btn-open" href="' + safeUrl + '" target="_blank">Open checklist ↗</a>'

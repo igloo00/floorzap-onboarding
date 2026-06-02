@@ -669,50 +669,56 @@ function renderCardGrid(ids, showOnboarder) {
 }
 
 var HS_PILL_DEFS = [
-  { key: 'kickoff',      label: 'Kickoff'      },
-  { key: 'checkin',      label: '2-Week'       },
-  { key: 'integrations', label: 'Integrations' },
-  { key: 'graduation',   label: 'Graduation'   }
+  { key: 'kickoff',      label: 'Kickoff',      color: '#7c3aed' },
+  { key: 'checkin',      label: '2-Week',        color: '#0891b2' },
+  { key: 'integrations', label: 'Integrations',  color: '#d97706' },
+  { key: 'graduation',   label: 'Graduation',    color: '#16a34a' }
 ];
 
-function buildMeetingPills(row) {
+function buildMeetingBar(row) {
   if (!row.hubspot_ticket_id) return '';
   var hm    = (row.state || {}).hs_meetings    || {};
   var dates = (row.state || {}).hs_meeting_dates || {};
   var today = new Date(); today.setHours(0,0,0,0);
 
-  // Determine each meeting's status
   var statuses = HS_PILL_DEFS.map(function(m) {
     var done   = (hm[m.key] || {}).done;
     var iso    = dates[m.key];
     var isPast = iso && new Date(iso) < today;
-    return { key: m.key, label: m.label, done: done || isPast, iso: iso };
+    return { key: m.key, label: m.label, color: m.color, done: done || isPast, iso: iso };
   });
 
-  // First non-complete = upcoming
   var upcomingKey = null;
   for (var i = 0; i < statuses.length; i++) {
     if (!statuses[i].done) { upcomingKey = statuses[i].key; break; }
   }
 
-  return statuses.map(function(s) {
+  var segs = statuses.map(function(s, i) {
     var fmtDate = '';
     if (s.iso) {
-      var d = new Date(s.iso);
-      fmtDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+      var d = new Date(s.iso + 'T00:00:00');
+      fmtDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
-    var title = fmtDate ? ' title="' + fmtDate + '"' : '';
-    var style;
+    var tooltip = fmtDate ? ' title="' + s.label + ': ' + fmtDate + '"' : ' title="' + s.label + '"';
+    var isFirst = i === 0, isLast = i === statuses.length - 1;
+    var radius = 'border-radius:' + (isFirst ? '6px' : '0') + ' ' + (isLast ? '6px' : '0') + ' ' + (isLast ? '6px' : '0') + ' ' + (isFirst ? '6px' : '0') + ';';
+
+    var bg, textColor, border;
     if (s.done) {
-      style = 'background:#f0fdf4;color:#16a34a;';
+      bg = s.color; textColor = '#fff'; border = 'border:1.5px solid ' + s.color + ';';
     } else if (s.key === upcomingKey) {
-      style = 'background:#eff6ff;color:#116FEA;font-weight:700;';
+      bg = s.color + '18'; textColor = s.color; border = 'border:1.5px solid ' + s.color + ';';
     } else {
-      style = 'background:#f3f4f6;color:#9ca3af;';
+      bg = '#f3f4f6'; textColor = '#9ca3af'; border = 'border:1.5px solid #e5e7eb;';
     }
-    return '<span' + title + ' style="font-size:10.5px;font-weight:600;border-radius:20px;padding:2px 8px;cursor:default;' + style + '">'
-      + (s.done ? '✓ ' : '') + escHtml(s.label) + '</span>';
-  }).join('');
+
+    return '<div' + tooltip + ' style="flex:1;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;cursor:default;font-size:10px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;' + radius + 'background:' + bg + ';color:' + textColor + ';' + border + '">'
+      + (s.done ? '<svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
+      + escHtml(s.label)
+      + '</div>';
+  }).join('<div style="width:3px;flex-shrink:0;"></div>');
+
+  return '<div style="display:flex;gap:0;margin-top:12px;">' + segs + '</div>';
 }
 
 function buildCard(row, showOnboarder) {
@@ -731,7 +737,7 @@ function buildCard(row, showOnboarder) {
     obPill = '<span class="onboarder-pill" style="background:' + obColor + '18;color:' + obColor + '">' + escHtml(row.onboarder) + '</span>';
   }
 
-  var meetingPills = buildMeetingPills(row);
+  var meetingPills = buildMeetingBar(row);
 
   var card = document.createElement('div');
   card.className = 'client-card';
@@ -743,7 +749,7 @@ function buildCard(row, showOnboarder) {
     '<div class="card-top">'
     +   '<div style="min-width:0;">'
     +     '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
-    +     (meetingPills ? '<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">' + meetingPills + '</div>' : '')
+    +     meetingPills
     +   '</div>'
     +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;align-self:flex-start;">'
     +     obPill

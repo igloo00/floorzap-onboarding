@@ -905,7 +905,6 @@ function modalKey(e) { if (e.key === 'Enter') submitClient(); }
 
 async function submitClient() {
   var name = document.getElementById('company-input').value.trim();
-  var floorzapUrl = document.getElementById('floorzap-url-input').value.trim();
   var onboarder = document.getElementById('onboarder-select').value;
   if (!name) { document.getElementById('company-input').focus(); return; }
   if (!onboarder) { document.getElementById('onboarder-select').focus(); return; }

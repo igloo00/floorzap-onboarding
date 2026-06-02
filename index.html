@@ -965,7 +965,7 @@ async function loadHubSpotMeetings() {
         if (circle) {
           circle.className = 'mtg-circle' + (s.isDone ? ' done' : isUpcoming ? ' upcoming' : '');
           circle.innerHTML = s.isDone
-            ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l3 3 4-4" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            ? ''
             : String(i + 1);
         }
         if (label) {

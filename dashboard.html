@@ -182,21 +182,22 @@ body {
 .task-count { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 16px; }
 .task-count.complete { color: #16a34a; font-weight: 600; }
 
-.card-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 16px; }
+.card-actions { display: flex; margin-top: auto; padding-top: 16px; }
 .btn-open {
-  flex: 1; background: #116FEA; color: #fff; border: none; border-radius: 8px;
+  flex: 1; background: #116FEA; color: #fff; border: none; border-radius: 8px 0 0 8px;
   padding: 8px 14px; font-size: 12.5px; font-weight: 600; font-family: inherit;
   cursor: pointer; transition: background 0.12s; text-align: center; text-decoration: none;
-  display: flex; align-items: center; justify-content: center; gap: 5px;
+  display: flex; align-items: center; justify-content: center;
 }
 .btn-open:hover { background: #0f5fd4; }
 .btn-copy {
-  background: #f3f4f6; color: #374151; border: none; border-radius: 8px;
-  padding: 8px 14px; font-size: 12.5px; font-weight: 600; font-family: inherit;
-  cursor: pointer; transition: background 0.12s;
+  background: #0f5fd4; color: #fff; border: none; border-radius: 0 8px 8px 0;
+  border-left: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 11px; font-size: 12.5px; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: background 0.12s; display: flex; align-items: center; justify-content: center;
 }
-.btn-copy:hover { background: #e5e7eb; }
-.btn-copy.copied { background: #f0fdf4; color: #16a34a; }
+.btn-copy:hover { background: #0d53bb; }
+.btn-copy.copied { background: #16a34a; border-left-color: rgba(255,255,255,0.2); }
 .card-menu-wrap { position: relative; flex-shrink: 0; }
 .card-menu-btn {
   background: none; border: none; cursor: pointer; color: #9ca3af;
@@ -817,7 +818,7 @@ function buildCard(row, showOnboarder) {
     + '</div>'
     + '<div class="card-actions">'
     +   '<a class="btn-open" href="' + safeUrl + '" target="_blank">Checklist</a>'
-    +   '<button class="btn-copy" id="copybtn-' + safeId + '">Copy link</button>'
+    +   '<button class="btn-copy" id="copybtn-' + safeId + '" title="Copy link"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg></button>'
     + '</div>';
 
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
@@ -911,16 +912,19 @@ function copyClientUrl() {
   });
 }
 
+var COPY_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>';
+var CHECK_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7l3.5 3.5 5.5-6"/></svg>';
+
 function copyCardUrl(btn, url) {
   navigator.clipboard.writeText(url).then(function() {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+    btn.innerHTML = CHECK_ICON; btn.classList.add('copied');
+    setTimeout(function() { btn.innerHTML = COPY_ICON; btn.classList.remove('copied'); }, 2000);
   }).catch(function() {
     var ta = document.createElement('textarea');
     ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
     document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+    btn.innerHTML = CHECK_ICON; btn.classList.add('copied');
+    setTimeout(function() { btn.innerHTML = COPY_ICON; btn.classList.remove('copied'); }, 2000);
   });
 }
 

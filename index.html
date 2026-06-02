@@ -866,10 +866,8 @@ function applyClientName() {
   var wrap = document.getElementById('client-greeting');
   var nameEl = document.getElementById('greeting-name');
   var prog = document.getElementById('overall-progress');
-  var grid = document.getElementById('mtg-stepper-wrap');
   if (nameEl) nameEl.textContent = CLIENT_NAME;
   if (wrap) wrap.style.display = '';
-  if (grid) grid.style.display = '';
   if (prog) prog.style.display = '';
   updateOverallProgress();
 }
@@ -986,7 +984,7 @@ async function loadHubSpotMeetings() {
 
       // Show stepper
       var wrap = document.getElementById('mtg-stepper-wrap');
-      if (wrap) wrap.style.display = '';
+      if (wrap) wrap.style.display = 'block';
 
       // Next meeting callout
       var callout = document.getElementById('next-meeting-callout');

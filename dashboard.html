@@ -706,22 +706,23 @@ function buildMeetingBar(row) {
     var isUpcoming = i === upcomingIdx;
     var bg, borderColor, textColor, labelColor, labelWeight, content;
     if (s.done) {
-      bg = '#16a34a'; borderColor = '#16a34a'; textColor = '#fff';
+      bg = '#dcfce7'; borderColor = '#86efac'; textColor = '#16a34a';
       labelColor = '#9ca3af'; labelWeight = '500';
-      content = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      content = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 4-4" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     } else if (isUpcoming) {
-      bg = '#116FEA'; borderColor = '#116FEA'; textColor = '#fff';
-      labelColor = '#111827'; labelWeight = '700';
+      bg = '#dbeafe'; borderColor = '#93c5fd'; textColor = '#2563eb';
+      labelColor = '#374151'; labelWeight = '700';
       content = String(i + 1);
     } else {
-      bg = '#fff'; borderColor = '#d1d5db'; textColor = '#9ca3af';
+      bg = '#fff'; borderColor = '#e5e7eb'; textColor = '#9ca3af';
       labelColor = '#9ca3af'; labelWeight = '400';
       content = String(i + 1);
     }
     var caret = isUpcoming
-      ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#116FEA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
       : '';
-    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">'
+    var fmtDate = s.iso ? s.label + ': ' + new Date(s.iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : s.label;
+    return '<div title="' + escHtml(fmtDate) + '" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;">'
       + '<div style="height:12px;display:flex;align-items:center;justify-content:center;">' + caret + '</div>'
       + '<div style="width:22px;height:22px;border-radius:50%;background:' + bg + ';border:2px solid ' + borderColor + ';display:flex;align-items:center;justify-content:center;color:' + textColor + ';font-size:10px;font-weight:700;position:relative;z-index:1;flex-shrink:0;">' + content + '</div>'
       + '<div style="font-size:10px;font-weight:' + labelWeight + ';color:' + labelColor + ';text-align:center;line-height:1.3;margin-top:3px;white-space:nowrap;">' + escHtml(s.label) + '</div>'
@@ -730,28 +731,13 @@ function buildMeetingBar(row) {
 
   return '<div style="margin:14px -20px 0;padding:0 20px 14px;border-top:1px solid #f3f4f6;">'
     + '<div style="position:relative;padding-top:4px;">'
-    + '<div style="position:absolute;top:27px;left:12.5%;right:12.5%;height:2px;background:#e5e7eb;z-index:0;border-radius:2px;"></div>'
-    + (fillPct > 0 ? '<div style="position:absolute;top:27px;left:12.5%;width:' + fillPct + '%;height:2px;background:#16a34a;z-index:0;border-radius:2px;transition:width 0.3s;"></div>' : '')
+    + '<div style="position:absolute;top:27px;left:12.5%;right:12.5%;height:2px;background:#f0f0f0;z-index:0;border-radius:2px;"></div>'
+    + (fillPct > 0 ? '<div style="position:absolute;top:27px;left:12.5%;width:' + fillPct + '%;height:2px;background:#86efac;z-index:0;border-radius:2px;"></div>' : '')
     + '<div style="display:flex;position:relative;">' + nodes + '</div>'
     + '</div>'
     + '</div>';
 }
 
-function buildNextMeeting(row) {
-  if (!row.hubspot_ticket_id) return '';
-  var statuses = getMeetingStatuses(row);
-  var next = null;
-  for (var i = 0; i < statuses.length; i++) {
-    if (!statuses[i].done) { next = statuses[i]; break; }
-  }
-  if (!next) return '<div style="font-size:11.5px;color:#16a34a;font-weight:600;margin-top:6px;">✓ All meetings complete</div>';
-  var dateStr = '';
-  if (next.iso) {
-    var d = new Date(next.iso + 'T00:00:00');
-    dateStr = ' · ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-  return '<div style="font-size:11.5px;color:#6b7280;margin-top:6px;">Next: <span style="color:#111827;font-weight:600;">' + escHtml(next.label) + '</span>' + escHtml(dateStr) + '</div>';
-}
 
 function buildCard(row, showOnboarder) {
   var state = row.state || {};
@@ -826,11 +812,8 @@ function buildCard(row, showOnboarder) {
     + '</div>'
     + meetingPills
     + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
-    +   '<div class="task-count' + (complete ? ' complete' : '') + '" style="margin-bottom:0;">'
-    +     (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
-    +   '</div>'
-    +   buildNextMeeting(row)
+    + '<div class="task-count' + (complete ? ' complete' : '') + '">'
+    +   (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
     + '</div>'
     + '<div class="card-actions">'
     +   '<a class="btn-open" href="' + safeUrl + '" target="_blank">Open checklist ↗</a>'

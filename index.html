@@ -494,25 +494,25 @@ body {
       <div class="mtg-nodes">
         <div class="mtg-node" id="mtg-node-kickoff">
           <div class="mtg-caret" id="mtg-caret-kickoff"></div>
-          <div class="mtg-circle" id="mtg-circle-kickoff">1</div>
+          <div class="mtg-circle" id="mtg-circle-kickoff"></div>
           <div class="mtg-label" id="mtg-label-kickoff">Kickoff</div>
           <div class="mtg-date" id="mtg-date-kickoff"></div>
         </div>
         <div class="mtg-node" id="mtg-node-checkin">
           <div class="mtg-caret" id="mtg-caret-checkin"></div>
-          <div class="mtg-circle" id="mtg-circle-checkin">2</div>
+          <div class="mtg-circle" id="mtg-circle-checkin"></div>
           <div class="mtg-label" id="mtg-label-checkin">2-Week</div>
           <div class="mtg-date" id="mtg-date-checkin"></div>
         </div>
         <div class="mtg-node" id="mtg-node-integrations">
           <div class="mtg-caret" id="mtg-caret-integrations"></div>
-          <div class="mtg-circle" id="mtg-circle-integrations">3</div>
+          <div class="mtg-circle" id="mtg-circle-integrations"></div>
           <div class="mtg-label" id="mtg-label-integrations">Integrations</div>
           <div class="mtg-date" id="mtg-date-integrations"></div>
         </div>
         <div class="mtg-node" id="mtg-node-graduation">
           <div class="mtg-caret" id="mtg-caret-graduation"></div>
-          <div class="mtg-circle" id="mtg-circle-graduation">4</div>
+          <div class="mtg-circle" id="mtg-circle-graduation"></div>
           <div class="mtg-label" id="mtg-label-graduation">Graduation</div>
           <div class="mtg-date" id="mtg-date-graduation"></div>
         </div>
@@ -966,7 +966,7 @@ async function loadHubSpotMeetings() {
           circle.className = 'mtg-circle' + (s.isDone ? ' done' : isUpcoming ? ' upcoming' : '');
           circle.innerHTML = s.isDone
             ? ''
-            : String(i + 1);
+            : '';
         }
         if (label) {
           label.className = 'mtg-label' + (s.isDone ? ' done' : isUpcoming ? ' upcoming' : '');

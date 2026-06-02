@@ -712,11 +712,11 @@ function buildMeetingBar(row) {
     } else if (isUpcoming) {
       bg = '#dbeafe'; borderColor = '#93c5fd'; textColor = '#2563eb';
       labelColor = '#374151'; labelWeight = '700';
-      content = String(i + 1);
+      content = '';
     } else {
       bg = '#fff'; borderColor = '#e5e7eb'; textColor = '#9ca3af';
       labelColor = '#9ca3af'; labelWeight = '400';
-      content = String(i + 1);
+      content = '';
     }
     var caret = isUpcoming
       ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'

@@ -729,9 +729,10 @@ function buildMeetingBar(row) {
 
   var completedCount = 0;
   var upcomingIdx = -1;
+  var hasDates = statuses.some(function(s) { return s.iso; });
   for (var i = 0; i < statuses.length; i++) {
     if (statuses[i].done) completedCount++;
-    else if (upcomingIdx === -1 && statuses[i].iso) upcomingIdx = i;
+    else if (upcomingIdx === -1 && (!hasDates || statuses[i].iso)) upcomingIdx = i;
   }
 
   // Each node center is at 12.5%, 37.5%, 62.5%, 87.5% of the container

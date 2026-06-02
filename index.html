@@ -198,26 +198,27 @@ body {
 
 /* ── Meetings ── */
 .floorzap-url-card {
-  background: #eff6ff;
+  background: #fff;
   border-radius: 14px;
-  padding: 15px 20px;
+  padding: 16px 20px;
   margin-bottom: 10px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #e5e7eb;
   display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
 }
 .fz-url-text {
-  font-size: 15px; font-weight: 600; color: #1e3a8a;
+  font-size: 15px; font-weight: 700; color: #111827;
   letter-spacing: -0.2px; flex: 1; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .fz-open-btn {
-  flex-shrink: 0; color: #1d4ed8;
-  background: #fff; border: 1px solid #bfdbfe; border-radius: 8px;
+  flex-shrink: 0; color: #374151;
+  background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
   padding: 7px 9px; text-decoration: none;
   transition: background 0.12s, border-color 0.12s;
   display: flex; align-items: center; justify-content: center;
 }
-.fz-open-btn:hover { background: #dbeafe; border-color: #93c5fd; }
+.fz-open-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
 
 .meetings-card {
   background: #fff;
@@ -272,8 +273,8 @@ body {
 .card-header:hover { background: #fafafa; }
 .card-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.card-title { font-size: 14px; font-weight: 700; color: #111827; letter-spacing: -0.1px; }
-.card-meta { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+.card-title { font-size: 15px; font-weight: 700; color: #111827; letter-spacing: -0.1px; }
+.card-meta { font-size: 11.5px; color: #9ca3af; margin-top: 1px; font-weight: 400; }
 .card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.01em; }
 .pill-blue { background: #eff6ff; color: #1d4ed8; }
@@ -315,6 +316,8 @@ body {
 .task-links { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
 .task-link { font-size: 12px; color: #1566C0; text-decoration: none; font-weight: 600; transition: color 0.1s; }
 .task-link:hover { color: #1050a8; text-decoration: underline; }
+
+.task.done-row { background: #f0fdf4; }
 
 /* ── Email template ── */
 .email-block {
@@ -804,6 +807,7 @@ function applyState() {
       var tn = document.getElementById('tn-' + sec + '-' + i);
       if (cb) cb.classList.add('on');
       if (tn) tn.classList.add('done');
+      if (cb) { var taskRow = cb.closest('.task'); if (taskRow) taskRow.classList.add('done-row'); }
     });
     updateSection(sec);
   });
@@ -886,7 +890,7 @@ function updateOverallProgress() {
     else fill.classList.remove('complete');
   }
   if (text) {
-    text.textContent = complete ? '✓ All tasks complete!' : done + ' of ' + total + ' tasks complete';
+    text.textContent = complete ? '✓ All tasks complete' : done + ' / ' + total + ' tasks  ·  ' + pct + '%';
     if (complete) text.classList.add('complete');
     else text.classList.remove('complete');
   }
@@ -1013,9 +1017,19 @@ async function loadHubSpotMeetings() {
 function tick(sec, i) {
   var cb = document.getElementById('cb-' + sec + '-' + i);
   var tn = document.getElementById('tn-' + sec + '-' + i);
+  var taskRow = cb ? cb.closest('.task') : null;
   var idx = STATE[sec].indexOf(i);
-  if (idx > -1) { STATE[sec].splice(idx, 1); cb.classList.remove('on'); tn.classList.remove('done'); }
-  else { STATE[sec].push(i); cb.classList.add('on'); tn.classList.add('done'); }
+  if (idx > -1) {
+    STATE[sec].splice(idx, 1);
+    cb.classList.remove('on');
+    tn.classList.remove('done');
+    if (taskRow) taskRow.classList.remove('done-row');
+  } else {
+    STATE[sec].push(i);
+    cb.classList.add('on');
+    tn.classList.add('done');
+    if (taskRow) taskRow.classList.add('done-row');
+  }
   updateSection(sec);
   saveState();
 }

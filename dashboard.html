@@ -98,10 +98,10 @@ body {
   padding: 8px 10px; border-radius: 8px; cursor: pointer;
   font-size: 13.5px; font-weight: 500; color: #374151;
   transition: background 0.12s, color 0.12s; user-select: none;
-  margin-bottom: 2px;
+  margin-bottom: 2px; border-left: 3px solid transparent;
 }
 .nav-item:hover { background: #f3f4f6; }
-.nav-item.active { background: #eff6ff; color: #116FEA; font-weight: 600; }
+.nav-item.active { background: transparent; color: #116FEA; font-weight: 600; border-left: 3px solid #116FEA; padding-left: calc(16px - 3px); }
 .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .nav-count {
   margin-left: auto; font-size: 11px; font-weight: 600;
@@ -140,7 +140,7 @@ body {
 .client-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 10px;
+  gap: 16px;
 }
 
 /* ── Onboarder pill on cards (shown in Recent / search mode) ── */
@@ -284,6 +284,25 @@ body {
   padding: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
 }
 .btn-done:hover { background: #e5e7eb; }
+
+/* ── Skeleton loader ── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.skeleton-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-line {
+  background: #f3f4f6;
+  border-radius: 6px;
+  height: 12px;
+  margin-bottom: 10px;
+}
 
 /* ── Live indicator ── */
 .live-dot {
@@ -549,8 +568,29 @@ async function init() {
   subscribeRealtime();
 }
 
+/* ── Skeleton loader ── */
+function showSkeletons() {
+  var grid = document.getElementById('main-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (var i = 0; i < 4; i++) {
+    grid.innerHTML += '<div class="skeleton-card">'
+      + '<div class="skeleton-line" style="width:60%;margin-bottom:14px;height:14px;"></div>'
+      + '<div style="display:flex;gap:6px;margin-bottom:20px;">'
+      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
+      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
+      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
+      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
+      + '</div>'
+      + '<div class="skeleton-line" style="width:100%;height:7px;border-radius:4px;margin-bottom:6px;"></div>'
+      + '<div class="skeleton-line" style="width:40%;height:10px;"></div>'
+      + '</div>';
+  }
+}
+
 /* ── Load all clients ── */
 async function loadClients() {
+  showSkeletons();
   var res = await _sb.from('clients').select('*').order('updated_at', { ascending: false });
   if (res.data) {
     _clients = {};

@@ -595,7 +595,6 @@ async function syncHubSpotDates() {
         }
       }
       if (Object.keys(updates).length === 0) continue;
-      updates.updated_at = new Date().toISOString();
       await _sb.from('clients').update(updates).eq('id', id);
       Object.assign(_clients[id], updates);
     } catch(e) {}

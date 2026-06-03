@@ -520,6 +520,13 @@ var _clients = {}; // keyed by client id
 var _newClientUrl = '';
 var _activeNav = 'recent';
 var FIXED_TOTAL = 20;
+var _renderTimer = null;
+
+/* ── Debounced render — batches rapid updates into one repaint ── */
+function scheduleRender() {
+  if (_renderTimer) clearTimeout(_renderTimer);
+  _renderTimer = setTimeout(function() { _renderTimer = null; renderMain(); }, 120);
+}
 
 var ONBOARDERS = ['David', 'JB', 'Maddi', 'Valentin', 'Amber'];
 var ONBOARDER_INITIALS = {
@@ -599,7 +606,6 @@ async function syncHubSpotDates() {
       Object.assign(_clients[id], updates);
     } catch(e) {}
   }
-  renderMain();
 }
 
 /* ── Skeleton loader ── */
@@ -644,7 +650,7 @@ function subscribeRealtime() {
       } else {
         _clients[row.id] = row;
       }
-      renderMain();
+      scheduleRender();
     })
     .subscribe();
 }

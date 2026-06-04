@@ -757,14 +757,22 @@ var HS_PILL_DEFS = [
 ];
 
 function getMeetingStatuses(row) {
-  var hm    = (row.state || {}).hs_meetings    || {};
   var dates = (row.state || {}).hs_meeting_dates || {};
-  var today = new Date(); today.setHours(0,0,0,0);
+  var now = new Date();
   return HS_PILL_DEFS.map(function(m) {
-    var done   = (hm[m.key] || {}).done;
-    var iso    = dates[m.key];
-    var isPast = iso && new Date(iso) < today;
-    return { key: m.key, label: m.label, done: done || isPast, iso: iso };
+    var iso = dates[m.key];
+    var isDone = false;
+    if (iso) {
+      var raw = Number(iso);
+      var isTimestamp = !isNaN(raw) && raw > 0;
+      if (isTimestamp) {
+        isDone = now > new Date(raw + 30 * 60 * 1000);
+      } else {
+        var d = new Date(iso); d.setHours(23, 59, 59, 999);
+        isDone = now > d;
+      }
+    }
+    return { key: m.key, label: m.label, done: isDone, iso: iso };
   });
 }
 
@@ -1197,7 +1205,7 @@ var HS_MEETING_KEYS = [
 function openMeetingsModal(id, name) {
   _meetingsClientId = id;
   document.getElementById('meetings-modal-subtitle').textContent =
-    'Add Zoom links and mark meetings complete for "' + name + '".';
+    'Manage Zoom and recording links for "' + name + '".';
   renderHsMeetingsList();
   document.getElementById('meetings-backdrop').classList.add('open');
 }
@@ -1220,21 +1228,16 @@ function renderHsMeetingsList() {
   var meetings = getHsMeetings();
   container.innerHTML = '';
   HS_MEETING_KEYS.forEach(function(m) {
-    var data = meetings[m.key] || { zoom: '', done: false };
+    var data = meetings[m.key] || { zoom: '', recording: '' };
     var row = document.createElement('div');
     row.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px;';
     row.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-      + '<div style="font-size:13.5px;font-weight:700;color:#111827;">' + escHtml(m.label) + '</div>'
-      + '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#374151;cursor:pointer;">'
-      + '<input type="checkbox" id="done-' + m.key + '" ' + (data.done ? 'checked' : '') + ' style="width:15px;height:15px;accent-color:#116FEA;cursor:pointer;">'
-      + 'Complete'
-      + '</label>'
-      + '</div>'
-      + '<input class="modal-input" id="zoom-' + m.key + '" type="text" placeholder="Zoom link (optional)" value="' + escHtml(data.zoom || '') + '" style="margin-bottom:0;">';
+      '<div style="font-size:13.5px;font-weight:700;color:#111827;margin-bottom:10px;">' + escHtml(m.label) + '</div>'
+      + '<input class="modal-input" id="zoom-' + m.key + '" type="text" placeholder="Zoom link" value="' + escHtml(data.zoom || '') + '">'
+      + '<input class="modal-input" id="recording-' + m.key + '" type="text" placeholder="Recording link (Fathom URL)" value="' + escHtml(data.recording || '') + '" style="margin-bottom:0;">';
     container.appendChild(row);
     container.querySelector('#zoom-' + m.key).addEventListener('blur', function() { saveHsMeeting(m.key); });
-    container.querySelector('#done-' + m.key).addEventListener('change', function() { saveHsMeeting(m.key); });
+    container.querySelector('#recording-' + m.key).addEventListener('blur', function() { saveHsMeeting(m.key); });
   });
 }
 
@@ -1245,7 +1248,7 @@ async function saveHsMeeting(key) {
   var hsMeetings = Object.assign({}, state.hs_meetings || {});
   hsMeetings[key] = {
     zoom: document.getElementById('zoom-' + key).value.trim(),
-    done: document.getElementById('done-' + key).checked
+    recording: document.getElementById('recording-' + key).value.trim()
   };
   state.hs_meetings = hsMeetings;
   var res = await _sb.from('clients')

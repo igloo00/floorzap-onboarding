@@ -86,19 +86,71 @@ export default {
       });
     }
 
+    // 3. Fetch associated meeting engagements to extract Zoom links from their bodies
+    // zoomByDay maps "YYYY-MM-DD" -> first Zoom URL found in that meeting's body
+    const zoomByDay = {};
+    try {
+      const assocRes = await fetch(
+        `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/meetings`,
+        { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }
+      );
+      if (assocRes.ok) {
+        const assocData = await assocRes.json();
+        const meetingIds = (assocData.results || []).map(r => r.id).slice(0, 10);
+        const details = await Promise.all(
+          meetingIds.map(id =>
+            fetch(
+              `https://api.hubapi.com/crm/v3/objects/meetings/${id}?properties=hs_meeting_body,hs_timestamp`,
+              { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }
+            ).then(r => r.ok ? r.json() : null).catch(() => null)
+          )
+        );
+        const zoomRe = /https:\/\/[a-z0-9.-]*zoom\.us\/j\/[^\s\n"<>]+/i;
+        for (const m of details) {
+          if (!m?.properties) continue;
+          const ts = Number(m.properties.hs_timestamp);
+          if (!ts) continue;
+          const match = (m.properties.hs_meeting_body || '').match(zoomRe);
+          if (match) {
+            const dayKey = new Date(ts).toISOString().split('T')[0];
+            zoomByDay[dayKey] = match[0];
+          }
+        }
+      }
+    } catch (_) {
+      // Zoom enrichment is best-effort; continue without it
+    }
+
+    // Find the Zoom link for a ticket date property by matching within ±2 days
+    function getZoom(isoDateVal) {
+      if (!isoDateVal) return null;
+      const num = Number(isoDateVal);
+      const base = !isNaN(num) && num > 0 ? new Date(num) : new Date(isoDateVal);
+      if (isNaN(base.getTime())) return null;
+      for (let offset = 0; offset <= 2; offset++) {
+        for (const sign of [0, 1, -1]) {
+          const d = new Date(base);
+          d.setUTCDate(d.getUTCDate() + sign * offset);
+          const key = d.toISOString().split('T')[0];
+          if (zoomByDay[key]) return zoomByDay[key];
+        }
+      }
+      return null;
+    }
+
     // Extract company name from "Onboarding | Company Name" format
-    var rawSubject = p.subject || null;
-    var clientName = rawSubject ? rawSubject.replace(/^[^|]+\|\s*/, '').trim() : null;
+    const rawSubject = p.subject || null;
+    const clientName = rawSubject ? rawSubject.replace(/^[^|]+\|\s*/, '').trim() : null;
 
     return new Response(
       JSON.stringify({
         floorzap_url: p.floorzap_url ?? null,
         client_name: clientName,
         meetings: [
-          { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null, isoDate: p.initial_onboarding_meeting  || null },
-          { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null, isoDate: p.n2_week_check_in_meeting    || null },
-          { title: 'Integrations',       date: p.integrations_meeting        ? fmtDate(p.integrations_meeting)        : null, isoDate: p.integrations_meeting        || null },
-          { title: 'Graduation Meeting', date: p.graduation_meeting          ? fmtDate(p.graduation_meeting)          : null, isoDate: p.graduation_meeting          || null },
+          { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null, isoDate: p.initial_onboarding_meeting  || null, zoom: getZoom(p.initial_onboarding_meeting) },
+          { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null, isoDate: p.n2_week_check_in_meeting    || null, zoom: getZoom(p.n2_week_check_in_meeting) },
+          { title: 'Integrations',       date: p.integrations_meeting        ? fmtDate(p.integrations_meeting)        : null, isoDate: p.integrations_meeting        || null, zoom: getZoom(p.integrations_meeting) },
+          { title: 'Graduation Meeting', date: p.graduation_meeting          ? fmtDate(p.graduation_meeting)          : null, isoDate: p.graduation_meeting          || null, zoom: getZoom(p.graduation_meeting) },
         ],
       }),
       { headers: CORS }

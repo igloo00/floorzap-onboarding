@@ -47,170 +47,66 @@ body {
 .header-help:hover { color: #fff; }
 .header-help svg { flex-shrink: 0; }
 
-/* ── Meeting stepper ── */
-.mtg-stepper-wrap {
+/* ── Onboarding Journey cards ── */
+.journey-wrap {
   background: #fff;
   border-radius: 14px;
-  padding: 20px 20px 16px;
+  padding: 20px;
   margin-bottom: 10px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
+}
+.journey-wrap[style*="display:none"], .journey-wrap.hidden {
   display: none;
 }
-.mtg-stepper {
-  position: relative;
-  padding-top: 4px;
+.journey-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #9ca3af; margin-bottom: 14px;
 }
-.mtg-track {
-  position: absolute;
-  top: 27px;
-  left: 12.5%;
-  right: 12.5%;
-  height: 2px;
-  background: #f0f0f0;
-  border-radius: 2px;
-  z-index: 0;
+.journey-cards {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
 }
-.mtg-fill {
-  position: absolute;
-  top: 27px;
-  left: 12.5%;
-  height: 2px;
-  background: #86efac;
-  border-radius: 2px;
-  z-index: 0;
-  width: 0%;
-  transition: width 0.4s;
+.journey-card {
+  border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 14px;
+  display: flex; flex-direction: column; gap: 4px;
 }
-.mtg-nodes {
-  display: flex;
-  position: relative;
-  z-index: 1;
+.journey-card.done { background: #f0fdf4; border-color: #bbf7d0; }
+.journey-card.current { background: #eff6ff; border-color: #93c5fd; }
+.jc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.jc-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; background: #e5e7eb; color: #9ca3af; flex-shrink: 0;
 }
-.mtg-node {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: default;
+.jc-num.done { background: #16a34a; color: #fff; }
+.jc-num.current { background: #2563eb; color: #fff; }
+.jc-pill {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.05em;
 }
-.mtg-caret {
-  height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.jc-pill.done { background: #dcfce7; color: #16a34a; }
+.jc-pill.next { background: #dbeafe; color: #2563eb; }
+.jc-pill.upcoming { background: #f3f4f6; color: #9ca3af; }
+.jc-title { font-size: 13px; font-weight: 700; color: #111827; line-height: 1.3; }
+.journey-card.current .jc-title { color: #1d4ed8; }
+.jc-date { font-size: 11.5px; color: #6b7280; }
+.journey-card.current .jc-date { color: #3b82f6; }
+.jc-relative { font-size: 11.5px; color: #9ca3af; }
+.jc-btn {
+  margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; text-decoration: none; border: 1.5px solid #e5e7eb;
+  transition: background 0.12s, border-color 0.12s; color: #374151; background: #fff;
+  font-family: inherit; white-space: nowrap;
 }
-.mtg-circle {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 2px solid #e5e7eb;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #9ca3af;
-  flex-shrink: 0;
+.jc-btn:hover { background: #f3f4f6; }
+.jc-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+.jc-btn.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.jc-btn-text { color: #9ca3af; font-size: 12px; text-align: center; padding: 8px 0; margin-top: 8px; }
+@media (max-width: 540px) {
+  .journey-cards { grid-template-columns: repeat(2, 1fr); }
 }
-.mtg-circle.done {
-  background: #dcfce7;
-  border-color: #86efac;
-  color: #16a34a;
-}
-.mtg-circle.upcoming {
-  background: #dbeafe;
-  border-color: #93c5fd;
-  color: #2563eb;
-}
-.mtg-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: #9ca3af;
-  text-align: center;
-  line-height: 1.3;
-  margin-top: 3px;
-  white-space: nowrap;
-}
-.mtg-label.upcoming {
-  color: #374151;
-  font-weight: 700;
-}
-.mtg-label.done {
-  color: #9ca3af;
-}
-.mtg-date {
-  font-size: 10.5px;
-  color: #9ca3af;
-  text-align: center;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-.mtg-date.upcoming {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-/* ── Next meeting callout ── */
-.next-meeting-callout {
-  display: none;
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-top: -4px;
-  margin-bottom: 10px;
-  border: 1px solid #e5e7eb;
-  font-size: 13px;
-  color: #374151;
-}
-.next-meeting-callout .nmc-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #9ca3af;
-  margin-bottom: 2px;
-}
-.next-meeting-callout .nmc-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-}
-.next-meeting-callout .nmc-date {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 1px;
-}
-.next-meeting-callout .nmc-zoom {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1566C0;
-  background: #eff6ff;
-  border-radius: 6px;
-  padding: 4px 12px;
-  text-decoration: none;
-  transition: background 0.12s;
-}
-.next-meeting-callout .nmc-zoom:hover { background: #dbeafe; }
 
 /* ── Meetings ── */
-.floorzap-url-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px 20px;
-  margin-bottom: 10px;
-  border: 1px solid #e5e7eb;
-  display: flex; align-items: center; gap: 14px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
-}
-.fz-url-text {
-  font-size: 15px; font-weight: 700; color: #111827;
-  letter-spacing: -0.2px; flex: 1; min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
 .fz-open-btn {
   flex-shrink: 0; color: #374151;
   background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
@@ -413,25 +309,36 @@ body {
   font-size: 21px; font-weight: 700; color: #111827; letter-spacing: -0.4px; line-height: 1.3;
 }
 
-/* ── Overall progress bar ── */
+/* ── Progress + URL combined card ── */
 .overall-progress {
   background: #fff; border-radius: 14px; padding: 16px 20px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
   margin-bottom: 10px;
+  display: flex; align-items: center; gap: 16px;
 }
-.op-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+.op-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.op-ring { width: 64px; height: 64px; flex-shrink: 0; }
+.op-ring-bg { fill: none; stroke: #f0f2f5; stroke-width: 5; }
+.op-ring-fill {
+  fill: none; stroke: #116FEA; stroke-width: 5; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.4s cubic-bezier(.4,0,.2,1), stroke 0.3s;
 }
-.op-title { font-size: 13px; font-weight: 600; color: #374151; }
-.op-text { font-size: 13px; color: #6b7280; font-weight: 500; }
+.op-ring-fill.complete { stroke: #16a34a; }
+.op-ring-pct { font-size: 13px; font-weight: 700; fill: #111827; text-anchor: middle; dominant-baseline: central; font-family: "Inter", sans-serif; }
+.op-title { font-size: 13px; font-weight: 700; color: #111827; }
+.op-text { font-size: 12px; color: #6b7280; font-weight: 400; margin-top: 2px; }
 .op-text.complete { color: #16a34a; font-weight: 600; }
-.op-track { height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
-.op-fill {
-  height: 100%; border-radius: 4px;
-  transition: width 0.4s cubic-bezier(.4,0,.2,1);
-  background: linear-gradient(90deg, #116FEA, #3b8ef5);
+.op-divider { width: 1px; background: #f3f4f6; align-self: stretch; flex-shrink: 0; }
+.op-url-section { flex-shrink: 0; }
+.op-fz-btn {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #1566C0;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+  padding: 8px 14px; text-decoration: none; white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
 }
-.op-fill.complete { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.op-fz-btn:hover { background: #dbeafe; border-color: #93c5fd; }
 
 /* ── Mobile ── */
 @media (max-width: 540px) {
@@ -478,66 +385,36 @@ body {
     <div class="client-greeting">Hello, <span id="greeting-name"></span> 👋</div>
   </div>
 
-  <!-- Floorzap URL (shown only when floorzap_url is set on the client) -->
-  <div class="floorzap-url-card" id="floorzap-url-card" style="display:none">
-    <span class="fz-url-text" id="fz-url-text"></span>
-    <a class="fz-open-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener" title="Open Floorzap">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <path d="M6.5 2.5H3a1 1 0 00-1 1v8.5a1 1 0 001 1h8.5a1 1 0 001-1V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M9 1.5h4.5V6M13.5 1.5L7.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
+  <!-- Onboarding Journey (shown only when ?c= param is present) -->
+  <div class="journey-wrap hidden" id="journey-wrap">
+    <div class="journey-title">Your Onboarding Journey</div>
+    <div class="journey-cards" id="journey-cards"></div>
   </div>
 
-  <!-- Meeting stepper (shown only when ?c= param is present) -->
-  <div class="mtg-stepper-wrap" id="mtg-stepper-wrap">
-    <div class="mtg-stepper" id="mtg-stepper">
-      <div class="mtg-track"></div>
-      <div class="mtg-fill" id="mtg-fill"></div>
-      <div class="mtg-nodes">
-        <div class="mtg-node" id="mtg-node-kickoff">
-          <div class="mtg-caret" id="mtg-caret-kickoff"></div>
-          <div class="mtg-circle" id="mtg-circle-kickoff"></div>
-          <div class="mtg-label" id="mtg-label-kickoff">Kickoff</div>
-          <div class="mtg-date" id="mtg-date-kickoff"></div>
-        </div>
-        <div class="mtg-node" id="mtg-node-checkin">
-          <div class="mtg-caret" id="mtg-caret-checkin"></div>
-          <div class="mtg-circle" id="mtg-circle-checkin"></div>
-          <div class="mtg-label" id="mtg-label-checkin">2-Week</div>
-          <div class="mtg-date" id="mtg-date-checkin"></div>
-        </div>
-        <div class="mtg-node" id="mtg-node-integrations">
-          <div class="mtg-caret" id="mtg-caret-integrations"></div>
-          <div class="mtg-circle" id="mtg-circle-integrations"></div>
-          <div class="mtg-label" id="mtg-label-integrations">Integrations</div>
-          <div class="mtg-date" id="mtg-date-integrations"></div>
-        </div>
-        <div class="mtg-node" id="mtg-node-graduation">
-          <div class="mtg-caret" id="mtg-caret-graduation"></div>
-          <div class="mtg-circle" id="mtg-circle-graduation"></div>
-          <div class="mtg-label" id="mtg-label-graduation">Graduation</div>
-          <div class="mtg-date" id="mtg-date-graduation"></div>
-        </div>
+  <!-- Progress ring + Floorzap URL (shown only when ?c= param is present) -->
+  <div class="overall-progress" id="overall-progress" style="display:none">
+    <div class="op-left">
+      <svg class="op-ring" viewBox="0 0 64 64">
+        <circle class="op-ring-bg" cx="32" cy="32" r="26"/>
+        <circle class="op-ring-fill" id="op-fill" cx="32" cy="32" r="26"
+          stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
+        <text class="op-ring-pct" id="op-ring-pct" x="32" y="32">0%</text>
+      </svg>
+      <div>
+        <div class="op-title">Onboarding progress</div>
+        <div class="op-text" id="op-text">0 of 20 tasks complete</div>
       </div>
     </div>
-  </div>
-
-  <!-- Next meeting callout -->
-  <div class="next-meeting-callout" id="next-meeting-callout">
-    <div class="nmc-label">Next meeting</div>
-    <div class="nmc-name" id="nmc-name"></div>
-    <div class="nmc-date" id="nmc-date"></div>
-    <a class="nmc-zoom" id="nmc-zoom" href="#" target="_blank" style="display:none;">Join Zoom ↗</a>
-  </div>
-
-  <!-- Overall progress bar (shown only when ?c= param is present) -->
-  <div class="overall-progress" id="overall-progress" style="display:none">
-    <div class="op-header">
-      <span class="op-title">Onboarding progress</span>
-      <span class="op-text" id="op-text">0 of 20 tasks complete</span>
+    <div class="op-divider" id="op-divider" style="display:none"></div>
+    <div class="op-url-section" id="floorzap-url-card" style="display:none">
+      <a class="op-fz-btn" id="fz-open-btn" href="#" target="_blank" rel="noopener">
+        <span id="fz-url-text">My Floorzap</span>
+        <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
+          <path d="M6.5 2.5H3a1 1 0 00-1 1v8.5a1 1 0 001 1h8.5a1 1 0 001-1V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M9 1.5h4.5V6M13.5 1.5L7.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
     </div>
-    <div class="op-track"><div class="op-fill" id="op-fill" style="width:0%"></div></div>
   </div>
 
   <!-- System Configuration -->
@@ -723,7 +600,7 @@ var _sb = null;
 try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
 
 var TOTALS = { sys: 8, b2b: 4, mig: 4, qs: 4 };
-var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [], hs_meetings: {} };
+var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [], hs_meetings: {}, hs_meeting_dates: {} };
 var CLIENT_NAME = null;
 var FLOORZAP_URL = null;
 
@@ -846,7 +723,8 @@ async function loadState() {
           STATE.qs       = Array.isArray(s.qs)       ? s.qs       : [];
           STATE.custom      = Array.isArray(s.custom)   ? s.custom   : [];
           STATE.meetings    = Array.isArray(s.meetings) ? s.meetings : [];
-          STATE.hs_meetings = (s.hs_meetings && typeof s.hs_meetings === 'object') ? s.hs_meetings : {};
+          STATE.hs_meetings      = (s.hs_meetings      && typeof s.hs_meetings      === 'object') ? s.hs_meetings      : {};
+          STATE.hs_meeting_dates = (s.hs_meeting_dates && typeof s.hs_meeting_dates === 'object') ? s.hs_meeting_dates : {};
           applyState();
           try { localStorage.setItem(LS_KEY, JSON.stringify(STATE)); } catch(e) {}
         }
@@ -879,18 +757,21 @@ function applyClientName() {
 function updateOverallProgress() {
   if (!CLIENT_ID) return;
   var done = STATE.sys.length + STATE.b2b.length + STATE.mig.length + STATE.qs.length;
-  var total = TOTALS.sys + TOTALS.b2b + TOTALS.mig + TOTALS.qs; // 20
+  var total = TOTALS.sys + TOTALS.b2b + TOTALS.mig + TOTALS.qs;
   var pct = Math.round(done / total * 100);
   var complete = done === total;
+  var circumference = 163.36;
   var fill = document.getElementById('op-fill');
+  var pctEl = document.getElementById('op-ring-pct');
   var text = document.getElementById('op-text');
   if (fill) {
-    fill.style.width = pct + '%';
+    fill.style.strokeDashoffset = circumference * (1 - pct / 100);
     if (complete) fill.classList.add('complete');
     else fill.classList.remove('complete');
   }
+  if (pctEl) pctEl.textContent = pct + '%';
   if (text) {
-    text.textContent = complete ? '✓ All tasks complete' : done + ' / ' + total + ' tasks  ·  ' + pct + '%';
+    text.textContent = complete ? '✓ All tasks complete' : done + ' of ' + total + ' tasks complete';
     if (complete) text.classList.add('complete');
     else text.classList.remove('complete');
   }
@@ -900,10 +781,10 @@ function updateOverallProgress() {
 function applyFloorzapUrl() {
   if (!FLOORZAP_URL || !CLIENT_ID) return;
   var card = document.getElementById('floorzap-url-card');
-  var text = document.getElementById('fz-url-text');
+  var divider = document.getElementById('op-divider');
   var link = document.getElementById('fz-open-btn');
-  if (card) card.style.display = '';
-  if (text) text.textContent = FLOORZAP_URL;
+  if (card) card.style.display = 'flex';
+  if (divider) divider.style.display = 'block';
   if (link) link.href = 'https://' + FLOORZAP_URL;
 }
 
@@ -921,96 +802,172 @@ function relMeetingTime(isoDate) {
   return 'In ' + Math.round(diff / 7) + ' weeks';
 }
 
+/* ── Journey card helpers ── */
+function fmtDateClient(val) {
+  if (!val) return '';
+  var num = Number(val);
+  var d = !isNaN(num) && num > 0 ? new Date(num) : new Date(val);
+  if (isNaN(d.getTime())) return String(val);
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
+function buildStatusesFromCache() {
+  var keys   = ['kickoff', 'checkin', 'integrations', 'graduation'];
+  var labels = ['Kickoff', '2-Week', 'Integrations', 'Graduation'];
+  var dates  = STATE.hs_meeting_dates || {};
+  var now    = new Date();
+  return keys.map(function(key, i) {
+    var hs      = STATE.hs_meetings[key] || {};
+    var isoDate = dates[key] || null;
+    var isDone  = false;
+    if (isoDate) {
+      var raw  = Number(isoDate);
+      var isTs = !isNaN(raw) && raw > 0;
+      if (isTs) {
+        isDone = now > new Date(raw + 30 * 60 * 1000);
+      } else {
+        var d = new Date(isoDate); d.setHours(23, 59, 59, 999);
+        isDone = now > d;
+      }
+    }
+    return { key: key, label: labels[i], isDone: isDone, isoDate: isoDate,
+             date: fmtDateClient(isoDate), zoom: hs.zoom || null, recording: hs.recording || null };
+  });
+}
+
 /* ── HubSpot meeting sync ── */
 async function loadHubSpotMeetings() {
   if (!CLIENT_ID || !WORKER_URL) return;
   try {
     var res = await fetch(WORKER_URL + '?c=' + encodeURIComponent(CLIENT_ID));
-    if (!res.ok) return;
+    if (!res.ok) { renderJourneyCards(buildStatusesFromCache()); return; }
     var data = await res.json();
     if (data.floorzap_url) {
       FLOORZAP_URL = data.floorzap_url;
       applyFloorzapUrl();
+    }
+    if (data.client_name && !CLIENT_NAME) {
+      CLIENT_NAME = data.client_name;
+      applyClientName();
     }
     if (data.meetings) {
       var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
       var labels = ['Kickoff', '2-Week', 'Integrations', 'Graduation'];
       var today = new Date(); today.setHours(0,0,0,0);
 
-      // Determine status of each meeting
+      var now = new Date();
       var statuses = data.meetings.map(function(m, i) {
         var hs = STATE.hs_meetings[keys[i]] || {};
-        var isPast = m.isoDate && new Date(m.isoDate) < today;
-        var isDone = hs.done || isPast;
-        return { key: keys[i], label: labels[i], isDone: isDone, isoDate: m.isoDate, date: m.date, zoom: hs.zoom };
-      });
-
-      // Find upcoming
-      var upcomingIdx = -1;
-      for (var i = 0; i < statuses.length; i++) {
-        if (!statuses[i].isDone && statuses[i].isoDate) { upcomingIdx = i; break; }
-      }
-
-      // Count completed for fill line
-      var completedCount = 0;
-      statuses.forEach(function(s) { if (s.isDone) completedCount++; });
-      var fillPct = Math.min(completedCount, 3) * 25;
-      var fillEl = document.getElementById('mtg-fill');
-      if (fillEl) fillEl.style.width = fillPct + '%';
-
-      // Update each node
-      statuses.forEach(function(s, i) {
-        var circle = document.getElementById('mtg-circle-' + s.key);
-        var label  = document.getElementById('mtg-label-' + s.key);
-        var dateEl = document.getElementById('mtg-date-' + s.key);
-        var caret  = document.getElementById('mtg-caret-' + s.key);
-        var isUpcoming = i === upcomingIdx;
-
-        if (circle) {
-          circle.className = 'mtg-circle' + (s.isDone ? ' done' : isUpcoming ? ' upcoming' : '');
-          circle.innerHTML = s.isDone
-            ? ''
-            : '';
-        }
-        if (label) {
-          label.className = 'mtg-label' + (s.isDone ? ' done' : isUpcoming ? ' upcoming' : '');
-        }
-        if (dateEl) {
-          dateEl.className = 'mtg-date' + (isUpcoming ? ' upcoming' : '');
-          dateEl.textContent = s.date || '';
-        }
-        if (caret) {
-          caret.innerHTML = isUpcoming
-            ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-            : '';
-        }
-      });
-
-      // Show stepper
-      var wrap = document.getElementById('mtg-stepper-wrap');
-      if (wrap) wrap.style.display = 'block';
-
-      // Next meeting callout
-      var callout = document.getElementById('next-meeting-callout');
-      if (callout) {
-        if (upcomingIdx !== -1) {
-          var next = statuses[upcomingIdx];
-          var nameEl = document.getElementById('nmc-name');
-          var dateEl2 = document.getElementById('nmc-date');
-          var zoomEl = document.getElementById('nmc-zoom');
-          if (nameEl) nameEl.textContent = next.label + ' Meeting';
-          if (dateEl2) dateEl2.textContent = next.date + (next.isoDate ? '  ·  ' + relMeetingTime(next.isoDate) : '');
-          if (zoomEl) {
-            if (next.zoom) { zoomEl.href = next.zoom; zoomEl.style.display = ''; }
-            else { zoomEl.style.display = 'none'; }
+        var zoom = m.zoom || hs.zoom || null;
+        var recording = hs.recording || null;
+        var isDone = false;
+        if (m.isoDate) {
+          var raw = Number(m.isoDate);
+          var isTimestamp = !isNaN(raw) && raw > 0;
+          if (isTimestamp) {
+            // Full datetime: stay active for 30 mins after scheduled start
+            isDone = now > new Date(raw + 30 * 60 * 1000);
+          } else {
+            // Date-only: stay active all day, flip at midnight local time
+            var d = new Date(m.isoDate);
+            d.setHours(23, 59, 59, 999);
+            isDone = now > d;
           }
-          callout.style.display = '';
-        } else {
-          callout.style.display = 'none';
         }
-      }
+        return { key: keys[i], label: labels[i], isDone: isDone, isoDate: m.isoDate, date: m.date, zoom: zoom, recording: recording };
+      });
+
+      renderJourneyCards(statuses);
     }
-  } catch(e) { console.error('HubSpot meetings error:', e); }
+  } catch(e) { console.error('HubSpot meetings error:', e); renderJourneyCards(buildStatusesFromCache()); }
+}
+
+function renderJourneyCards(statuses) {
+  var wrap = document.getElementById('journey-wrap');
+  var container = document.getElementById('journey-cards');
+  if (!wrap || !container) return;
+
+  // First upcoming (not done) meeting gets the highlighted card + primary button
+  var nextIdx = -1;
+  for (var i = 0; i < statuses.length; i++) {
+    if (!statuses[i].isDone) { nextIdx = i; break; }
+  }
+
+  container.innerHTML = '';
+  statuses.forEach(function(s, i) {
+    var isNext = i === nextIdx;
+    var card = document.createElement('div');
+    card.className = 'journey-card' + (s.isDone ? ' done' : isNext ? ' current' : '');
+
+    // Top: number circle + pill
+    var top = document.createElement('div');
+    top.className = 'jc-top';
+    var num = document.createElement('div');
+    num.className = 'jc-num' + (s.isDone ? ' done' : isNext ? ' current' : '');
+    num.innerHTML = s.isDone
+      ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l2.5 2.5L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : String(i + 1);
+    var pill = document.createElement('div');
+    pill.className = 'jc-pill ' + (s.isDone ? 'done' : isNext ? 'next' : 'upcoming');
+    pill.textContent = s.isDone ? 'DONE' : isNext ? 'NEXT' : 'UPCOMING';
+    top.appendChild(num);
+    top.appendChild(pill);
+    card.appendChild(top);
+
+    // Title, date, relative time
+    var title = document.createElement('div');
+    title.className = 'jc-title';
+    title.textContent = s.label;
+    card.appendChild(title);
+
+    if (s.date) {
+      var dateEl = document.createElement('div');
+      dateEl.className = 'jc-date';
+      dateEl.textContent = s.date;
+      card.appendChild(dateEl);
+    }
+
+    var rel = s.isDone ? 'Completed' : relMeetingTime(s.isoDate);
+    if (rel) {
+      var relEl = document.createElement('div');
+      relEl.className = 'jc-relative';
+      relEl.textContent = rel;
+      card.appendChild(relEl);
+    }
+
+    // Action button
+    if (s.isDone) {
+      if (s.recording) {
+        var btn = document.createElement('a');
+        btn.className = 'jc-btn';
+        btn.href = s.recording;
+        btn.target = '_blank';
+        btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 1.5l6 3.5-6 3.5V1.5z" fill="currentColor"/></svg> Recording';
+        card.appendChild(btn);
+      } else {
+        var noRec = document.createElement('div');
+        noRec.className = 'jc-btn-text';
+        noRec.textContent = 'Recording pending';
+        card.appendChild(noRec);
+      }
+    } else if (s.zoom) {
+      var zBtn = document.createElement('a');
+      zBtn.className = 'jc-btn' + (isNext ? ' primary' : '');
+      zBtn.href = s.zoom;
+      zBtn.target = '_blank';
+      zBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 7l4-2.5v7L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ' + (isNext ? 'Join Zoom' : 'Join');
+      card.appendChild(zBtn);
+    } else {
+      var noLink = document.createElement('div');
+      noLink.className = 'jc-btn-text';
+      noLink.textContent = 'Link coming soon';
+      card.appendChild(noLink);
+    }
+
+    container.appendChild(card);
+  });
+
+  wrap.classList.remove('hidden');
 }
 
 /* ── Fixed tasks ── */

@@ -86,6 +86,7 @@ body {
 .jc-pill.done { background: #dcfce7; color: #16a34a; }
 .jc-pill.next { background: #dbeafe; color: #2563eb; }
 .jc-pill.upcoming { background: #f3f4f6; color: #9ca3af; }
+.jc-pill.skipped { background: #fef9ec; color: #b45309; }
 .jc-title { font-size: 13px; font-weight: 700; color: #111827; line-height: 1.3; }
 .journey-card.current .jc-title { color: #1d4ed8; }
 .jc-date { font-size: 11.5px; color: #6b7280; }
@@ -1024,15 +1025,28 @@ function renderJourneyCards(statuses) {
   var container = document.getElementById('journey-cards');
   if (!wrap || !container) return;
 
-  // First upcoming (not done) meeting gets the highlighted card + primary button
-  var nextIdx = -1;
+  // Find the last completed meeting, then NEXT is the first non-done after it.
+  // This handles skipped/rescheduled meetings: if Integrations is done but 2-Week isn't,
+  // Graduation becomes NEXT rather than the stale 2-Week slot.
+  var lastDoneIdx = -1;
   for (var i = 0; i < statuses.length; i++) {
+    if (statuses[i].isDone) lastDoneIdx = i;
+  }
+  var nextIdx = -1;
+  for (var i = lastDoneIdx + 1; i < statuses.length; i++) {
     if (!statuses[i].isDone) { nextIdx = i; break; }
+  }
+  // Fallback: no meetings done yet — original behaviour (first non-done)
+  if (nextIdx === -1 && lastDoneIdx === -1) {
+    for (var i = 0; i < statuses.length; i++) {
+      if (!statuses[i].isDone) { nextIdx = i; break; }
+    }
   }
 
   container.innerHTML = '';
   statuses.forEach(function(s, i) {
     var isNext = i === nextIdx;
+    var isSkipped = !s.isDone && i < lastDoneIdx;
     var card = document.createElement('div');
     card.className = 'journey-card' + (s.isDone ? ' done' : isNext ? ' current' : '');
 
@@ -1045,8 +1059,8 @@ function renderJourneyCards(statuses) {
       ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l2.5 2.5L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
       : String(i + 1);
     var pill = document.createElement('div');
-    pill.className = 'jc-pill ' + (s.isDone ? 'done' : isNext ? 'next' : 'upcoming');
-    pill.textContent = s.isDone ? 'DONE' : isNext ? 'NEXT' : 'UPCOMING';
+    pill.className = 'jc-pill ' + (s.isDone ? 'done' : isNext ? 'next' : isSkipped ? 'skipped' : 'upcoming');
+    pill.textContent = s.isDone ? 'DONE' : isNext ? 'NEXT' : isSkipped ? 'SKIPPED' : 'UPCOMING';
     top.appendChild(num);
     top.appendChild(pill);
     card.appendChild(top);
@@ -1094,7 +1108,7 @@ function renderJourneyCards(statuses) {
       zBtn.target = '_blank';
       zBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 7l4-2.5v7L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ' + (isNext ? 'Join Zoom' : 'Join');
       card.appendChild(zBtn);
-    } else {
+    } else if (!isSkipped) {
       var noLink = document.createElement('div');
       noLink.className = 'jc-btn-text';
       noLink.textContent = 'Link coming soon';

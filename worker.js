@@ -25,32 +25,35 @@ export default {
 
     const url = new URL(request.url);
     const clientId = url.searchParams.get('c');
+    const directTicketId = url.searchParams.get('t');
 
-    if (!clientId) {
-      return new Response(JSON.stringify({ error: 'Missing ?c= param', meetings: [] }), {
+    if (!clientId && !directTicketId) {
+      return new Response(JSON.stringify({ error: 'Missing ?c= or ?t= param', meetings: [] }), {
         status: 400,
         headers: CORS,
       });
     }
 
-    // 1. Look up hubspot_ticket_id from Supabase
-    let ticketId;
-    try {
-      const sbRes = await fetch(
-        `${env.SUPABASE_URL}/rest/v1/clients?id=eq.${encodeURIComponent(clientId)}&select=hubspot_ticket_id`,
-        {
-          headers: {
-            apikey: env.SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const rows = await sbRes.json();
-      ticketId = rows?.[0]?.hubspot_ticket_id;
-    } catch (e) {
-      return new Response(JSON.stringify({ error: 'Supabase lookup failed', meetings: [] }), {
-        headers: CORS,
-      });
+    // 1. Look up hubspot_ticket_id from Supabase (skip if ?t= provided directly)
+    let ticketId = directTicketId || null;
+    if (!ticketId) {
+      try {
+        const sbRes = await fetch(
+          `${env.SUPABASE_URL}/rest/v1/clients?id=eq.${encodeURIComponent(clientId)}&select=hubspot_ticket_id`,
+          {
+            headers: {
+              apikey: env.SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+            },
+          }
+        );
+        const rows = await sbRes.json();
+        ticketId = rows?.[0]?.hubspot_ticket_id;
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Supabase lookup failed', meetings: [] }), {
+          headers: CORS,
+        });
+      }
     }
 
     if (!ticketId) {

@@ -97,11 +97,14 @@ body {
   display: flex; align-items: center; gap: 9px;
   padding: 8px 10px; border-radius: 8px; cursor: pointer;
   font-size: 13.5px; font-weight: 500; color: #374151;
-  transition: background 0.12s, color 0.12s; user-select: none;
-  margin-bottom: 2px; border-left: 3px solid transparent;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s; user-select: none;
+  margin-bottom: 2px;
 }
 .nav-item:hover { background: #f3f4f6; }
-.nav-item.active { background: transparent; color: #116FEA; font-weight: 600; border-left: 3px solid #116FEA; padding-left: calc(16px - 3px); }
+.nav-item.active {
+  background: #eff6ff; color: #116FEA; font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px #bfdbfe;
+}
 .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .nav-count {
   margin-left: auto; font-size: 11px; font-weight: 600;
@@ -170,16 +173,6 @@ body {
   cursor: pointer; position: relative;
 }
 .client-card:hover { background: #eff6ff; box-shadow: 0 4px 20px rgba(17,111,234,0.1), 0 0 0 1.5px #93c5fd; }
-.btn-copy {
-  position: absolute; bottom: 14px; right: 16px;
-  background: none; border: none; cursor: pointer;
-  color: #9ca3af; padding: 5px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.15s, background 0.12s, color 0.12s;
-}
-.client-card:hover .btn-copy { opacity: 1; }
-.btn-copy:hover { background: #dbeafe; color: #116FEA; }
-.btn-copy.copied { color: #16a34a; opacity: 1; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-width: 0; }
 .client-name {
   font-size: 15px; font-weight: 700; color: #111827; letter-spacing: -0.2px; line-height: 1.3;
@@ -187,11 +180,17 @@ body {
 }
 .last-active { font-size: 11.5px; color: #9ca3af; font-weight: 500; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
 
-.prog-track { height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.card-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 14px; }
+.card-footer-left { flex: 1; min-width: 0; }
+.prog-track { height: 6px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
 .prog-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); background: linear-gradient(90deg, #116FEA, #3b8ef5); }
 .prog-fill.complete { background: linear-gradient(90deg, #16a34a, #22c55e); }
-.task-count { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 16px; }
+.task-count { font-size: 11px; color: #6b7280; font-weight: 500; }
 .task-count.complete { color: #16a34a; font-weight: 600; }
+.card-date-pill {
+  font-size: 11px; color: #9ca3af; font-weight: 500; white-space: nowrap; flex-shrink: 0;
+  background: #f3f4f6; border-radius: 20px; padding: 3px 9px;
+}
 
 .card-menu-wrap { position: relative; flex-shrink: 0; }
 .card-menu-btn {
@@ -682,7 +681,7 @@ function showSkeletons() {
 /* ── Load all clients ── */
 async function loadClients() {
   showSkeletons();
-  var res = await _sb.from('clients').select('*').order('updated_at', { ascending: false });
+  var res = await _sb.from('clients').select('*').order('created_at', { ascending: false });
   if (res.data) {
     _clients = {};
     res.data.forEach(function(row) { _clients[row.id] = row; });
@@ -745,7 +744,7 @@ function renderSidebar() {
 function renderMain() {
   var query = document.getElementById('search-input').value.trim().toLowerCase();
   var allIds = Object.keys(_clients).sort(function(a, b) {
-    return new Date(_clients[b].updated_at) - new Date(_clients[a].updated_at);
+    return new Date(_clients[b].created_at) - new Date(_clients[a].created_at);
   });
 
   var ids, showOnboarder;
@@ -914,6 +913,10 @@ function buildCard(row, showOnboarder) {
     +         '</svg>'
     +       '</button>'
     +       '<div class="card-menu-dropdown" id="menu-' + safeId + '">'
+    +         '<button class="card-menu-item" id="copybtn-' + safeId + '">'
+    +           '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>'
+    +           'Copy link'
+    +         '</button>'
     +         '<button class="card-menu-item" id="mtgbtn-' + safeId + '">'
     +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
     +           '<rect x="1" y="2" width="11" height="10" rx="1.5"/>'
@@ -954,11 +957,17 @@ function buildCard(row, showOnboarder) {
     +   '</div>'
     + '</div>'
     + meetingPills
-    + '<button class="btn-copy" id="copybtn-' + safeId + '" title="Copy link"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg></button>'
-    + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
-    + '<div class="task-count' + (complete ? ' complete' : '') + '">'
-    +   (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks complete')
-    + '</div>';
+    + ''
+    + (function() {
+        var dateStr = row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        return '<div class="card-footer">'
+          + '<div class="card-footer-left">'
+          + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
+          + '<div class="task-count' + (complete ? ' complete' : '') + '">' + (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks') + '</div>'
+          + '</div>'
+          + (dateStr ? '<span class="card-date-pill">' + dateStr + '</span>' : '')
+          + '</div>';
+      })();
 
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
     toggleCardMenu(row.id, e);
@@ -985,12 +994,12 @@ function buildCard(row, showOnboarder) {
   });
 
   card.querySelector('#copybtn-' + row.id).addEventListener('click', function(e) {
-    e.stopPropagation();
+    closeAllMenus();
     copyCardUrl(this, clientUrl);
   });
 
   card.addEventListener('click', function(e) {
-    if (e.target.closest('.card-menu-wrap') || e.target.closest('#copybtn-' + row.id)) return;
+    if (e.target.closest('.card-menu-wrap')) return;
     window.open(clientUrl, '_blank');
   });
 

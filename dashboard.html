@@ -417,8 +417,8 @@ body {
       <p>Paste the HubSpot Ticket ID to auto-fill the company name, or enter it manually.</p>
       <div style="position:relative;">
         <input class="modal-input" id="hubspot-ticket-input" type="text"
-               placeholder="HubSpot Ticket ID (optional)" maxlength="30"
-               onblur="autoFillCompanyName()" onkeydown="modalKey(event)">
+               placeholder="Onboarding Ticket Record ID (e.g. 12345678901)" maxlength="30"
+               autofocus onblur="autoFillCompanyName()" onkeydown="modalKey(event)">
         <span id="hs-lookup-spinner" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:#9ca3af;">Looking up…</span>
       </div>
       <input class="modal-input" id="company-input" type="text"

@@ -92,6 +92,7 @@ body {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
 }
 .journey-card {
+  min-height: 180px;
   border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 14px;
   display: flex; flex-direction: column; gap: 4px;
 }
@@ -119,7 +120,7 @@ body {
 .journey-card.current .jc-date { color: #3b82f6; }
 .jc-relative { font-size: 11.5px; color: #9ca3af; }
 .jc-btn {
-  margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px;
+  margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 5px;
   padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
   cursor: pointer; text-decoration: none; border: 1.5px solid #e5e7eb;
   transition: background 0.12s, border-color 0.12s; color: #374151; background: #fff;
@@ -128,7 +129,7 @@ body {
 .jc-btn:hover { background: #f3f4f6; }
 .jc-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
 .jc-btn.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
-.jc-btn-text { color: #9ca3af; font-size: 12px; text-align: center; padding: 8px 0; margin-top: 8px; }
+.jc-btn-text { color: #9ca3af; font-size: 12px; text-align: center; padding: 8px 0; margin-top: auto; }
 @media (max-width: 540px) {
   .journey-cards { grid-template-columns: repeat(2, 1fr); }
 }

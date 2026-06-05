@@ -55,8 +55,34 @@ body {
   margin-bottom: 10px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
 }
-.journey-wrap[style*="display:none"], .journey-wrap.hidden {
+.journey-wrap {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.journey-wrap.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.journey-wrap.hidden {
   display: none;
+  opacity: 0;
+}
+.journey-cards.updating { opacity: 0; transition: opacity 0.2s ease; }
+.journey-cards.updated  { opacity: 1; transition: opacity 0.3s ease; }
+.jc-skeleton {
+  background: #f3f4f6; border-radius: 12px; border: 1px solid #e5e7eb;
+  padding: 18px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.jc-skel-line {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s infinite;
+  border-radius: 5px;
+}
+@keyframes skel-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 .journey-title {
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -876,6 +902,7 @@ async function loadState() {
         }
       }
     } catch(e) {}
+    showSkeletonCards();
     loadHubSpotMeetings();
   }
 }
@@ -1020,6 +1047,28 @@ async function loadHubSpotMeetings() {
   } catch(e) { console.error('HubSpot meetings error:', e); renderJourneyCards(buildStatusesFromCache()); }
 }
 
+function showSkeletonCards() {
+  var wrap = document.getElementById('journey-wrap');
+  var container = document.getElementById('journey-cards');
+  if (!wrap || !container) return;
+  container.innerHTML = '';
+  for (var i = 0; i < 4; i++) {
+    var sk = document.createElement('div');
+    sk.className = 'jc-skeleton';
+    sk.innerHTML =
+      '<div class="jc-skel-line" style="width:55%;height:11px;"></div>' +
+      '<div class="jc-skel-line" style="width:70%;height:20px;margin-top:4px;"></div>' +
+      '<div class="jc-skel-line" style="width:45%;height:11px;"></div>' +
+      '<div class="jc-skel-line" style="width:50%;height:11px;"></div>' +
+      '<div class="jc-skel-line" style="width:38%;height:30px;margin-top:6px;border-radius:8px;"></div>';
+    container.appendChild(sk);
+  }
+  wrap.classList.remove('hidden');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { wrap.classList.add('visible'); });
+  });
+}
+
 function renderJourneyCards(statuses) {
   var wrap = document.getElementById('journey-wrap');
   var container = document.getElementById('journey-cards');
@@ -1043,7 +1092,15 @@ function renderJourneyCards(statuses) {
     }
   }
 
-  container.innerHTML = '';
+  // Fade cards out, swap content, fade back in
+  container.classList.add('updating');
+  setTimeout(function() {
+    container.innerHTML = '';
+    _doRenderCards(statuses, wrap, container, nextIdx, lastDoneIdx);
+  }, 150);
+}
+
+function _doRenderCards(statuses, wrap, container, nextIdx, lastDoneIdx) {
   statuses.forEach(function(s, i) {
     var isNext = i === nextIdx;
     var isSkipped = !s.isDone && i < lastDoneIdx;
@@ -1119,6 +1176,9 @@ function renderJourneyCards(statuses) {
   });
 
   wrap.classList.remove('hidden');
+  wrap.classList.add('visible');
+  container.classList.remove('updating');
+  container.classList.add('updated');
 }
 
 /* ── Fixed tasks ── */

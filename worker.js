@@ -92,6 +92,7 @@ export default {
     // 3. Fetch associated meeting engagements to extract Zoom links from their bodies
     // zoomByDay maps "YYYY-MM-DD" -> first Zoom URL found in that meeting's body
     const zoomByDay = {};
+    const zoomByTitle = {}; // slot key -> zoom url (title-based match)
     try {
       const assocRes = await fetch(
         `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/meetings`,
@@ -117,7 +118,6 @@ export default {
           { key: 'integrations', words: ['integration'] },
           { key: 'graduation',   words: ['graduation'] },
         ];
-        const zoomByTitle = {}; // slot key → zoom url
 
         for (const m of details) {
           if (!m?.properties) continue;

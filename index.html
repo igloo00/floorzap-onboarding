@@ -209,11 +209,20 @@ body {
   transition: transform 0.25s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; justify-content: center;
 }
 .card.collapsed .chevron { transform: rotate(-90deg); }
-.card-body { border-top: 1px solid #f3f4f6; }
-#c-qs .card-body { padding: 14px 16px; }
-#c-mig .card-body { padding-top: 14px; }
-#c-mig .card-body .note { margin: 0 16px 14px; border-radius: 8px; border: 1px solid #fde68a; border-top: 1px solid #fde68a; }
-.card.collapsed .card-body { display: none; }
+.card-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s cubic-bezier(.4,0,.2,1);
+  border-top: 1px solid #f3f4f6;
+}
+.card.collapsed .card-body {
+  grid-template-rows: 0fr;
+  border-top-color: transparent;
+}
+.card-body-inner { overflow: hidden; }
+#c-qs .card-body-inner { padding: 14px 16px; }
+#c-mig .card-body-inner { padding-top: 14px; }
+#c-mig .card-body-inner .note { margin: 0 16px 14px; border-radius: 8px; border: 1px solid #fde68a; border-top: 1px solid #fde68a; }
 
 
 /* ── Notes ── */
@@ -486,7 +495,7 @@ body {
         <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body"><div class="card-body-inner">
       <div class="task"><div class="cb" id="cb-sys-0" onclick="tick('sys',0)"></div><div class="task-body"><div class="task-name" id="tn-sys-0">Locations</div><div class="task-desc">Add all store locations where your business operates</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/how-do-i-set-up-a-location-" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-1" onclick="tick('sys',1)"></div><div class="task-body"><div class="task-name" id="tn-sys-1">Employees &amp; users</div><div class="task-desc">Add all team members — check "Send Email Confirmation" so they can set their own password and log in. <strong>⚠️ Avoid using the ! symbol in passwords — it may cause login issues.</strong></div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/how-to-add-a-new-employee-user" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-2" onclick="tick('sys',2)"></div><div class="task-body"><div class="task-name" id="tn-sys-2">Contractors &amp; subs</div><div class="task-desc">Start with the "Installer TBD" placeholder your specialist set up, then add your real contractors</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/how-do-i-add-a-contractor-or-sub-contractor" target="_blank">How-to guide ↗</a></div></div></div>
@@ -495,7 +504,7 @@ body {
       <div class="task"><div class="cb" id="cb-sys-5" onclick="tick('sys',5)"></div><div class="task-body"><div class="task-name" id="tn-sys-5">Warehouses</div><div class="task-desc">Any location you send an installer to pick up materials — onsite, offsite, will call, third party</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/what-is-the-warehouse-section-for" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-6" onclick="tick('sys',6)"></div><div class="task-body"><div class="task-name" id="tn-sys-6">Completion checklist</div><div class="task-desc">Personalize the default template — add, edit, or remove questions for your workflow</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/completion-checklist" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-7" onclick="tick('sys',7)"></div><div class="task-body"><div class="task-name" id="tn-sys-7">Contract templates</div><div class="task-desc">Edit the defaults or replace with your own contract language</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/contract-templates" target="_blank">How-to guide ↗</a></div></div></div>
-    </div>
+    </div></div>
   </div>
 
   <!-- Quick Start Training -->
@@ -515,7 +524,7 @@ body {
         <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body"><div class="card-body-inner">
       <div class="qs-banner">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="10" cy="10" r="8" stroke="#3b82f6" stroke-width="1.5"/><path d="M10 9v5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="6.5" r=".85" fill="#3b82f6"/></svg>
         <span>Live, trainer-led sessions to get your team confident in Floorzap. Each session runs at two times every week — pick whichever fits, and bring the right people. Missed one? A recording is posted after each session.</span>
@@ -634,7 +643,7 @@ body {
           </div>
         </div>
       </div>
-    </div>
+    </div></div>
   </div>
 
   <!-- Data Migration -->
@@ -654,13 +663,13 @@ body {
         <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body"><div class="card-body-inner">
       <div class="note amber">Download each template below, fill it out, and send the completed file to your onboarding specialist. Start early — processing takes 2–3 weeks after files are received.</div>
       <div class="task"><div class="cb" id="cb-mig-0" onclick="tick('mig',0)"></div><div class="task-body"><div class="task-name" id="tn-mig-0">Labor cost list</div><div class="task-desc">All labor items (install, tear down, etc.) — include cost, margin, and unit type (sqft, each, LF)</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1pc2tmMpyRHJrx4IQayYFZvCPlxohXe_k/edit?gid=695381032#gid=695381032" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/creating-a-labor-cost-list" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-1" onclick="tick('mig',1)"></div><div class="task-body"><div class="task-name" id="tn-mig-1">Customer list</div><div class="task-desc">First and last name, or company name required at minimum</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1GMRgjz3uDvu540VO-gCMNnL6lXE5KkFS/edit?gid=92032769#gid=92032769" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/how-do-i-create-a-customer-import-list" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-2" onclick="tick('mig',2)"></div><div class="task-body"><div class="task-name" id="tn-mig-2">Vendor list</div><div class="task-desc">Vendor name is required — include any additional contact details you have</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1rng2YFE8rh_vP07yLUIB0J-3u7fYdxww/edit?gid=1292759137#gid=1292759137" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/vendor-import-template" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-3" onclick="tick('mig',3)"></div><div class="task-body"><div class="task-name" id="tn-mig-3">Non-B2B products</div><div class="task-desc">One template per vendor — your specialist reviews and confirms before import</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1STO6eijj02b1f7WRqqZjR6_FVDY7L7OE/edit?gid=1722535537#gid=1722535537" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/adding-non-b2b-vendors-non-b2b-material-import" target="_blank">How-to guide ↗</a></div></div></div>
-    </div>
+    </div></div>
   </div>
 
   <!-- B2B Integration -->
@@ -680,7 +689,7 @@ body {
         <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body"><div class="card-body-inner">
       <div class="task"><div class="cb" id="cb-b2b-0" onclick="tick('b2b',0)"></div><div class="task-body"><div class="task-name" id="tn-b2b-0">Verify your vendor is B2B-enabled</div><div class="task-desc">Check the vendor directory at fcb2b.info/connections before reaching out</div><div class="task-links"><a class="task-link" href="https://fcb2b.info/connections/" target="_blank">Check vendors ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-b2b-1" onclick="tick('b2b',1)"></div><div class="task-body">
         <div class="task-name" id="tn-b2b-1">Email vendor for B2B credentials</div>
@@ -709,7 +718,7 @@ Regards,</div>
       </div></div>
       <div class="task"><div class="cb" id="cb-b2b-2" onclick="tick('b2b',2)"></div><div class="task-body"><div class="task-name" id="tn-b2b-2">Enter credentials in Floorzap</div><div class="task-desc">Paste the username and password from the vendor's reply, enable B2B, and save</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/b2b-setup-guide" target="_blank">Setup guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-b2b-3" onclick="tick('b2b',3)"></div><div class="task-body"><div class="task-name" id="tn-b2b-3">Import your B2B catalog</div><div class="task-desc">Once credentials are active, import your full product catalog into Floorzap</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/b2b-setup-guide" target="_blank">Setup guide ↗</a></div></div></div>
-    </div>
+    </div></div>
   </div>
 
   <!-- Custom To-Do -->

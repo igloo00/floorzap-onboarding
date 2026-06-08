@@ -157,6 +157,47 @@ export default {
       // Zoom enrichment is best-effort; continue without it
     }
 
+    // 4. Fetch last contact date from notes, calls, and emails on this ticket
+    let lastContactedIso = null;
+    try {
+      const [notesRes, callsRes, emailsRes] = await Promise.all([
+        fetch(`https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/notes`,
+          { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }),
+        fetch(`https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/calls`,
+          { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }),
+        fetch(`https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/emails`,
+          { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }),
+      ]);
+      const [notesData, callsData, emailsData] = await Promise.all([
+        notesRes.ok ? notesRes.json() : { results: [] },
+        callsRes.ok ? callsRes.json() : { results: [] },
+        emailsRes.ok ? emailsRes.json() : { results: [] },
+      ]);
+
+      const engagements = [
+        ...(notesData.results  || []).map(r => ({ id: r.id, type: 'notes'  })),
+        ...(callsData.results  || []).map(r => ({ id: r.id, type: 'calls'  })),
+        ...(emailsData.results || []).map(r => ({ id: r.id, type: 'emails' })),
+      ].slice(0, 15);
+
+      const engDetails = await Promise.all(
+        engagements.map(({ id, type }) =>
+          fetch(`https://api.hubapi.com/crm/v3/objects/${type}/${id}?properties=hs_timestamp`,
+            { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } })
+            .then(r => r.ok ? r.json() : null).catch(() => null)
+        )
+      );
+
+      let maxTs = 0;
+      for (const d of engDetails) {
+        const ts = Number(d?.properties?.hs_timestamp);
+        if (!isNaN(ts) && ts > maxTs) maxTs = ts;
+      }
+      if (maxTs > 0) lastContactedIso = new Date(maxTs).toISOString().split('T')[0];
+    } catch (_) {
+      // Last contact enrichment is best-effort
+    }
+
     // Find the Zoom link — title match first, then date fallback (±2 days)
     function getZoom(slotKey, isoDateVal) {
       // 1. Title-based match
@@ -185,6 +226,7 @@ export default {
       JSON.stringify({
         floorzap_url: p.floorzap_url ?? null,
         client_name: clientName,
+        last_contacted: lastContactedIso,
         meetings: [
           { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null, isoDate: p.initial_onboarding_meeting  || null, zoom: getZoom('kickoff',      p.initial_onboarding_meeting) },
           { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null, isoDate: p.n2_week_check_in_meeting    || null, zoom: getZoom('checkin',      p.n2_week_check_in_meeting) },

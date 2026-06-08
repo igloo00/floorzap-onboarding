@@ -51,183 +51,300 @@ body {
 .gate-btn:hover { background: #0f5fd4; }
 .gate-error { font-size: 12px; color: #ef4444; margin-top: 8px; min-height: 16px; }
 
+/* ── User picker (step 2 of gate) ── */
+#user-picker { display: none; }
+#user-picker.visible { display: block; }
+#gate-password-step { display: block; }
+#gate-password-step.hidden { display: none; }
+
+.user-picker-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
+}
+.user-pick-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px; border: 2px solid #e5e7eb;
+  background: #fff; cursor: pointer; font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  text-align: left;
+}
+.user-pick-btn:hover { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(17,111,234,0.08); }
+.user-pick-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-pick-name { font-size: 14px; font-weight: 600; color: #111827; }
+
 /* ── Header ── */
 .header {
-  background: #116FEA; padding: 16px 24px;
+  background: #116FEA; padding: 0 24px;
   display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
   box-shadow: 0 2px 12px rgba(17,111,234,0.2);
   position: sticky; top: 0; z-index: 100;
 }
-.header-logo img { height: 32px; width: auto; display: block; }
-.header-right { display: flex; align-items: center; gap: 12px; }
+.header-logo img { height: 28px; width: auto; display: block; }
+.header-nav { display: flex; align-items: center; gap: 4px; }
+.header-nav-item {
+  color: rgba(255,255,255,0.7); font-size: 13.5px; font-weight: 500;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  border: none; background: none; font-family: inherit;
+}
+.header-nav-item:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.header-nav-item.active { color: #fff; background: rgba(255,255,255,0.18); font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+  display: inline-block; margin-right: 5px;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
 .header-label { color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 500; }
-.add-client-btn {
-  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-  color: #fff; border-radius: 8px; padding: 7px 16px; font-size: 13px;
-  font-weight: 600; font-family: inherit; cursor: pointer;
-  transition: background 0.12s;
-}
-.add-client-btn:hover { background: rgba(255,255,255,0.28); }
 
-/* ── App shell: sidebar + main ── */
-.app-shell { display: flex; min-height: calc(100vh - 65px); }
-
-.sidebar {
-  width: 220px; flex-shrink: 0;
-  background: #fff; border-right: 1px solid #e5e7eb;
-  padding: 16px 10px 16px; position: sticky; top: 65px;
-  height: calc(100vh - 65px); overflow-y: auto;
-  display: flex; flex-direction: column;
+/* User dropdown */
+.user-menu-wrap { position: relative; }
+.user-menu-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px; padding: 6px 10px 6px 8px;
+  cursor: pointer; transition: background 0.12s; color: #fff;
+  font-family: inherit;
 }
-.sidebar-nav { flex: 1; }
-.btn-logout {
-  display: flex; align-items: center; gap: 9px;
-  width: 100%; padding: 8px 10px; border-radius: 8px;
-  font-size: 13.5px; font-weight: 500; color: #6b7280;
-  background: none; border: none; cursor: pointer;
-  font-family: inherit; transition: background 0.12s, color 0.12s;
-  margin-top: 4px;
+.user-menu-btn:hover { background: rgba(255,255,255,0.25); }
+.user-menu-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
 }
-.btn-logout:hover { background: #fef2f2; color: #dc2626; }
-
-.main-content { flex: 1; padding: 28px 28px 80px; min-width: 0; }
-
-/* ── Sidebar nav ── */
-.nav-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 8px; cursor: pointer;
-  font-size: 13.5px; font-weight: 500; color: #374151;
-  transition: background 0.12s, color 0.12s, box-shadow 0.12s; user-select: none;
-  margin-bottom: 2px;
+.user-menu-name { font-size: 13px; font-weight: 600; }
+.user-menu-caret {
+  opacity: 0.7;
 }
-.nav-item:hover { background: #f3f4f6; }
-.nav-item.active {
-  background: #eff6ff; color: #116FEA; font-weight: 600;
-  box-shadow: inset 0 0 0 1.5px #bfdbfe;
+.user-dropdown {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.14);
+  min-width: 190px; z-index: 300; display: none; overflow: hidden;
 }
-.nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.nav-count {
-  margin-left: auto; font-size: 11px; font-weight: 600;
-  background: #f3f4f6; color: #9ca3af; border-radius: 20px; padding: 2px 7px;
-  min-width: 20px; text-align: center;
-}
-.nav-item.active .nav-count { background: #dbeafe; color: #116FEA; }
-.nav-divider { height: 1px; background: #e5e7eb; margin: 10px 2px; }
-.nav-label {
-  font-size: 11px; font-weight: 600; color: #9ca3af;
+.user-dropdown.open { display: block; }
+.user-dropdown-label {
+  font-size: 10.5px; font-weight: 600; color: #9ca3af;
   text-transform: uppercase; letter-spacing: 0.06em;
-  padding: 0 10px; margin: 8px 0 4px;
+  padding: 10px 14px 4px;
 }
-.nav-icon { flex-shrink: 0; color: currentColor; opacity: 0.7; }
+.user-dropdown-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 14px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.1s;
+  border: none; background: none; width: 100%; text-align: left;
+  font-family: inherit; color: #374151;
+}
+.user-dropdown-item:hover { background: #f3f4f6; }
+.user-dropdown-item.active { color: #116FEA; font-weight: 600; }
+.user-dropdown-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-dropdown-divider { height: 1px; background: #e5e7eb; margin: 4px 0; }
+.user-dropdown-item.danger { color: #dc2626; }
+.user-dropdown-item.danger:hover { background: #fef2f2; }
 
-/* ── Main content header + search ── */
-.main-header { margin-bottom: 18px; }
-.main-title { font-size: 18px; font-weight: 700; color: #111827; letter-spacing: -0.3px; }
-.main-subtitle { font-size: 13px; color: #9ca3af; margin-top: 3px; }
+/* ── Stats bar ── */
+.stats-bar {
+  background: #fff; border-bottom: 1px solid #e5e7eb;
+  padding: 12px 28px; display: flex; align-items: center; gap: 24px;
+  flex-wrap: wrap;
+}
+.stats-title { font-size: 16px; font-weight: 700; color: #111827; margin-right: 8px; }
+.stat-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.stat-dot.active { background: #116FEA; }
+.stat-dot.attention { background: #f59e0b; }
+.stat-dot.postlive { background: #7c3aed; }
+.stat-dot.graduated { background: #16a34a; }
+.stat-count { font-weight: 700; color: #111827; }
 
-.search-wrap { position: relative; margin-bottom: 20px; }
+/* ── Search + actions bar ── */
+.toolbar {
+  padding: 16px 28px 0; display: flex; align-items: center; gap: 12px;
+}
+.search-wrap { position: relative; flex: 1; max-width: 380px; }
 .search-input {
   width: 100%; font-size: 14px; font-family: inherit; color: #111827;
   border: 1.5px solid #e5e7eb; border-radius: 10px;
-  padding: 10px 14px 10px 38px; outline: none; background: #fff;
+  padding: 9px 14px 9px 36px; outline: none; background: #fff;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .search-input:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); }
 .search-input::placeholder { color: #9ca3af; }
 .search-icon {
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
   color: #9ca3af; pointer-events: none;
 }
+.add-client-btn {
+  background: #116FEA; color: #fff; border: none;
+  border-radius: 8px; padding: 8px 16px; font-size: 13px;
+  font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.12s; white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.add-client-btn:hover { background: #0f5fd4; }
 
-/* ── Client grid ── */
-.client-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+/* ── Kanban board ── */
+.kanban-board {
+  display: flex; gap: 16px;
+  padding: 16px 28px 60px;
+  align-items: flex-start;
+  min-height: calc(100vh - 160px);
+}
+.kanban-col {
+  flex: 1; min-width: 300px; max-width: 420px;
+}
+.col-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding: 0 2px;
+}
+.col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.col-dot.onboarding { background: #116FEA; }
+.col-dot.post_go_live { background: #7c3aed; }
+.col-dot.graduated { background: #16a34a; }
+.col-title { font-size: 14px; font-weight: 700; color: #374151; }
+.col-count {
+  font-size: 11px; font-weight: 700; color: #6b7280;
+  background: #e5e7eb; border-radius: 20px; padding: 2px 8px;
+}
+.col-subtitle { font-size: 11.5px; color: #9ca3af; margin-left: auto; font-style: italic; }
+.col-cards { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Kanban card ── */
+.kanban-card {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
+  cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
+  position: relative;
+}
+.kanban-card:hover {
+  box-shadow: 0 4px 16px rgba(17,111,234,0.1), 0 0 0 1.5px #93c5fd;
+  transform: translateY(-1px);
+}
+.kanban-card.has-alert {
+  border-left: 3px solid #f59e0b;
+  padding-left: 13px;
 }
 
-/* ── Onboarder pill on cards (shown in Recent / search mode) ── */
-.onboarder-pill {
-  font-size: 11px; font-weight: 600; border-radius: 20px;
-  padding: 2px 8px; white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+.kcard-top {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+}
+.kcard-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+}
+.kcard-info { flex: 1; min-width: 0; }
+.kcard-name {
+  font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.kcard-meeting {
+  font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px;
+}
+.kcard-meeting.overdue { color: #dc2626; }
+.kcard-meeting.today { color: #d97706; }
+.kcard-meeting.soon { color: #116FEA; }
+.kcard-meeting.normal { color: #6b7280; }
+.kcard-meeting.none { color: #d1d5db; }
+.kcard-alert-icon { flex-shrink: 0; margin-top: 2px; }
+
+.kcard-bottom {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding-top: 10px; border-top: 1px solid #f3f4f6;
+}
+.stage-badge {
+  font-size: 10px; font-weight: 700; border-radius: 5px;
+  padding: 3px 7px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.stage-badge.onboarding { background: #eff6ff; color: #116FEA; }
+.stage-badge.post_go_live { background: #f5f3ff; color: #7c3aed; }
+.stage-badge.graduated { background: #f0fdf4; color: #16a34a; }
+.kcard-tasks { font-size: 12px; color: #9ca3af; font-weight: 500; white-space: nowrap; }
+.kcard-tasks.complete { color: #16a34a; font-weight: 600; }
+
+.kcard-contact {
+  margin-top: 8px; font-size: 12px; color: #6b7280;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.contact-age { font-weight: 600; }
+.contact-age.ok { color: #16a34a; }
+.contact-age.warn { color: #d97706; }
+.contact-age.overdue { color: #dc2626; }
+.contact-age.never { color: #9ca3af; }
+
+.kcard-warn {
+  margin-top: 7px; font-size: 11.5px; color: #b45309;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;
+  padding: 5px 8px; display: flex; align-items: center; gap: 6px;
 }
 
-/* ── Modal select ── */
-.modal-select {
-  width: 100%; font-size: 14px; font-family: inherit; color: #111827;
-  border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 36px 10px 14px;
-  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-  margin-bottom: 16px; background: #fafafa;
-  appearance: none; -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; cursor: pointer;
-}
-.modal-select:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); background-color: #fff; }
-
-/* ── Client card ── */
-.client-card {
-  background: #fff; border-radius: 14px; padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
-  transition: background 0.15s, box-shadow 0.15s;
-  display: flex; flex-direction: column;
-  cursor: pointer; position: relative;
-}
-.client-card:hover { background: #eff6ff; box-shadow: 0 4px 20px rgba(17,111,234,0.1), 0 0 0 1.5px #93c5fd; }
-.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; min-width: 0; }
-.client-name {
-  font-size: 15px; font-weight: 700; color: #111827; letter-spacing: -0.2px; line-height: 1.3;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
-}
-.last-active { font-size: 11.5px; color: #9ca3af; font-weight: 500; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
-
-.card-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 14px; }
-.card-footer-left { flex: 1; min-width: 0; }
-.prog-track { height: 6px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-.prog-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); background: linear-gradient(90deg, #116FEA, #3b8ef5); }
-.prog-fill.complete { background: linear-gradient(90deg, #16a34a, #22c55e); }
-.task-count { font-size: 11px; color: #6b7280; font-weight: 500; }
-.task-count.complete { color: #16a34a; font-weight: 600; }
-.card-date-pill {
-  font-size: 11px; color: #9ca3af; font-weight: 500; white-space: nowrap; flex-shrink: 0;
-  background: #f3f4f6; border-radius: 20px; padding: 3px 9px;
-}
-
-.card-menu-wrap { position: relative; flex-shrink: 0; }
-.card-menu-btn {
+/* 3-dot menu on card */
+.kcard-menu-wrap { position: relative; flex-shrink: 0; }
+.kcard-menu-btn {
   background: none; border: none; cursor: pointer; color: #9ca3af;
-  padding: 4px 5px; border-radius: 6px; line-height: 1;
+  padding: 3px 4px; border-radius: 5px; line-height: 1;
   transition: background 0.12s, color 0.12s;
   display: flex; align-items: center;
 }
-.card-menu-btn:hover { background: #f3f4f6; color: #374151; }
-.card-menu-dropdown {
+.kcard-menu-btn:hover { background: #f3f4f6; color: #374151; }
+.kcard-menu-dropdown {
   position: absolute; top: calc(100% + 4px); right: 0;
   background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  min-width: 155px; z-index: 200; display: none; overflow: hidden;
+  min-width: 168px; z-index: 200; display: none; overflow: hidden;
 }
-.card-menu-dropdown.open { display: block; }
-.card-menu-item {
+.kcard-menu-dropdown.open { display: block; }
+.kcard-menu-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; font-size: 13px; font-weight: 500;
+  padding: 9px 13px; font-size: 13px; font-weight: 500;
   cursor: pointer; transition: background 0.1s;
   border: none; background: none; width: 100%; text-align: left;
   font-family: inherit; color: #374151;
 }
-.card-menu-item:hover { background: #f3f4f6; }
-.card-menu-item.danger { color: #dc2626; }
-.card-menu-item.danger:hover { background: #fef2f2; }
+.kcard-menu-item:hover { background: #f3f4f6; }
+.kcard-menu-item.highlight { color: #116FEA; }
+.kcard-menu-item.highlight:hover { background: #eff6ff; }
+.kcard-menu-item.success { color: #16a34a; }
+.kcard-menu-item.success:hover { background: #f0fdf4; }
+.kcard-menu-item.danger { color: #dc2626; }
+.kcard-menu-item.danger:hover { background: #fef2f2; }
 
-/* ── Empty state ── */
-.empty-state {
-  grid-column: 1 / -1; text-align: center;
-  padding: 60px 20px; color: #9ca3af;
+/* ── Empty column state ── */
+.col-empty {
+  text-align: center; padding: 40px 16px;
+  color: #d1d5db; font-size: 13px;
 }
-.empty-state svg { opacity: 0.35; margin-bottom: 16px; }
-.empty-state p { font-size: 14px; }
-.empty-state strong { display: block; font-size: 16px; font-weight: 700; color: #6b7280; margin-bottom: 6px; }
 
-/* ── Modal ── */
+/* ── Skeleton loader ── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.skeleton-card {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-line {
+  background: #f3f4f6; border-radius: 6px; height: 11px; margin-bottom: 8px;
+}
+
+/* ── Modals ── */
 .modal-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   display: none; align-items: center; justify-content: center;
@@ -248,6 +365,16 @@ body {
   margin-bottom: 16px; background: #fafafa;
 }
 .modal-input:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); background: #fff; }
+.modal-select {
+  width: 100%; font-size: 14px; font-family: inherit; color: #111827;
+  border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 36px 10px 14px;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px; background: #fafafa;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; cursor: pointer;
+}
+.modal-select:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); background-color: #fff; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .btn-cancel {
   background: #f3f4f6; color: #374151; border: none; border-radius: 8px;
@@ -261,8 +388,6 @@ body {
 }
 .btn-submit:hover { background: #0f5fd4; }
 .btn-submit:disabled { background: #93c5fd; cursor: default; }
-
-/* Success state inside modal */
 .modal-success { display: none; }
 .modal-success.show { display: block; }
 .modal-form.hide { display: none; }
@@ -284,52 +409,21 @@ body {
 }
 .btn-done:hover { background: #e5e7eb; }
 
-/* ── Skeleton loader ── */
-@keyframes skeleton-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+/* Settings modal onboarder list */
+.settings-onboarder-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px; background: #f9fafb;
+  border: 1px solid #e5e7eb; margin-bottom: 8px;
 }
-.skeleton-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.05);
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
-}
-.skeleton-line {
-  background: #f3f4f6;
-  border-radius: 6px;
-  height: 12px;
-  margin-bottom: 10px;
-}
+.settings-onboarder-name { flex: 1; font-size: 14px; font-weight: 600; color: #111827; }
+.settings-onboarder-meta { font-size: 12px; color: #9ca3af; }
 
-/* ── Live indicator ── */
-.live-dot {
-  width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
-  display: inline-block; margin-right: 5px;
-  box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-}
-
-@media (max-width: 700px) {
-  .app-shell { flex-direction: column; }
-  .sidebar {
-    width: 100%; height: auto; position: static;
-    border-right: none; border-bottom: 1px solid #e5e7eb;
-    padding: 8px 8px 6px; display: flex; flex-direction: row;
-    overflow-x: auto; gap: 4px; white-space: nowrap;
-  }
-  .nav-divider, .nav-label { display: none; }
-  .nav-item { flex-shrink: 0; margin-bottom: 0; }
-  .main-content { padding: 16px 14px 60px; }
-  .client-grid { grid-template-columns: 1fr; }
-  .header { padding: 12px 16px; }
-  .header-label { display: none; }
+@media (max-width: 900px) {
+  .kanban-board { flex-direction: column; padding: 16px 16px 60px; }
+  .kanban-col { max-width: 100%; }
+  .stats-bar { padding: 10px 16px; gap: 14px; }
+  .toolbar { padding: 12px 16px 0; }
+  .header { padding: 0 16px; }
 }
 </style>
 </head>
@@ -337,9 +431,9 @@ body {
 
 <!-- Password gate -->
 <div id="gate">
-  <img class="gate-logo" src="Logo - White.png" alt="Floorzap"
-       onerror="this.style.display='none'">
-  <div class="gate-box">
+  <img class="gate-logo" src="Logo - White.png" alt="Floorzap" onerror="this.style.display='none'">
+
+  <div class="gate-box" id="gate-password-step">
     <h2>Onboarder Dashboard</h2>
     <p>Enter your password to continue</p>
     <input class="gate-input" id="gate-input" type="password"
@@ -347,73 +441,124 @@ body {
     <button class="gate-btn" onclick="gateSubmit()">Sign in</button>
     <div class="gate-error" id="gate-error"></div>
   </div>
+
+  <div class="gate-box" id="user-picker">
+    <h2>Who are you?</h2>
+    <p>Select your name to continue</p>
+    <div class="user-picker-grid" id="user-picker-grid"></div>
+  </div>
 </div>
 
-<!-- Dashboard app (hidden until authenticated) -->
+<!-- Dashboard app -->
 <div id="app" style="display:none">
 
   <div class="header">
     <div class="header-logo">
-      <img src="Logo - White.png" alt="Floorzap">
+      <img src="Logo - White.png" alt="Floorzap" onerror="this.style.display='none'">
+    </div>
+    <div class="header-nav">
+      <button class="header-nav-item active">My Offices</button>
     </div>
     <div class="header-right">
       <span class="header-label"><span class="live-dot"></span>Live</span>
-      <button class="add-client-btn" onclick="openModal()">+ Add client</button>
+      <div class="user-menu-wrap">
+        <button class="user-menu-btn" id="user-menu-btn" onclick="toggleUserMenu(event)">
+          <div class="user-menu-avatar" id="user-menu-avatar"></div>
+          <span class="user-menu-name" id="user-menu-name"></span>
+          <svg class="user-menu-caret" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-label">Switch to</div>
+          <div id="user-switch-list"></div>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" onclick="openSettingsModal(); closeUserMenu();">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="7" cy="7" r="2.5"/>
+              <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.93 2.93l1.06 1.06M10.01 10.01l1.06 1.06M2.93 11.07l1.06-1.06M10.01 3.99l1.06-1.06"/>
+            </svg>
+            Settings
+          </button>
+          <button class="user-dropdown-item danger" onclick="logout(); closeUserMenu();">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12H2.5A1.5 1.5 0 011 10.5v-7A1.5 1.5 0 012.5 2H5"/>
+              <path d="M9.5 10l3-3-3-3M12.5 7H5.5"/>
+            </svg>
+            Log out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="app-shell">
-    <!-- Left sidebar nav -->
-    <div class="sidebar">
-      <div class="sidebar-nav">
-        <div class="nav-item active" id="nav-recent" onclick="setNav('recent')">
-          <svg class="nav-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M7 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Recent
-          <span class="nav-count" id="count-recent">—</span>
-        </div>
-        <div class="nav-divider"></div>
-        <div class="nav-label">Onboarders</div>
-        <div id="nav-onboarders"></div>
-      </div>
-      <div class="nav-divider"></div>
-      <button class="btn-logout" onclick="logout()">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12H2.5A1.5 1.5 0 011 10.5v-7A1.5 1.5 0 012.5 2H5"/>
-          <path d="M9.5 10l3-3-3-3M12.5 7H5.5"/>
-        </svg>
-        Log out
-      </button>
-    </div>
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <span class="stats-title" id="stats-title">My Offices</span>
+    <span class="stat-item"><span class="stat-dot active"></span><span class="stat-count" id="stat-active">0</span> active</span>
+    <span class="stat-item"><span class="stat-dot attention"></span><span class="stat-count" id="stat-attention">0</span> need attention</span>
+    <span class="stat-item"><span class="stat-dot postlive"></span><span class="stat-count" id="stat-postlive">0</span> post go-live</span>
+    <span class="stat-item"><span class="stat-dot graduated"></span><span class="stat-count" id="stat-graduated">0</span> graduated</span>
+  </div>
 
-    <!-- Main content -->
-    <div class="main-content">
-      <div class="main-header">
-        <div class="main-title" id="main-title">Recent activity</div>
-        <div class="main-subtitle" id="main-subtitle"></div>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input class="search-input" id="search-input" type="text"
+             placeholder="Search offices by name…" oninput="renderKanban()">
+    </div>
+    <button class="add-client-btn" onclick="openModal()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M6.5 1v11M1 6.5h11"/>
+      </svg>
+      Add office
+    </button>
+  </div>
+
+  <!-- Kanban board -->
+  <div class="kanban-board" id="kanban-board">
+    <div class="kanban-col" id="col-onboarding">
+      <div class="col-header">
+        <span class="col-dot onboarding"></span>
+        <span class="col-title">Onboarding</span>
+        <span class="col-count" id="count-onboarding">0</span>
+        <span class="col-subtitle">Working the setup checklist</span>
       </div>
-      <div class="search-wrap">
-        <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <input class="search-input" id="search-input" type="text"
-               placeholder="Search clients by name…" oninput="renderMain()">
+      <div class="col-cards" id="cards-onboarding"></div>
+    </div>
+    <div class="kanban-col" id="col-post_go_live">
+      <div class="col-header">
+        <span class="col-dot post_go_live"></span>
+        <span class="col-title">Post Go-Live</span>
+        <span class="col-count" id="count-post_go_live">0</span>
+        <span class="col-subtitle">Graduated, still in support</span>
       </div>
-      <div class="client-grid" id="main-grid"></div>
+      <div class="col-cards" id="cards-post_go_live"></div>
+    </div>
+    <div class="kanban-col" id="col-graduated">
+      <div class="col-header">
+        <span class="col-dot graduated"></span>
+        <span class="col-title">Graduated</span>
+        <span class="col-count" id="count-graduated">0</span>
+        <span class="col-subtitle">Done — kept for reference</span>
+      </div>
+      <div class="col-cards" id="cards-graduated"></div>
     </div>
   </div>
 
 </div>
 
-<!-- Add client modal -->
+<!-- ── Modals ── -->
+
+<!-- Add client -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="backdropClick(event)">
   <div class="modal">
-
     <div class="modal-form" id="modal-form">
-      <h3>Add new client</h3>
+      <h3>Add new office</h3>
       <p>Paste the HubSpot Ticket ID to auto-fill the company name, or enter it manually.</p>
       <div style="position:relative;">
         <input class="modal-input" id="hubspot-ticket-input" type="text"
@@ -425,73 +570,51 @@ body {
              placeholder="Company name" maxlength="80" onkeydown="modalKey(event)">
       <select class="modal-select" id="onboarder-select">
         <option value="">Assign to onboarder…</option>
-        <option value="David">David</option>
-        <option value="JB">JB</option>
-        <option value="Maddi">Maddi</option>
-        <option value="Valentin">Valentin</option>
-        <option value="Amber">Amber</option>
       </select>
-
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151;font-weight:500;cursor:pointer;margin-top:4px;">
         <input type="checkbox" id="meetings-scheduled-chk" onchange="toggleNewClientMeetings()" style="width:15px;height:15px;accent-color:#116FEA;cursor:pointer;">
         Meetings are already scheduled
       </label>
-
       <div id="new-client-meetings" style="display:none;margin-top:10px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
         <div style="padding:10px 14px 6px;background:#f9fafb;border-bottom:1px solid #e5e7eb;font-size:11.5px;font-weight:600;color:#6b7280;letter-spacing:.05em;text-transform:uppercase;">Zoom links <span style="font-weight:400;text-transform:none;letter-spacing:0;">(you can add these later too)</span></div>
         <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;">
-          <div>
-            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Kickoff</div>
-            <input class="modal-input" id="new-zoom-kickoff" type="text" placeholder="Zoom link" style="margin-bottom:0;">
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">2-Week Check-in</div>
-            <input class="modal-input" id="new-zoom-checkin" type="text" placeholder="Zoom link" style="margin-bottom:0;">
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Integrations</div>
-            <input class="modal-input" id="new-zoom-integrations" type="text" placeholder="Zoom link" style="margin-bottom:0;">
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Graduation</div>
-            <input class="modal-input" id="new-zoom-graduation" type="text" placeholder="Zoom link" style="margin-bottom:0;">
-          </div>
+          <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Kickoff</div><input class="modal-input" id="new-zoom-kickoff" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
+          <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">2-Week Check-in</div><input class="modal-input" id="new-zoom-checkin" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
+          <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Integrations</div><input class="modal-input" id="new-zoom-integrations" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
+          <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Graduation</div><input class="modal-input" id="new-zoom-graduation" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
         </div>
       </div>
-
       <div class="modal-actions" style="margin-top:20px;">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-submit" id="submit-btn" onclick="submitClient()">Create link</button>
       </div>
     </div>
-
     <div class="modal-success" id="modal-success">
-      <h3>Client created!</h3>
+      <h3>Office created!</h3>
       <p>Share this link with <strong id="success-name"></strong>. Save it in HubSpot as their "Onboarding Checklist URL".</p>
       <div class="url-box" id="success-url"></div>
       <button class="btn-copy-url" id="copy-url-btn" onclick="copyClientUrl()">Copy link</button>
       <button class="btn-done" onclick="closeModal()">Done</button>
     </div>
-
   </div>
 </div>
 
-<!-- Delete confirmation modal -->
+<!-- Delete -->
 <div class="modal-backdrop" id="delete-backdrop" onclick="deleteBackdropClick(event)">
   <div class="modal">
-    <h3 style="color:#111827;">Delete client?</h3>
+    <h3 style="color:#111827;">Delete office?</h3>
     <p id="delete-modal-text" style="margin-bottom:24px;"></p>
     <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#b91c1c;margin-bottom:20px;">
-      ⚠️ This will permanently remove the client and all their checklist progress. This cannot be undone.
+      ⚠️ This will permanently remove the office and all checklist progress. This cannot be undone.
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-      <button id="confirm-delete-btn" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="confirmDelete()">Delete client</button>
+      <button id="confirm-delete-btn" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="confirmDelete()">Delete office</button>
     </div>
   </div>
 </div>
 
-<!-- Manage Meetings modal -->
+<!-- Manage Meetings -->
 <div class="modal-backdrop" id="meetings-backdrop" onclick="meetingsBackdropClick(event)">
   <div class="modal" style="max-width:500px;">
     <h3 style="color:#111827;">Manage meetings</h3>
@@ -503,19 +626,13 @@ body {
   </div>
 </div>
 
-
-<!-- Reassign onboarder modal -->
+<!-- Reassign -->
 <div class="modal-backdrop" id="reassign-backdrop" onclick="reassignBackdropClick(event)">
   <div class="modal">
     <h3 style="color:#111827;">Reassign onboarder</h3>
     <p id="reassign-modal-text" style="margin-bottom:16px;"></p>
     <select class="modal-select" id="reassign-select">
       <option value="">Select onboarder…</option>
-      <option value="David">David</option>
-      <option value="JB">JB</option>
-      <option value="Maddi">Maddi</option>
-      <option value="Valentin">Valentin</option>
-      <option value="Amber">Amber</option>
     </select>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeReassignModal()">Cancel</button>
@@ -524,7 +641,7 @@ body {
   </div>
 </div>
 
-<!-- Set HubSpot Ticket ID modal -->
+<!-- Set HubSpot Ticket ID -->
 <div class="modal-backdrop" id="set-hs-backdrop" onclick="setHsBackdropClick(event)">
   <div class="modal">
     <h3 style="color:#111827;">Set HubSpot Ticket ID</h3>
@@ -539,10 +656,10 @@ body {
   </div>
 </div>
 
-<!-- Rename client modal -->
+<!-- Rename -->
 <div class="modal-backdrop" id="rename-backdrop" onclick="renameBackdropClick(event)">
   <div class="modal">
-    <h3 style="color:#111827;">Rename client</h3>
+    <h3 style="color:#111827;">Rename office</h3>
     <p id="rename-modal-text" style="margin-bottom:16px;"></p>
     <input class="modal-input" id="rename-input" type="text" maxlength="80"
            onkeydown="if(event.key==='Enter')confirmRename()">
@@ -553,43 +670,78 @@ body {
   </div>
 </div>
 
+<!-- Settings -->
+<div class="modal-backdrop" id="settings-backdrop" onclick="settingsBackdropClick(event)">
+  <div class="modal" style="max-width:460px;">
+    <h3>Settings</h3>
+    <p style="margin-bottom:16px;">Manage onboarders on this dashboard.</p>
+    <div style="font-size:11.5px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Onboarders</div>
+    <div id="settings-onboarder-list"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input class="modal-input" id="new-onboarder-name" type="text" placeholder="Full name" maxlength="30" style="margin-bottom:0;flex:1;" onkeydown="if(event.key==='Enter')addOnboarder()">
+      <input class="modal-input" id="new-onboarder-initials" type="text" placeholder="AB" maxlength="2" style="margin-bottom:0;width:64px;text-transform:uppercase;" onkeydown="if(event.key==='Enter')addOnboarder()">
+      <button class="btn-submit" onclick="addOnboarder()" style="white-space:nowrap;">Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn-cancel" onclick="closeSettingsModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ── Config ── */
 var WORKER_URL = 'https://fz-hubspot.valentinfernandez1994.workers.dev';
 var SUPABASE_URL = 'https://abszmmrjaxqpnjomfbxd.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFic3ptbXJqYXhxcG5qb21mYnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzUxMTYsImV4cCI6MjA5NDk1MTExNn0.5aPz4IHoINh1sgRixDwI4S5-KykJCuYMQOiONYVqkC4';
-var DASHBOARD_PASSWORD = 'floorzap2026'; // Change this to your preferred password
+var DASHBOARD_PASSWORD = 'floorzap2026';
+
+/* Default onboarders — editable via Settings */
+var DEFAULT_ONBOARDERS = [
+  { name: 'David',    initials: 'DB', color: '#7c3aed' },
+  { name: 'JB',       initials: 'JB', color: '#0891b2' },
+  { name: 'Maddi',    initials: 'MB', color: '#db2777' },
+  { name: 'Valentin', initials: 'VF', color: '#116FEA' },
+  { name: 'Amber',    initials: 'AS', color: '#d97706' },
+];
 
 var _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-var _clients = {}; // keyed by client id
+var _clients = {};
 var _newClientUrl = '';
-var _activeNav = 'recent';
+var _currentUser = null; // { name, initials, color }
 var FIXED_TOTAL = 20;
 var _renderTimer = null;
 var _syncing = false;
 
-/* ── Debounced render — batches rapid updates into one repaint ── */
+/* ── Onboarders (persisted to localStorage) ── */
+function getOnboarders() {
+  try {
+    var stored = localStorage.getItem('fz-onboarders');
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return DEFAULT_ONBOARDERS;
+}
+function saveOnboarders(list) {
+  localStorage.setItem('fz-onboarders', JSON.stringify(list));
+}
+function getOnboarder(name) {
+  return getOnboarders().find(function(o) { return o.name === name; }) || { name: name, initials: name.slice(0,2).toUpperCase(), color: '#475569' };
+}
+
 function scheduleRender() {
   if (_syncing) return;
   if (_renderTimer) clearTimeout(_renderTimer);
-  _renderTimer = setTimeout(function() { _renderTimer = null; renderMain(); }, 120);
+  _renderTimer = setTimeout(function() { _renderTimer = null; renderKanban(); }, 120);
 }
-
-var ONBOARDERS = ['David', 'JB', 'Maddi', 'Valentin', 'Amber'];
-var ONBOARDER_INITIALS = {
-  'David':    'DB',
-  'JB':       'JB',
-  'Maddi':    'MB',
-  'Valentin': 'VF',
-  'Amber':    'AS'
-};
-var OS_COLOR = '#475569';
 
 /* ── Password gate ── */
 function logout() {
   sessionStorage.removeItem('fz-dash-auth');
+  sessionStorage.removeItem('fz-dash-user');
+  _currentUser = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('gate').style.display = 'flex';
+  document.getElementById('gate-password-step').classList.remove('hidden');
+  document.getElementById('user-picker').classList.remove('visible');
   document.getElementById('gate-input').value = '';
 }
 function gateKey(e) { if (e.key === 'Enter') gateSubmit(); }
@@ -598,10 +750,8 @@ function gateSubmit() {
   var err = document.getElementById('gate-error');
   var inp = document.getElementById('gate-input');
   if (val === DASHBOARD_PASSWORD) {
-    sessionStorage.setItem('fz-dash-auth', '1');
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    init();
+    document.getElementById('gate-password-step').classList.add('hidden');
+    showUserPicker();
   } else {
     inp.classList.add('error');
     err.textContent = 'Incorrect password. Try again.';
@@ -610,20 +760,100 @@ function gateSubmit() {
   }
 }
 
-// Skip gate if already authenticated this session
-if (sessionStorage.getItem('fz-dash-auth') === '1') {
+function showUserPicker() {
+  var picker = document.getElementById('user-picker');
+  var grid = document.getElementById('user-picker-grid');
+  picker.classList.add('visible');
+  grid.innerHTML = '';
+  getOnboarders().forEach(function(ob) {
+    var btn = document.createElement('button');
+    btn.className = 'user-pick-btn';
+    btn.innerHTML =
+      '<div class="user-pick-avatar" style="background:' + ob.color + '">' + escHtml(ob.initials) + '</div>'
+      + '<span class="user-pick-name">' + escHtml(ob.name) + '</span>';
+    btn.onclick = (function(o) { return function() { selectUser(o); }; })(ob);
+    grid.appendChild(btn);
+  });
+}
+
+function selectUser(ob) {
+  sessionStorage.setItem('fz-dash-auth', '1');
+  sessionStorage.setItem('fz-dash-user', JSON.stringify(ob));
+  _currentUser = ob;
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  updateUserMenuUI();
+  init();
 }
+
+function updateUserMenuUI() {
+  if (!_currentUser) return;
+  var avatarEl = document.getElementById('user-menu-avatar');
+  var nameEl = document.getElementById('user-menu-name');
+  avatarEl.textContent = _currentUser.initials;
+  avatarEl.style.background = _currentUser.color;
+  nameEl.textContent = _currentUser.name;
+
+  var list = document.getElementById('user-switch-list');
+  list.innerHTML = '';
+  getOnboarders().forEach(function(ob) {
+    if (ob.name === _currentUser.name) return;
+    var btn = document.createElement('button');
+    btn.className = 'user-dropdown-item';
+    btn.innerHTML =
+      '<div class="user-dropdown-avatar" style="background:' + ob.color + '">' + escHtml(ob.initials) + '</div>'
+      + escHtml(ob.name);
+    btn.onclick = (function(o) { return function() { switchUser(o); }; })(ob);
+    list.appendChild(btn);
+  });
+}
+
+function switchUser(ob) {
+  sessionStorage.setItem('fz-dash-user', JSON.stringify(ob));
+  _currentUser = ob;
+  updateUserMenuUI();
+  closeUserMenu();
+  renderKanban();
+}
+
+function toggleUserMenu(e) {
+  e.stopPropagation();
+  var dd = document.getElementById('user-dropdown');
+  dd.classList.toggle('open');
+}
+function closeUserMenu() {
+  document.getElementById('user-dropdown').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.user-menu-wrap')) closeUserMenu();
+});
 
 /* ── Init ── */
 async function init() {
+  populateOnboarderSelects();
   await loadClients();
   subscribeRealtime();
   syncHubSpotDates();
 }
 
-/* ── Background HubSpot sync on load ── */
+function populateOnboarderSelects() {
+  var obs = getOnboarders();
+  ['onboarder-select', 'reassign-select'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var firstOpt = sel.options[0];
+    sel.innerHTML = '';
+    sel.appendChild(firstOpt);
+    obs.forEach(function(ob) {
+      var opt = document.createElement('option');
+      opt.value = ob.name;
+      opt.textContent = ob.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+/* ── HubSpot sync ── */
 async function syncHubSpotDates() {
   if (!WORKER_URL) return;
   _syncing = true;
@@ -649,362 +879,433 @@ async function syncHubSpotDates() {
           updates.state = state;
         }
       }
+      if (data.last_contacted) {
+        var current = client.last_contact_date;
+        if (!current || data.last_contacted > current) {
+          updates.last_contact_date = data.last_contacted;
+        }
+      }
       if (Object.keys(updates).length === 0) continue;
       Object.assign(_clients[id], updates);
       await _sb.from('clients').update(updates).eq('id', id);
     } catch(e) {}
   }
   _syncing = false;
-  renderMain();
+  renderKanban();
 }
 
-/* ── Skeleton loader ── */
-function showSkeletons() {
-  var grid = document.getElementById('main-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  for (var i = 0; i < 4; i++) {
-    grid.innerHTML += '<div class="skeleton-card">'
-      + '<div class="skeleton-line" style="width:60%;margin-bottom:14px;height:14px;"></div>'
-      + '<div style="display:flex;gap:6px;margin-bottom:20px;">'
-      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
-      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
-      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
-      + '<div class="skeleton-line" style="width:22%;height:10px;margin-bottom:0;border-radius:20px;"></div>'
-      + '</div>'
-      + '<div class="skeleton-line" style="width:100%;height:7px;border-radius:4px;margin-bottom:6px;"></div>'
-      + '<div class="skeleton-line" style="width:40%;height:10px;"></div>'
-      + '</div>';
-  }
-}
-
-/* ── Load all clients ── */
+/* ── Load clients ── */
 async function loadClients() {
   showSkeletons();
   var res = await _sb.from('clients').select('*').order('created_at', { ascending: false });
   if (res.data) {
     _clients = {};
     res.data.forEach(function(row) { _clients[row.id] = row; });
-    renderMain();
+    renderKanban();
   }
 }
 
-/* ── Supabase Realtime ── */
+function showSkeletons() {
+  ['onboarding','post_go_live','graduated'].forEach(function(col) {
+    var el = document.getElementById('cards-' + col);
+    if (!el) return;
+    el.innerHTML = '';
+    for (var i = 0; i < 3; i++) {
+      el.innerHTML += '<div class="skeleton-card">'
+        + '<div style="display:flex;gap:10px;margin-bottom:12px;">'
+        + '<div class="skeleton-line" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;margin-bottom:0;"></div>'
+        + '<div style="flex:1;">'
+        + '<div class="skeleton-line" style="width:70%;height:13px;"></div>'
+        + '<div class="skeleton-line" style="width:50%;height:10px;"></div>'
+        + '</div></div>'
+        + '<div class="skeleton-line" style="width:100%;height:1px;margin-bottom:10px;"></div>'
+        + '<div style="display:flex;justify-content:space-between;">'
+        + '<div class="skeleton-line" style="width:80px;height:20px;border-radius:5px;margin-bottom:0;"></div>'
+        + '<div class="skeleton-line" style="width:60px;height:10px;margin-bottom:0;"></div>'
+        + '</div></div>';
+    }
+  });
+}
+
+/* ── Realtime ── */
 function subscribeRealtime() {
   _sb.channel('clients-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, function(payload) {
       var row = payload.new || payload.old;
       if (!row) return;
-      if (payload.eventType === 'DELETE') {
-        delete _clients[row.id];
-      } else {
-        _clients[row.id] = row;
-      }
+      if (payload.eventType === 'DELETE') delete _clients[row.id];
+      else _clients[row.id] = row;
       scheduleRender();
     })
     .subscribe();
 }
 
-/* ── Nav ── */
-function setNav(name) {
-  _activeNav = name;
-  document.getElementById('search-input').value = '';
-  renderMain();
+/* ── Stage logic ── */
+function getStage(client) {
+  if (client.stage === 'graduated') return 'graduated';
+  var dates = (client.state || {}).hs_meeting_dates || {};
+  var gradIso = dates.graduation;
+  if (!gradIso) return 'onboarding';
+  var now = new Date();
+  var raw = Number(gradIso);
+  var gradDate = (!isNaN(raw) && raw > 0)
+    ? new Date(raw + 30 * 60 * 1000)
+    : new Date(gradIso + 'T23:59:59');
+  return now > gradDate ? 'post_go_live' : 'onboarding';
 }
 
-function renderSidebar() {
-  // Recent item
-  var allIds = Object.keys(_clients);
-  var recentCount = Math.min(allIds.length, 10);
-  document.getElementById('count-recent').textContent = recentCount;
-  var recentEl = document.getElementById('nav-recent');
-  if (_activeNav === 'recent') recentEl.classList.add('active');
-  else recentEl.classList.remove('active');
-
-  // Onboarder items
-  var container = document.getElementById('nav-onboarders');
-  container.innerHTML = '';
-  ONBOARDERS.forEach(function(name) {
-    var count = Object.values(_clients).filter(function(c) {
-      return (c.onboarder || 'Unassigned') === name;
-    }).length;
-    var initials = ONBOARDER_INITIALS[name] || name.slice(0,2).toUpperCase();
-    var isActive = _activeNav === name;
-    var item = document.createElement('div');
-    item.className = 'nav-item' + (isActive ? ' active' : '');
-    item.onclick = (function(n) { return function() { setNav(n); }; })(name);
-    item.innerHTML =
-      escHtml(name)
-      + '<span class="nav-count">' + count + '</span>';
-    container.appendChild(item);
-  });
-}
-
-/* ── Render ── */
-function renderMain() {
-  var query = document.getElementById('search-input').value.trim().toLowerCase();
-  var allIds = Object.keys(_clients).sort(function(a, b) {
-    return new Date(_clients[b].created_at) - new Date(_clients[a].created_at);
-  });
-
-  var ids, showOnboarder;
-  var titleEl = document.getElementById('main-title');
-  var subEl   = document.getElementById('main-subtitle');
-
-  if (query) {
-    ids = allIds.filter(function(id) {
-      return _clients[id].name.toLowerCase().indexOf(query) !== -1;
-    });
-    titleEl.textContent = ids.length + ' result' + (ids.length !== 1 ? 's' : '') + ' for "' + query + '"';
-    subEl.textContent = '';
-    showOnboarder = true;
-  } else if (_activeNav === 'recent') {
-    ids = allIds.slice(0, 10);
-    titleEl.textContent = 'Recent activity';
-    subEl.textContent = ids.length ? 'Showing the ' + ids.length + ' most recently updated' : '';
-    showOnboarder = true;
-  } else {
-    ids = allIds.filter(function(id) {
-      return (_clients[id].onboarder || 'Unassigned') === _activeNav;
-    });
-    titleEl.textContent = _activeNav + '’s clients';
-    subEl.textContent = ids.length + ' client' + (ids.length !== 1 ? 's' : '');
-    showOnboarder = false;
-  }
-
-  renderCardGrid(ids, showOnboarder);
-  renderSidebar();
-}
-
-function renderCardGrid(ids, showOnboarder) {
-  var grid = document.getElementById('main-grid');
-  var noClients = Object.keys(_clients).length === 0;
-  if (ids.length === 0) {
-    grid.innerHTML = '<div class="empty-state">'
-      + '<svg width="48" height="48" viewBox="0 0 48 48" fill="none">'
-      + '<rect x="8" y="10" width="32" height="30" rx="4" stroke="#9ca3af" stroke-width="2.5"/>'
-      + '<path d="M16 20h16M16 27h10" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round"/>'
-      + '</svg>'
-      + '<strong>' + (noClients ? 'No clients yet' : 'No clients here') + '</strong>'
-      + '<p>' + (noClients ? 'Click “+ Add client” to create your first onboarding link.' : 'Try selecting a different onboarder or searching by name.') + '</p>'
-      + '</div>';
-    return;
-  }
-  grid.innerHTML = '';
-  ids.forEach(function(id) { grid.appendChild(buildCard(_clients[id], showOnboarder)); });
-}
-
-var HS_PILL_DEFS = [
-  { key: 'kickoff',      label: 'Kickoff'      },
-  { key: 'checkin',      label: '2-Week'       },
+/* ── Next meeting ── */
+var MEETING_DEFS = [
+  { key: 'kickoff',      label: 'Kickoff' },
+  { key: 'checkin',      label: '2-Week check-in' },
   { key: 'integrations', label: 'Integrations' },
-  { key: 'graduation',   label: 'Graduation'   }
+  { key: 'graduation',   label: 'Graduation' },
 ];
 
-function getMeetingStatuses(row) {
-  var dates = (row.state || {}).hs_meeting_dates || {};
+function getNextMeeting(client) {
+  var dates = (client.state || {}).hs_meeting_dates || {};
   var now = new Date();
-  return HS_PILL_DEFS.map(function(m) {
+  var todayStr = now.toISOString().split('T')[0];
+  for (var i = 0; i < MEETING_DEFS.length; i++) {
+    var m = MEETING_DEFS[i];
     var iso = dates[m.key];
-    var isDone = false;
-    if (iso) {
-      var raw = Number(iso);
-      var isTimestamp = !isNaN(raw) && raw > 0;
-      if (isTimestamp) {
-        isDone = now > new Date(raw + 30 * 60 * 1000);
-      } else {
-        var d = new Date(iso); d.setHours(23, 59, 59, 999);
-        isDone = now > d;
-      }
+    if (!iso) continue;
+    var raw = Number(iso);
+    var d = (!isNaN(raw) && raw > 0) ? new Date(raw) : new Date(iso + 'T00:00:00');
+    if (isNaN(d.getTime())) continue;
+    var dayStr = d.toISOString().split('T')[0];
+    var endOfDay = new Date(d); endOfDay.setHours(23, 59, 59, 999);
+    if (now > endOfDay) continue; // already passed
+    var diffDays = Math.round((new Date(dayStr) - new Date(todayStr)) / 86400000);
+    return { label: m.label, date: d, diffDays: diffDays };
+  }
+  // All meetings passed — find the last one
+  return null;
+}
+
+function getLastMeeting(client) {
+  var dates = (client.state || {}).hs_meeting_dates || {};
+  var now = new Date();
+  var last = null;
+  for (var i = 0; i < MEETING_DEFS.length; i++) {
+    var m = MEETING_DEFS[i];
+    var iso = dates[m.key];
+    if (!iso) continue;
+    var raw = Number(iso);
+    var d = (!isNaN(raw) && raw > 0) ? new Date(raw) : new Date(iso + 'T00:00:00');
+    if (isNaN(d.getTime())) continue;
+    var endOfDay = new Date(d); endOfDay.setHours(23, 59, 59, 999);
+    if (now > endOfDay) last = { label: m.label, date: d };
+  }
+  return last;
+}
+
+function getMeetingDisplay(client, stage) {
+  if (stage === 'post_go_live' || stage === 'graduated') {
+    var last = getLastMeeting(client);
+    if (!last) return { text: 'No meetings on record', cls: 'none' };
+    return {
+      text: 'Graduated ' + last.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      cls: 'normal'
+    };
+  }
+  if (!client.hubspot_ticket_id) {
+    return { text: 'No HubSpot ID set', cls: 'none' };
+  }
+  var next = getNextMeeting(client);
+  if (!next) {
+    // Graduation should have just passed — handled by stage logic
+    return { text: 'All meetings complete', cls: 'normal' };
+  }
+  var dateStr = next.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  if (next.diffDays < 0) {
+    var overdueDays = Math.abs(next.diffDays);
+    return { text: 'Overdue ' + overdueDays + 'd · ' + next.label, cls: 'overdue' };
+  }
+  if (next.diffDays === 0) return { text: 'Today · ' + next.label, cls: 'today' };
+  if (next.diffDays === 1) return { text: 'Tomorrow · ' + next.label, cls: 'soon' };
+  if (next.diffDays <= 7)  return { text: dateStr + ' · ' + next.label, cls: 'soon' };
+  return { text: dateStr + ' · ' + next.label, cls: 'normal' };
+}
+
+/* ── Attention flags ── */
+function getAttentionWarning(client, stage) {
+  if (stage === 'graduated') return null;
+  var dates = (client.state || {}).hs_meeting_dates || {};
+  var state = client.state || {};
+  var done = (state.sys ? state.sys.length : 0)
+           + (state.b2b ? state.b2b.length : 0)
+           + (state.mig ? state.mig.length : 0)
+           + (state.qs  ? state.qs.length  : 0);
+
+  if (stage === 'onboarding') {
+    if (!client.hubspot_ticket_id) return 'No HubSpot ID — meeting dates unknown';
+    var next = getNextMeeting(client);
+    if (next) {
+      if (next.diffDays < 0) return 'Meeting overdue by ' + Math.abs(next.diffDays) + ' day' + (Math.abs(next.diffDays) !== 1 ? 's' : '');
+      if (next.diffDays === 1 && done === 0) return next.label + ' is tomorrow · nothing set up yet';
+      if (next.diffDays === 0 && done === 0) return next.label + ' is today · nothing set up yet';
     }
-    return { key: m.key, label: m.label, done: isDone, iso: iso };
+  }
+  return null;
+}
+
+/* ── Last contact display ── */
+function getContactDisplay(client) {
+  var lc = client.last_contact_date;
+  var now = new Date();
+  var createdAt = client.created_at ? new Date(client.created_at) : now;
+  var ageDays = Math.floor((now - createdAt) / 86400000);
+
+  if (!lc) {
+    var isAlert = ageDays > 7;
+    return { text: 'Never logged', ageCls: 'never', isAlert: isAlert };
+  }
+  var d = new Date(lc + 'T00:00:00');
+  var diffDays = Math.floor((now - d) / 86400000);
+  var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  var ageStr = diffDays === 0 ? 'today' : diffDays === 1 ? '1d ago' : diffDays + 'd ago';
+  var cls = diffDays <= 3 ? 'ok' : diffDays <= 7 ? 'warn' : 'overdue';
+  var isAlert = diffDays > 7;
+  return { text: dateStr, ageStr: ageStr, ageCls: cls, isAlert: isAlert };
+}
+
+/* ── Render Kanban ── */
+function renderKanban() {
+  var query = (document.getElementById('search-input') || {}).value;
+  query = (query || '').trim().toLowerCase();
+
+  var allClients = Object.values(_clients);
+
+  // Filter to current user's clients (or all if no user somehow)
+  var myClients = _currentUser
+    ? allClients.filter(function(c) { return c.onboarder === _currentUser.name; })
+    : allClients;
+
+  if (query) {
+    myClients = myClients.filter(function(c) {
+      return c.name.toLowerCase().indexOf(query) !== -1;
+    });
+  }
+
+  // Bucket by stage
+  var buckets = { onboarding: [], post_go_live: [], graduated: [] };
+  myClients.forEach(function(c) {
+    var s = getStage(c);
+    buckets[s].push(c);
+  });
+
+  // Sort each bucket: attention first, then by created_at desc
+  ['onboarding', 'post_go_live'].forEach(function(s) {
+    buckets[s].sort(function(a, b) {
+      var aAlert = !!getAttentionWarning(a, s) || getContactDisplay(a).isAlert;
+      var bAlert = !!getAttentionWarning(b, s) || getContactDisplay(b).isAlert;
+      if (aAlert && !bAlert) return -1;
+      if (!aAlert && bAlert) return 1;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+  });
+  buckets.graduated.sort(function(a, b) {
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  // Update stats
+  var active = buckets.onboarding.length + buckets.post_go_live.length;
+  var attention = myClients.filter(function(c) {
+    var s = getStage(c);
+    return !!getAttentionWarning(c, s) || (s !== 'graduated' && getContactDisplay(c).isAlert);
+  }).length;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-attention').textContent = attention;
+  document.getElementById('stat-postlive').textContent = buckets.post_go_live.length;
+  document.getElementById('stat-graduated').textContent = buckets.graduated.length;
+
+  // Render columns
+  ['onboarding', 'post_go_live', 'graduated'].forEach(function(s) {
+    var countEl = document.getElementById('count-' + s);
+    var cardsEl = document.getElementById('cards-' + s);
+    countEl.textContent = buckets[s].length;
+    cardsEl.innerHTML = '';
+    if (buckets[s].length === 0) {
+      cardsEl.innerHTML = '<div class="col-empty">No offices here</div>';
+    } else {
+      buckets[s].forEach(function(c) { cardsEl.appendChild(buildKanbanCard(c, s)); });
+    }
   });
 }
 
-function buildMeetingBar(row) {
-  if (!row.hubspot_ticket_id) return '';
-  var statuses = getMeetingStatuses(row);
-
-  var completedCount = 0;
-  var upcomingIdx = -1;
-  var hasDates = statuses.some(function(s) { return s.iso; });
-  for (var i = 0; i < statuses.length; i++) {
-    if (statuses[i].done) completedCount++;
-    else if (upcomingIdx === -1 && (!hasDates || statuses[i].iso)) upcomingIdx = i;
-  }
-
-  // Each node center is at 12.5%, 37.5%, 62.5%, 87.5% of the container
-  // Fill goes from first node center → completed node center: width = completedCount * 25%
-  var fillPct = Math.min(completedCount, 3) * 25;
-
-  var nodes = statuses.map(function(s, i) {
-    var isUpcoming = i === upcomingIdx;
-    var bg, borderColor, textColor, labelColor, labelWeight, content;
-    if (s.done) {
-      bg = '#dcfce7'; borderColor = '#86efac'; textColor = '#16a34a';
-      labelColor = '#9ca3af'; labelWeight = '500';
-      content = '';
-    } else if (isUpcoming) {
-      bg = '#dbeafe'; borderColor = '#93c5fd'; textColor = '#2563eb';
-      labelColor = '#374151'; labelWeight = '700';
-      content = '';
-    } else {
-      bg = '#fff'; borderColor = '#e5e7eb'; textColor = '#9ca3af';
-      labelColor = '#9ca3af'; labelWeight = '400';
-      content = '';
-    }
-    var caret = isUpcoming
-      ? '<svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      : '';
-    var fmtDate = s.iso ? s.label + ': ' + new Date(s.iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : s.label;
-    return '<div title="' + escHtml(fmtDate) + '" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;">'
-      + '<div style="height:12px;display:flex;align-items:center;justify-content:center;">' + caret + '</div>'
-      + '<div style="width:22px;height:22px;border-radius:50%;background:' + bg + ';border:2px solid ' + borderColor + ';display:flex;align-items:center;justify-content:center;color:' + textColor + ';font-size:10px;font-weight:700;position:relative;z-index:1;flex-shrink:0;">' + content + '</div>'
-      + '<div style="font-size:10px;font-weight:' + labelWeight + ';color:' + labelColor + ';text-align:center;line-height:1.3;margin-top:3px;white-space:nowrap;">' + escHtml(s.label) + '</div>'
-      + '</div>';
-  }).join('');
-
-  return '<div style="margin:14px -20px 0;padding:0 20px 14px;border-top:1px solid #f3f4f6;">'
-    + '<div style="position:relative;padding-top:4px;">'
-    + '<div style="position:absolute;top:27px;left:12.5%;right:12.5%;height:2px;background:#f0f0f0;z-index:0;border-radius:2px;"></div>'
-    + (fillPct > 0 ? '<div style="position:absolute;top:27px;left:12.5%;width:' + fillPct + '%;height:2px;background:#86efac;z-index:0;border-radius:2px;"></div>' : '')
-    + '<div style="display:flex;position:relative;">' + nodes + '</div>'
-    + '</div>'
-    + '</div>';
-}
-
-
-function buildCard(row, showOnboarder) {
+/* ── Build card ── */
+function buildKanbanCard(row, stage) {
+  var ob = getOnboarder(row.onboarder || '');
+  var meeting = getMeetingDisplay(row, stage);
+  var warn = getAttentionWarning(row, stage);
+  var contact = getContactDisplay(row);
   var state = row.state || {};
-  var done = (state.sys   ? state.sys.length   : 0)
-           + (state.b2b   ? state.b2b.length   : 0)
-           + (state.mig   ? state.mig.length   : 0)
-           + (state.qs    ? state.qs.length    : 0);
-  var pct = Math.round(done / FIXED_TOTAL * 100);
+  var done = (state.sys ? state.sys.length : 0)
+           + (state.b2b ? state.b2b.length : 0)
+           + (state.mig ? state.mig.length : 0)
+           + (state.qs  ? state.qs.length  : 0);
   var complete = done === FIXED_TOTAL;
-  var clientUrl = buildClientUrl(row.id);
-
-  var obPill = '';
-  if (showOnboarder && row.onboarder && row.onboarder !== 'Unassigned') {
-    var initials = ONBOARDER_INITIALS[row.onboarder] || row.onboarder.slice(0,2).toUpperCase();
-    obPill = '<span class="onboarder-pill" style="background:' + OS_COLOR + '18;color:' + OS_COLOR + '">' + initials + '</span>';
-  }
-
-  var meetingPills = buildMeetingBar(row);
+  var hasAlert = !!warn;
 
   var card = document.createElement('div');
-  card.className = 'client-card';
+  card.className = 'kanban-card' + (hasAlert ? ' has-alert' : '');
   card.id = 'card-' + row.id;
-  var safeId  = escHtml(row.id);
-  var safeName = escHtml(row.name);
-  var safeUrl  = escHtml(clientUrl);
+
+  var safeId = escHtml(row.id);
+
+  // Meeting icon
+  var mtgIcon = '';
+  if (meeting.cls === 'overdue' || meeting.cls === 'today') {
+    mtgIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  } else if (meeting.cls !== 'none') {
+    mtgIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;opacity:.6"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  }
+
+  var alertIcon = hasAlert
+    ? '<svg class="kcard-alert-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L14.5 13H1.5L8 2z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3M8 11h.01" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/></svg>'
+    : '';
+
+  var stageLabel = stage === 'onboarding' ? 'Onboarding' : stage === 'post_go_live' ? 'Post Go-Live' : 'Graduated';
+  var taskText = complete ? '✓ All tasks' : done + ' / ' + FIXED_TOTAL + ' tasks';
+
+  // Contact row
+  var contactHtml = '';
+  if (stage !== 'graduated') {
+    contactHtml = '<div class="kcard-contact">'
+      + '<span>Last contact: ' + (contact.text || '—') + (contact.ageStr ? ' <span class="contact-age ' + contact.ageCls + '">' + contact.ageStr + '</span>' : '') + '</span>'
+      + '</div>';
+  }
+
+  var warnHtml = warn
+    ? '<div class="kcard-warn"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5L11 10H1L6 1.5z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 5v2.5M6 9h.01" stroke="#d97706" stroke-width="1.3" stroke-linecap="round"/></svg>' + escHtml(warn) + '</div>'
+    : '';
+
+  // Menu items by stage
+  var menuItems = '';
+  if (stage !== 'graduated') {
+    menuItems += '<button class="kcard-menu-item highlight" id="logbtn-' + safeId + '">'
+      + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v2.5l1.5 1"/></svg>Log contact</button>';
+  }
+  menuItems += '<button class="kcard-menu-item" id="copybtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>Copy link</button>';
+  menuItems += '<button class="kcard-menu-item" id="mtgbtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="11" height="10" rx="1.5"/><path d="M1 5.5h11M4 1v2M9 1v2"/></svg>Meetings</button>';
+  menuItems += '<button class="kcard-menu-item" id="hsbtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v2.5l1.5 1.5"/></svg>HubSpot ID</button>';
+  menuItems += '<button class="kcard-menu-item" id="renamebtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10.5h9"/><path d="M8.5 2.5l2 2-5.5 5.5H3v-2L8.5 2.5z"/></svg>Rename</button>';
+  menuItems += '<button class="kcard-menu-item" id="reassignbtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="4" r="2.5"/><path d="M1 11.5c0-2 1.8-3.5 4-3.5"/><path d="M9.5 8v4M7.5 10h4"/></svg>Reassign</button>';
+  if (stage === 'post_go_live') {
+    menuItems += '<button class="kcard-menu-item success" id="donebtn-' + safeId + '">'
+      + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6"/></svg>Done with support</button>';
+  }
+  menuItems += '<button class="kcard-menu-item danger" id="delbtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="1,3 12,3"/><path d="M3 3V11a1 1 0 001 1h5a1 1 0 001-1V3"/><path d="M4.5 3V2a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1"/></svg>Delete</button>';
+
   card.innerHTML =
-    '<div class="card-top">'
-    +   '<div style="min-width:0;">'
-    +     '<div class="client-name" title="' + safeName + '">' + safeName + '</div>'
-    +   '</div>'
-    +   '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;align-self:flex-start;">'
-    +     obPill
-    +     ''
-    +     '<div class="card-menu-wrap">'
-    +       '<button class="card-menu-btn" id="menubtn-' + safeId + '" title="More options">'
-    +         '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor">'
-    +           '<circle cx="7.5" cy="3" r="1.2"/><circle cx="7.5" cy="7.5" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/>'
-    +         '</svg>'
-    +       '</button>'
-    +       '<div class="card-menu-dropdown" id="menu-' + safeId + '">'
-    +         '<button class="card-menu-item" id="copybtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>'
-    +           'Copy link'
-    +         '</button>'
-    +         '<button class="card-menu-item" id="mtgbtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
-    +           '<rect x="1" y="2" width="11" height="10" rx="1.5"/>'
-    +           '<path d="M1 5.5h11M4 1v2M9 1v2"/>'
-    +           '</svg>'
-    +           'Meetings'
-    +         '</button>'
-    +         '<button class="card-menu-item" id="hsbtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
-    +           '<circle cx="6.5" cy="6.5" r="5"/>'
-    +           '<path d="M6.5 4v2.5l1.5 1.5"/>'
-    +           '</svg>'
-    +           'HubSpot ID'
-    +         '</button>'
-    +         '<button class="card-menu-item" id="renamebtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
-    +           '<path d="M2 10.5h9"/>'
-    +           '<path d="M8.5 2.5l2 2-5.5 5.5H3v-2L8.5 2.5z"/>'
-    +           '</svg>'
-    +           'Rename'
-    +         '</button>'
-    +         '<button class="card-menu-item" id="reassignbtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
-    +           '<circle cx="5" cy="4" r="2.5"/>'
-    +           '<path d="M1 11.5c0-2 1.8-3.5 4-3.5"/>'
-    +           '<path d="M9.5 8v4M7.5 10h4"/>'
-    +           '</svg>'
-    +           'Reassign'
-    +         '</button>'
-    +         '<button class="card-menu-item danger" id="delbtn-' + safeId + '">'
-    +           '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">'
-    +           '<polyline points="1,3 12,3"/><path d="M3 3V11a1 1 0 001 1h5a1 1 0 001-1V3"/><path d="M4.5 3V2a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1"/>'
-    +           '</svg>'
-    +           'Delete'
-    +         '</button>'
-    +       '</div>'
-    +     '</div>'
-    +   '</div>'
+    '<div class="kcard-top">'
+    + '<div class="kcard-avatar" style="background:' + ob.color + '">' + escHtml(ob.initials) + '</div>'
+    + '<div class="kcard-info">'
+    +   '<div class="kcard-name" title="' + escHtml(row.name) + '">' + escHtml(row.name) + '</div>'
+    +   '<div class="kcard-meeting ' + meeting.cls + '">' + mtgIcon + escHtml(meeting.text) + '</div>'
     + '</div>'
-    + meetingPills
-    + ''
-    + (function() {
-        var dateStr = row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-        return '<div class="card-footer">'
-          + '<div class="card-footer-left">'
-          + '<div class="prog-track"><div class="prog-fill' + (complete ? ' complete' : '') + '" style="width:' + pct + '%"></div></div>'
-          + '<div class="task-count' + (complete ? ' complete' : '') + '">' + (complete ? '✓ All tasks complete' : done + ' of ' + FIXED_TOTAL + ' tasks') + '</div>'
-          + '</div>'
-          + (dateStr ? '<span class="card-date-pill">' + dateStr + '</span>' : '')
-          + '</div>';
-      })();
+    + alertIcon
+    + '<div class="kcard-menu-wrap">'
+    +   '<button class="kcard-menu-btn" id="menubtn-' + safeId + '" title="More options">'
+    +     '<svg width="14" height="14" viewBox="0 0 15 15" fill="currentColor"><circle cx="7.5" cy="3" r="1.2"/><circle cx="7.5" cy="7.5" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/></svg>'
+    +   '</button>'
+    +   '<div class="kcard-menu-dropdown" id="menu-' + safeId + '">' + menuItems + '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="kcard-bottom">'
+    +   '<span class="stage-badge ' + stage + '">' + stageLabel + '</span>'
+    +   '<span class="kcard-tasks' + (complete ? ' complete' : '') + '">' + taskText + '</span>'
+    + '</div>'
+    + contactHtml
+    + warnHtml;
 
+  // Event listeners
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
-    toggleCardMenu(row.id, e);
+    e.stopPropagation(); toggleKcardMenu(row.id);
   });
-  card.querySelector('#mtgbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openMeetingsModal(row.id, row.name);
-  });
-  card.querySelector('#hsbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openSetHubSpotModal(row.id, row.name, row.hubspot_ticket_id || '');
-  });
-  card.querySelector('#renamebtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openRenameModal(row.id, row.name);
-  });
-  card.querySelector('#reassignbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openReassignModal(row.id, row.name, row.onboarder || '');
-  });
-  card.querySelector('#delbtn-' + row.id).addEventListener('click', function() {
-    closeAllMenus();
-    openDeleteModal(row.id, row.name);
-  });
-
+  if (stage !== 'graduated') {
+    card.querySelector('#logbtn-' + row.id).addEventListener('click', function(e) {
+      e.stopPropagation(); closeAllMenus(); logContact(row.id);
+    });
+  }
   card.querySelector('#copybtn-' + row.id).addEventListener('click', function(e) {
-    closeAllMenus();
-    copyCardUrl(this, clientUrl);
+    e.stopPropagation(); closeAllMenus();
+    copyCardUrl(this, buildClientUrl(row.id));
   });
+  card.querySelector('#mtgbtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus(); openMeetingsModal(row.id, row.name);
+  });
+  card.querySelector('#hsbtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus(); openSetHubSpotModal(row.id, row.name, row.hubspot_ticket_id || '');
+  });
+  card.querySelector('#renamebtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus(); openRenameModal(row.id, row.name);
+  });
+  card.querySelector('#reassignbtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus(); openReassignModal(row.id, row.name, row.onboarder || '');
+  });
+  card.querySelector('#delbtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus(); openDeleteModal(row.id, row.name);
+  });
+  if (stage === 'post_go_live') {
+    card.querySelector('#donebtn-' + row.id).addEventListener('click', function(e) {
+      e.stopPropagation(); closeAllMenus(); markGraduated(row.id, row.name);
+    });
+  }
 
   card.addEventListener('click', function(e) {
-    if (e.target.closest('.card-menu-wrap')) return;
-    window.open(clientUrl, '_blank');
+    if (e.target.closest('.kcard-menu-wrap')) return;
+    window.open(buildClientUrl(row.id), '_blank');
   });
 
   return card;
 }
+
+/* ── Log contact ── */
+async function logContact(id) {
+  var today = new Date().toISOString().split('T')[0];
+  var res = await _sb.from('clients')
+    .update({ last_contact_date: today, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (res.error) { alert('Error: ' + res.error.message); return; }
+  if (_clients[id]) _clients[id].last_contact_date = today;
+  renderKanban();
+}
+
+/* ── Done with support ── */
+async function markGraduated(id, name) {
+  if (!confirm('Mark "' + name + '" as fully graduated from support?')) return;
+  var res = await _sb.from('clients')
+    .update({ stage: 'graduated', updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (res.error) { alert('Error: ' + res.error.message); return; }
+  if (_clients[id]) _clients[id].stage = 'graduated';
+  renderKanban();
+}
+
+/* ── Card menu ── */
+function toggleKcardMenu(id) {
+  var menu = document.getElementById('menu-' + id);
+  var isOpen = menu.classList.contains('open');
+  closeAllMenus();
+  if (!isOpen) {
+    menu.classList.add('open');
+    var card = document.getElementById('card-' + id);
+    if (card) card.style.zIndex = '50';
+  }
+}
+function closeAllMenus() {
+  document.querySelectorAll('.kcard-menu-dropdown.open').forEach(function(el) { el.classList.remove('open'); });
+  document.querySelectorAll('.kanban-card').forEach(function(el) { el.style.zIndex = ''; });
+}
+document.addEventListener('click', closeAllMenus);
 
 /* ── Add client ── */
 function openModal() {
@@ -1012,16 +1313,16 @@ function openModal() {
   document.getElementById('modal-success').classList.remove('show');
   document.getElementById('company-input').value = '';
   document.getElementById('hubspot-ticket-input').value = '';
-  document.getElementById('onboarder-select').value = '';
+  document.getElementById('onboarder-select').value = _currentUser ? _currentUser.name : '';
   document.getElementById('hs-lookup-spinner').style.display = 'none';
   var chk = document.getElementById('meetings-scheduled-chk');
   chk.checked = false;
   document.getElementById('new-client-meetings').style.display = 'none';
-  ['kickoff', 'checkin', 'integrations', 'graduation'].forEach(function(k) {
+  ['kickoff','checkin','integrations','graduation'].forEach(function(k) {
     document.getElementById('new-zoom-' + k).value = '';
   });
   document.getElementById('modal-backdrop').classList.add('open');
-  setTimeout(function() { document.getElementById('company-input').focus(); }, 50);
+  setTimeout(function() { document.getElementById('hubspot-ticket-input').focus(); }, 50);
 }
 function closeModal() {
   document.getElementById('modal-backdrop').classList.remove('open');
@@ -1029,7 +1330,6 @@ function closeModal() {
 }
 function backdropClick(e) { if (e.target === e.currentTarget) closeModal(); }
 function modalKey(e) { if (e.key === 'Enter') submitClient(); }
-
 function toggleNewClientMeetings() {
   var chk = document.getElementById('meetings-scheduled-chk');
   document.getElementById('new-client-meetings').style.display = chk.checked ? 'block' : 'none';
@@ -1044,11 +1344,9 @@ async function submitClient() {
   btn.disabled = true; btn.textContent = 'Creating…';
 
   var hubspotTicketId = document.getElementById('hubspot-ticket-input').value.trim();
-
   var hsMeetings = {};
-  var meetingsChk = document.getElementById('meetings-scheduled-chk');
-  if (meetingsChk.checked) {
-    ['kickoff', 'checkin', 'integrations', 'graduation'].forEach(function(key) {
+  if (document.getElementById('meetings-scheduled-chk').checked) {
+    ['kickoff','checkin','integrations','graduation'].forEach(function(key) {
       var zoom = document.getElementById('new-zoom-' + key).value.trim();
       if (zoom) hsMeetings[key] = { zoom: zoom, recording: '' };
     });
@@ -1069,8 +1367,7 @@ async function submitClient() {
 
   _newClientUrl = buildClientUrl(id);
   _clients[id] = res.data;
-  _activeNav = 'recent';
-  renderMain();
+  renderKanban();
 
   document.getElementById('success-name').textContent = name;
   document.getElementById('success-url').textContent = _newClientUrl;
@@ -1085,13 +1382,7 @@ function copyClientUrl() {
   navigator.clipboard.writeText(_newClientUrl).then(function() {
     btn.textContent = 'Copied!'; btn.classList.add('copied');
     setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
-  }).catch(function() {
-    var ta = document.createElement('textarea');
-    ta.value = _newClientUrl; ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
-  });
+  }).catch(function() { fallbackCopy(_newClientUrl); });
 }
 
 var COPY_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>';
@@ -1099,154 +1390,85 @@ var CHECK_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" st
 
 function copyCardUrl(btn, url) {
   navigator.clipboard.writeText(url).then(function() {
-    btn.innerHTML = CHECK_ICON; btn.classList.add('copied');
-    setTimeout(function() { btn.innerHTML = COPY_ICON; btn.classList.remove('copied'); }, 2000);
-  }).catch(function() {
-    var ta = document.createElement('textarea');
-    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    btn.innerHTML = CHECK_ICON; btn.classList.add('copied');
-    setTimeout(function() { btn.innerHTML = COPY_ICON; btn.classList.remove('copied'); }, 2000);
-  });
+    btn.innerHTML = CHECK_ICON;
+    setTimeout(function() { btn.innerHTML = COPY_ICON; }, 2000);
+  }).catch(function() { fallbackCopy(url); });
+}
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
 }
 
-/* ── Helpers ── */
-function buildClientUrl(id) {
-  return window.location.origin + '/?c=' + id;
-}
-function slugify(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 40);
-}
-function randomSuffix() { return Math.random().toString(36).substring(2, 6); }
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function relativeTime(ts) {
-  if (!ts) return 'Never';
-  var diff = Math.floor((Date.now() - new Date(ts)) / 1000);
-  if (diff < 60)   return 'Just now';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-  return Math.floor(diff / 86400) + 'd ago';
-}
-
-/* ── Card 3-dot menu ── */
-function toggleCardMenu(id, e) {
-  e.stopPropagation();
-  var menu = document.getElementById('menu-' + id);
-  var isOpen = menu.classList.contains('open');
-  closeAllMenus();
-  if (!isOpen) menu.classList.add('open');
-}
-function closeAllMenus() {
-  document.querySelectorAll('.card-menu-dropdown.open').forEach(function(el) {
-    el.classList.remove('open');
-  });
-}
-document.addEventListener('click', closeAllMenus);
-
-/* ── Delete client ── */
+/* ── Delete ── */
 var _deleteTargetId = null;
-
 function openDeleteModal(id, name) {
   _deleteTargetId = id;
-  document.getElementById('delete-modal-text').textContent =
-    'Are you sure you want to delete "' + name + '"?';
+  document.getElementById('delete-modal-text').textContent = 'Are you sure you want to delete "' + name + '"?';
   document.getElementById('delete-backdrop').classList.add('open');
 }
-function closeDeleteModal() {
-  document.getElementById('delete-backdrop').classList.remove('open');
-  _deleteTargetId = null;
-}
+function closeDeleteModal() { document.getElementById('delete-backdrop').classList.remove('open'); _deleteTargetId = null; }
 function deleteBackdropClick(e) { if (e.target === e.currentTarget) closeDeleteModal(); }
-
 async function confirmDelete() {
   if (!_deleteTargetId) return;
   var btn = document.getElementById('confirm-delete-btn');
   btn.disabled = true; btn.textContent = 'Deleting…';
-
   var res = await _sb.from('clients').delete().eq('id', _deleteTargetId);
-  btn.disabled = false; btn.textContent = 'Delete client';
-
+  btn.disabled = false; btn.textContent = 'Delete office';
   if (res.error) { alert('Error: ' + res.error.message); return; }
-
   delete _clients[_deleteTargetId];
-  renderMain();
+  renderKanban();
   closeDeleteModal();
 }
 
-
-/* ── Reassign onboarder ── */
+/* ── Reassign ── */
 var _reassignClientId = null;
-
-function openReassignModal(id, name, currentOnboarder) {
+function openReassignModal(id, name, current) {
   _reassignClientId = id;
-  document.getElementById('reassign-modal-text').textContent =
-    'Reassign "' + name + '" to a different onboarder.';
-  document.getElementById('reassign-select').value = currentOnboarder;
+  document.getElementById('reassign-modal-text').textContent = 'Reassign "' + name + '" to a different onboarder.';
+  document.getElementById('reassign-select').value = current;
   document.getElementById('reassign-submit-btn').disabled = false;
   document.getElementById('reassign-submit-btn').textContent = 'Save';
   document.getElementById('reassign-backdrop').classList.add('open');
   setTimeout(function() { document.getElementById('reassign-select').focus(); }, 50);
 }
-function closeReassignModal() {
-  document.getElementById('reassign-backdrop').classList.remove('open');
-  _reassignClientId = null;
-}
+function closeReassignModal() { document.getElementById('reassign-backdrop').classList.remove('open'); _reassignClientId = null; }
 function reassignBackdropClick(e) { if (e.target === e.currentTarget) closeReassignModal(); }
-
 async function confirmReassign() {
   if (!_reassignClientId) return;
   var val = document.getElementById('reassign-select').value;
   if (!val) { document.getElementById('reassign-select').focus(); return; }
   var btn = document.getElementById('reassign-submit-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
-
-  var res = await _sb.from('clients')
-    .update({ onboarder: val, updated_at: new Date().toISOString() })
-    .eq('id', _reassignClientId);
-
+  var res = await _sb.from('clients').update({ onboarder: val, updated_at: new Date().toISOString() }).eq('id', _reassignClientId);
   btn.disabled = false; btn.textContent = 'Save';
   if (res.error) { alert('Error: ' + res.error.message); return; }
-
   if (_clients[_reassignClientId]) _clients[_reassignClientId].onboarder = val;
-  renderMain();
+  renderKanban();
   closeReassignModal();
 }
 
-/* ── Set HubSpot Ticket ID ── */
+/* ── HubSpot Ticket ID ── */
 var _setHsClientId = null;
-
-function openSetHubSpotModal(id, name, currentVal) {
+function openSetHubSpotModal(id, name, current) {
   _setHsClientId = id;
-  document.getElementById('set-hs-modal-text').textContent =
-    'Paste the HubSpot Record ID for "' + name + '". Meeting dates will be pulled automatically.';
-  document.getElementById('set-hs-input').value = currentVal;
+  document.getElementById('set-hs-modal-text').textContent = 'Paste the HubSpot Record ID for "' + name + '". Meeting dates will be pulled automatically.';
+  document.getElementById('set-hs-input').value = current;
   document.getElementById('set-hs-submit-btn').disabled = false;
   document.getElementById('set-hs-submit-btn').textContent = 'Save';
   document.getElementById('set-hs-backdrop').classList.add('open');
   setTimeout(function() { document.getElementById('set-hs-input').focus(); }, 50);
 }
-function closeSetHubSpotModal() {
-  document.getElementById('set-hs-backdrop').classList.remove('open');
-  _setHsClientId = null;
-}
+function closeSetHubSpotModal() { document.getElementById('set-hs-backdrop').classList.remove('open'); _setHsClientId = null; }
 function setHsBackdropClick(e) { if (e.target === e.currentTarget) closeSetHubSpotModal(); }
-
 async function confirmSetHubSpot() {
   if (!_setHsClientId) return;
   var val = document.getElementById('set-hs-input').value.trim();
   var btn = document.getElementById('set-hs-submit-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
-
-  // Save the HubSpot ticket ID first
-  var res = await _sb.from('clients')
-    .update({ hubspot_ticket_id: val || null, updated_at: new Date().toISOString() })
-    .eq('id', _setHsClientId);
+  var res = await _sb.from('clients').update({ hubspot_ticket_id: val || null, updated_at: new Date().toISOString() }).eq('id', _setHsClientId);
   if (res.error) { btn.disabled = false; btn.textContent = 'Save'; alert('Error: ' + res.error.message); return; }
   if (_clients[_setHsClientId]) _clients[_setHsClientId].hubspot_ticket_id = val || null;
-
-  // If a Record ID was set, pull data from HubSpot via worker
   if (val && WORKER_URL) {
     btn.textContent = 'Pulling HubSpot data…';
     try {
@@ -1254,76 +1476,51 @@ async function confirmSetHubSpot() {
       if (workerRes.ok) {
         var data = await workerRes.json();
         var updates = { updated_at: new Date().toISOString() };
-        var client = _clients[_setHsClientId];
-
-        // Auto-populate name from HubSpot (only if ticket ID was just set)
         if (data.client_name) updates.name = data.client_name;
-
-        // Auto-populate Floorzap URL
         if (data.floorzap_url) updates.floorzap_url = data.floorzap_url;
-
-        // Store meeting dates for dashboard pills
         if (data.meetings) {
-          var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
+          var keys = ['kickoff','checkin','integrations','graduation'];
           var dates = {};
           data.meetings.forEach(function(m, i) { dates[keys[i]] = m.isoDate || null; });
-          var state = Object.assign({}, (client.state || {}));
+          var state = Object.assign({}, (_clients[_setHsClientId].state || {}));
           state.hs_meeting_dates = dates;
           updates.state = state;
         }
-
         await _sb.from('clients').update(updates).eq('id', _setHsClientId);
         if (_clients[_setHsClientId]) Object.assign(_clients[_setHsClientId], updates);
       }
     } catch(e) {}
   }
-
   btn.disabled = false; btn.textContent = 'Save';
-  renderMain();
+  renderKanban();
   closeSetHubSpotModal();
 }
 
 /* ── Manage Meetings ── */
 var _meetingsClientId = null;
-
 var HS_MEETING_KEYS = [
   { key: 'kickoff',      label: 'Kickoff Meeting' },
   { key: 'checkin',      label: '2-Week Check-in' },
   { key: 'integrations', label: 'Integrations Meeting' },
   { key: 'graduation',   label: 'Graduation Meeting' }
 ];
-
 function openMeetingsModal(id, name) {
   _meetingsClientId = id;
-  document.getElementById('meetings-modal-subtitle').textContent =
-    'Manage Zoom and recording links for "' + name + '".';
+  document.getElementById('meetings-modal-subtitle').textContent = 'Manage Zoom and recording links for "' + name + '".';
   renderHsMeetingsList();
   document.getElementById('meetings-backdrop').classList.add('open');
 }
-
-function closeMeetingsModal() {
-  document.getElementById('meetings-backdrop').classList.remove('open');
-  _meetingsClientId = null;
-}
-
+function closeMeetingsModal() { document.getElementById('meetings-backdrop').classList.remove('open'); _meetingsClientId = null; }
 function meetingsBackdropClick(e) { if (e.target === e.currentTarget) closeMeetingsModal(); }
-
-function getHsMeetings() {
-  var client = _clients[_meetingsClientId];
-  if (!client) return {};
-  return (client.state || {}).hs_meetings || {};
-}
-
 function renderHsMeetingsList() {
   var container = document.getElementById('hs-meetings-list');
-  var meetings = getHsMeetings();
+  var meetings = (_clients[_meetingsClientId] && (_clients[_meetingsClientId].state || {}).hs_meetings) || {};
   container.innerHTML = '';
   HS_MEETING_KEYS.forEach(function(m) {
     var data = meetings[m.key] || { zoom: '', recording: '' };
     var row = document.createElement('div');
     row.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px;';
-    row.innerHTML =
-      '<div style="font-size:13.5px;font-weight:700;color:#111827;margin-bottom:10px;">' + escHtml(m.label) + '</div>'
+    row.innerHTML = '<div style="font-size:13.5px;font-weight:700;color:#111827;margin-bottom:10px;">' + escHtml(m.label) + '</div>'
       + '<input class="modal-input" id="zoom-' + m.key + '" type="text" placeholder="Zoom link" value="' + escHtml(data.zoom || '') + '">'
       + '<input class="modal-input" id="recording-' + m.key + '" type="text" placeholder="Recording link (Fathom URL)" value="' + escHtml(data.recording || '') + '" style="margin-bottom:0;">';
     container.appendChild(row);
@@ -1331,7 +1528,6 @@ function renderHsMeetingsList() {
     container.querySelector('#recording-' + m.key).addEventListener('blur', function() { saveHsMeeting(m.key); });
   });
 }
-
 async function saveHsMeeting(key) {
   if (!_meetingsClientId) return;
   var client = _clients[_meetingsClientId];
@@ -1342,67 +1538,131 @@ async function saveHsMeeting(key) {
     recording: document.getElementById('recording-' + key).value.trim()
   };
   state.hs_meetings = hsMeetings;
-  var res = await _sb.from('clients')
-    .update({ state: state, updated_at: new Date().toISOString() })
-    .eq('id', _meetingsClientId);
+  var res = await _sb.from('clients').update({ state: state, updated_at: new Date().toISOString() }).eq('id', _meetingsClientId);
   if (res.error) { alert('Error saving: ' + res.error.message); return; }
   if (_clients[_meetingsClientId]) _clients[_meetingsClientId].state = state;
 }
 
-/* ── HubSpot auto-fill on new client modal ── */
+/* ── Rename ── */
+var _renameClientId = null;
+function openRenameModal(id, currentName) {
+  _renameClientId = id;
+  document.getElementById('rename-modal-text').textContent = 'Enter a new name for this office.';
+  var input = document.getElementById('rename-input');
+  input.value = currentName;
+  document.getElementById('rename-backdrop').classList.add('open');
+  setTimeout(function() { input.select(); }, 50);
+}
+function closeRenameModal() { document.getElementById('rename-backdrop').classList.remove('open'); _renameClientId = null; }
+function renameBackdropClick(e) { if (e.target === e.currentTarget) closeRenameModal(); }
+async function confirmRename() {
+  if (!_renameClientId) return;
+  var newName = document.getElementById('rename-input').value.trim();
+  if (!newName) { document.getElementById('rename-input').focus(); return; }
+  var res = await _sb.from('clients').update({ name: newName, updated_at: new Date().toISOString() }).eq('id', _renameClientId);
+  if (res.error) { alert('Error: ' + res.error.message); return; }
+  if (_clients[_renameClientId]) _clients[_renameClientId].name = newName;
+  renderKanban();
+  closeRenameModal();
+}
+
+/* ── HubSpot auto-fill ── */
 async function autoFillCompanyName() {
   var ticketId = document.getElementById('hubspot-ticket-input').value.trim();
   if (!ticketId || !WORKER_URL) return;
   var companyInput = document.getElementById('company-input');
-  if (companyInput.value.trim()) return; // don't overwrite if already typed
+  if (companyInput.value.trim()) return;
   var spinner = document.getElementById('hs-lookup-spinner');
   spinner.style.display = 'inline';
   try {
     var res = await fetch(WORKER_URL + '?t=' + encodeURIComponent(ticketId));
     if (res.ok) {
       var data = await res.json();
-      if (data.client_name && !companyInput.value.trim()) {
-        companyInput.value = data.client_name;
-      }
+      if (data.client_name && !companyInput.value.trim()) companyInput.value = data.client_name;
     }
-  } catch (e) {}
+  } catch(e) {}
   spinner.style.display = 'none';
 }
 
-/* ── Rename modal ── */
-var _renameClientId = null;
+/* ── Settings ── */
+function openSettingsModal() {
+  renderSettingsOnboarders();
+  document.getElementById('settings-backdrop').classList.add('open');
+}
+function closeSettingsModal() {
+  document.getElementById('settings-backdrop').classList.remove('open');
+  populateOnboarderSelects();
+  updateUserMenuUI();
+}
+function settingsBackdropClick(e) { if (e.target === e.currentTarget) closeSettingsModal(); }
 
-function openRenameModal(id, currentName) {
-  _renameClientId = id;
-  document.getElementById('rename-modal-text').textContent = 'Enter a new name for this client.';
-  var input = document.getElementById('rename-input');
-  input.value = currentName;
-  document.getElementById('rename-backdrop').classList.add('open');
-  setTimeout(function() { input.select(); }, 50);
+function renderSettingsOnboarders() {
+  var list = document.getElementById('settings-onboarder-list');
+  list.innerHTML = '';
+  getOnboarders().forEach(function(ob, i) {
+    var row = document.createElement('div');
+    row.className = 'settings-onboarder-row';
+    row.innerHTML =
+      '<div class="user-pick-avatar" style="background:' + ob.color + ';width:32px;height:32px;font-size:11px;">' + escHtml(ob.initials) + '</div>'
+      + '<span class="settings-onboarder-name">' + escHtml(ob.name) + '</span>'
+      + '<span class="settings-onboarder-meta">' + escHtml(ob.initials) + '</span>';
+    if (getOnboarders().length > 1) {
+      var del = document.createElement('button');
+      del.style.cssText = 'background:none;border:none;cursor:pointer;color:#9ca3af;padding:4px;border-radius:4px;display:flex;align-items:center;';
+      del.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="1,3 12,3"/><path d="M3 3V11a1 1 0 001 1h5a1 1 0 001-1V3"/><path d="M4.5 3V2a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1"/></svg>';
+      del.title = 'Remove';
+      del.onmouseover = function() { del.style.color = '#dc2626'; del.style.background = '#fef2f2'; };
+      del.onmouseout = function() { del.style.color = '#9ca3af'; del.style.background = 'none'; };
+      del.onclick = (function(idx) { return function() { removeOnboarder(idx); }; })(i);
+      row.appendChild(del);
+    }
+    list.appendChild(row);
+  });
 }
 
-function closeRenameModal() {
-  document.getElementById('rename-backdrop').classList.remove('open');
-  _renameClientId = null;
+function addOnboarder() {
+  var name = document.getElementById('new-onboarder-name').value.trim();
+  var initials = document.getElementById('new-onboarder-initials').value.trim().toUpperCase();
+  if (!name || !initials) return;
+  var colors = ['#116FEA','#7c3aed','#0891b2','#db2777','#d97706','#16a34a','#dc2626','#475569'];
+  var obs = getOnboarders();
+  var color = colors[obs.length % colors.length];
+  obs.push({ name: name, initials: initials, color: color });
+  saveOnboarders(obs);
+  document.getElementById('new-onboarder-name').value = '';
+  document.getElementById('new-onboarder-initials').value = '';
+  renderSettingsOnboarders();
 }
 
-function renameBackdropClick(e) { if (e.target === e.currentTarget) closeRenameModal(); }
-
-async function confirmRename() {
-  if (!_renameClientId) return;
-  var newName = document.getElementById('rename-input').value.trim();
-  if (!newName) { document.getElementById('rename-input').focus(); return; }
-  var res = await _sb.from('clients')
-    .update({ name: newName, updated_at: new Date().toISOString() })
-    .eq('id', _renameClientId);
-  if (res.error) { alert('Error: ' + res.error.message); return; }
-  if (_clients[_renameClientId]) _clients[_renameClientId].name = newName;
-  renderMain();
-  closeRenameModal();
+function removeOnboarder(idx) {
+  var obs = getOnboarders();
+  obs.splice(idx, 1);
+  saveOnboarders(obs);
+  renderSettingsOnboarders();
 }
 
-// Auto-start if already authenticated
-if (sessionStorage.getItem('fz-dash-auth') === '1') init();
+/* ── Helpers ── */
+function buildClientUrl(id) { return window.location.origin + '/?c=' + id; }
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 40); }
+function randomSuffix() { return Math.random().toString(36).substring(2, 6); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Bootstrap ── */
+(function() {
+  var auth = sessionStorage.getItem('fz-dash-auth');
+  var userStr = sessionStorage.getItem('fz-dash-user');
+  if (auth === '1' && userStr) {
+    try {
+      _currentUser = JSON.parse(userStr);
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      updateUserMenuUI();
+      init();
+    } catch(e) { /* fall through to gate */ }
+  }
+})();
 </script>
 </body>
 </html>

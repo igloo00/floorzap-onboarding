@@ -1478,6 +1478,10 @@ async function confirmSetHubSpot() {
         var updates = { updated_at: new Date().toISOString() };
         if (data.client_name) updates.name = data.client_name;
         if (data.floorzap_url) updates.floorzap_url = data.floorzap_url;
+        if (data.last_contacted) {
+          var currentLc = (_clients[_setHsClientId] || {}).last_contact_date;
+          if (!currentLc || data.last_contacted > currentLc) updates.last_contact_date = data.last_contacted;
+        }
         if (data.meetings) {
           var keys = ['kickoff','checkin','integrations','graduation'];
           var dates = {};

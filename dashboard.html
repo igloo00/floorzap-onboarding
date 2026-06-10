@@ -581,6 +581,7 @@ body {
           <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Kickoff</div><input class="modal-input" id="new-zoom-kickoff" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
           <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">2-Week Check-in</div><input class="modal-input" id="new-zoom-checkin" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
           <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Integrations</div><input class="modal-input" id="new-zoom-integrations" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
+          <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Prep Go-Live</div><input class="modal-input" id="new-zoom-prep_golive" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
           <div><div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;">Graduation</div><input class="modal-input" id="new-zoom-graduation" type="text" placeholder="Zoom link" style="margin-bottom:0;"></div>
         </div>
       </div>
@@ -869,14 +870,21 @@ async function syncHubSpotDates() {
       if (data.client_name && data.client_name !== client.name) updates.name = data.client_name;
       if (data.floorzap_url && data.floorzap_url !== client.floorzap_url) updates.floorzap_url = data.floorzap_url;
       if (data.meetings) {
-        var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
+        var keys = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
         var dates = {};
-        data.meetings.forEach(function(m, j) { dates[keys[j]] = m.isoDate || null; });
+        data.meetings.forEach(function(m, j) { if (keys[j]) dates[keys[j]] = m.isoDate || null; });
         var existing = JSON.stringify((client.state || {}).hs_meeting_dates || {});
         if (existing !== JSON.stringify(dates)) {
           var state = Object.assign({}, client.state || {});
           state.hs_meeting_dates = dates;
           updates.state = state;
+        }
+      }
+      if (data.has_post_golive_meeting) {
+        var state = Object.assign({}, client.state || {});
+        if (!state.has_post_golive_meeting) {
+          state.has_post_golive_meeting = true;
+          updates.state = Object.assign(updates.state || {}, state);
         }
       }
       if (data.last_contacted) {
@@ -943,7 +951,11 @@ function subscribeRealtime() {
 /* ── Stage logic ── */
 function getStage(client) {
   if (client.stage === 'graduated') return 'graduated';
-  var dates = (client.state || {}).hs_meeting_dates || {};
+  var state = client.state || {};
+  // Post go-live meeting detected in HubSpot → flip immediately
+  if (state.has_post_golive_meeting) return 'post_go_live';
+  // Fallback: graduation date has passed
+  var dates = state.hs_meeting_dates || {};
   var gradIso = dates.graduation;
   if (!gradIso) return 'onboarding';
   var now = new Date();
@@ -959,6 +971,7 @@ var MEETING_DEFS = [
   { key: 'kickoff',      label: 'Kickoff' },
   { key: 'checkin',      label: '2-Week check-in' },
   { key: 'integrations', label: 'Integrations' },
+  { key: 'prep_golive',  label: 'Prep go-live' },
   { key: 'graduation',   label: 'Graduation' },
 ];
 
@@ -1336,7 +1349,7 @@ function openModal() {
   var chk = document.getElementById('meetings-scheduled-chk');
   chk.checked = false;
   document.getElementById('new-client-meetings').style.display = 'none';
-  ['kickoff','checkin','integrations','graduation'].forEach(function(k) {
+  ['kickoff','checkin','integrations','prep_golive','graduation'].forEach(function(k) {
     document.getElementById('new-zoom-' + k).value = '';
   });
   document.getElementById('modal-backdrop').classList.add('open');
@@ -1364,7 +1377,7 @@ async function submitClient() {
   var hubspotTicketId = document.getElementById('hubspot-ticket-input').value.trim();
   var hsMeetings = {};
   if (document.getElementById('meetings-scheduled-chk').checked) {
-    ['kickoff','checkin','integrations','graduation'].forEach(function(key) {
+    ['kickoff','checkin','integrations','prep_golive','graduation'].forEach(function(key) {
       var zoom = document.getElementById('new-zoom-' + key).value.trim();
       if (zoom) hsMeetings[key] = { zoom: zoom, recording: '' };
     });
@@ -1501,9 +1514,9 @@ async function confirmSetHubSpot() {
           if (!currentLc || data.last_contacted > currentLc) updates.last_contact_date = data.last_contacted;
         }
         if (data.meetings) {
-          var keys = ['kickoff','checkin','integrations','graduation'];
+          var keys = ['kickoff','checkin','integrations','prep_golive','graduation'];
           var dates = {};
-          data.meetings.forEach(function(m, i) { dates[keys[i]] = m.isoDate || null; });
+          data.meetings.forEach(function(m, i) { if (keys[i]) dates[keys[i]] = m.isoDate || null; });
           var state = Object.assign({}, (_clients[_setHsClientId].state || {}));
           state.hs_meeting_dates = dates;
           updates.state = state;
@@ -1524,7 +1537,8 @@ var HS_MEETING_KEYS = [
   { key: 'kickoff',      label: 'Kickoff Meeting' },
   { key: 'checkin',      label: '2-Week Check-in' },
   { key: 'integrations', label: 'Integrations Meeting' },
-  { key: 'graduation',   label: 'Graduation Meeting' }
+  { key: 'prep_golive',  label: 'Prep Go-Live Meeting' },
+  { key: 'graduation',   label: 'Graduation Meeting' },
 ];
 function openMeetingsModal(id, name) {
   _meetingsClientId = id;

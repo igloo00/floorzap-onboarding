@@ -92,7 +92,8 @@ export default {
     // 3. Fetch associated meeting engagements to extract Zoom links from their bodies
     // zoomByDay maps "YYYY-MM-DD" -> first Zoom URL found in that meeting's body
     const zoomByDay = {};
-    const zoomByTitle = {}; // slot key -> zoom url (title-based match)
+    const zoomByTitle = {};
+    let meetingDetails = [];
     try {
       const assocRes = await fetch(
         `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/meetings`,
@@ -101,7 +102,7 @@ export default {
       if (assocRes.ok) {
         const assocData = await assocRes.json();
         const meetingIds = (assocData.results || []).map(r => r.id).slice(0, 10);
-        const details = await Promise.all(
+        meetingDetails = await Promise.all(
           meetingIds.map(id =>
             fetch(
               `https://api.hubapi.com/crm/v3/objects/meetings/${id}?properties=hs_meeting_body,hs_timestamp,hs_meeting_title`,
@@ -116,40 +117,33 @@ export default {
           { key: 'kickoff',      words: ['kickoff', 'kick-off', 'initial onboarding'] },
           { key: 'checkin',      words: ['2-week', '2 week', 'check-in', 'check in', 'checkin'] },
           { key: 'integrations', words: ['integration'] },
+          { key: 'prep_golive',  words: ['prep go-live', 'prep golive', 'pre go-live', 'pregolive', 'prep for go live', 'prep for golive'] },
           { key: 'graduation',   words: ['graduation'] },
+          { key: 'post_golive',  words: ['post go-live', 'post golive', 'post-go-live', 'postgolive'] },
         ];
 
-        for (const m of details) {
+        for (const m of meetingDetails) {
           if (!m?.properties) continue;
           const body = m.properties.hs_meeting_body || '';
           const title = (m.properties.hs_meeting_title || '').toLowerCase();
+          const ts = Number(m.properties.hs_timestamp);
           const match = body.match(zoomRe);
-          if (!match) continue;
-          const zoomUrl = match[0];
+          const zoomUrl = match ? match[0] : null;
 
-          // 1. Try title-based match first (most reliable)
+          // Try title-based match
           let matched = false;
           for (const { key, words } of titleKeywords) {
             if (words.some(w => title.includes(w))) {
-              if (!zoomByTitle[key]) zoomByTitle[key] = zoomUrl; // first match wins
+              if (zoomUrl && !zoomByTitle[key]) zoomByTitle[key] = zoomUrl;
               matched = true;
               break;
             }
           }
 
-          // 2. Also store by date for fallback
-          if (!matched) {
-            const ts = Number(m.properties.hs_timestamp);
-            if (ts) {
-              const dayKey = new Date(ts).toISOString().split('T')[0];
-              zoomByDay[dayKey] = zoomUrl;
-            }
-          } else {
-            const ts = Number(m.properties.hs_timestamp);
-            if (ts) {
-              const dayKey = new Date(ts).toISOString().split('T')[0];
-              zoomByDay[dayKey] = zoomUrl;
-            }
+          // Store by date for fallback (Zoom links only)
+          if (zoomUrl && ts) {
+            const dayKey = new Date(ts).toISOString().split('T')[0];
+            if (!zoomByDay[dayKey]) zoomByDay[dayKey] = zoomUrl;
           }
         }
       }
@@ -198,11 +192,33 @@ export default {
       // Last contact enrichment is best-effort
     }
 
-    // Find the Zoom link — title match first, then date fallback (±2 days)
+    // Build date map from engagement timestamps (authoritative — reflects rescheduling)
+    // Falls back to ticket properties for the 4 legacy slots
+    const dateByKey = {};
+    for (const m of meetingDetails) {
+      if (!m?.properties) continue;
+      const title = (m.properties.hs_meeting_title || '').toLowerCase();
+      const ts = Number(m.properties.hs_timestamp);
+      if (!ts) continue;
+      const titleKeywordsForDate = [
+        { key: 'kickoff',      words: ['kickoff', 'kick-off', 'initial onboarding'] },
+        { key: 'checkin',      words: ['2-week', '2 week', 'check-in', 'check in', 'checkin'] },
+        { key: 'integrations', words: ['integration'] },
+        { key: 'prep_golive',  words: ['prep go-live', 'prep golive', 'pre go-live', 'pregolive', 'prep for go live', 'prep for golive'] },
+        { key: 'graduation',   words: ['graduation'] },
+        { key: 'post_golive',  words: ['post go-live', 'post golive', 'post-go-live', 'postgolive'] },
+      ];
+      for (const { key, words } of titleKeywordsForDate) {
+        if (words.some(w => title.includes(w)) && !dateByKey[key]) {
+          dateByKey[key] = String(ts);
+          break;
+        }
+      }
+    }
+
+    // Zoom link helper — title match first, then date fallback (±2 days)
     function getZoom(slotKey, isoDateVal) {
-      // 1. Title-based match
       if (zoomByTitle[slotKey]) return zoomByTitle[slotKey];
-      // 2. Date-based fallback
       if (!isoDateVal) return null;
       const num = Number(isoDateVal);
       const base = !isNaN(num) && num > 0 ? new Date(num) : new Date(isoDateVal);
@@ -218,6 +234,17 @@ export default {
       return null;
     }
 
+    // Resolve date for a slot: engagement timestamp wins, ticket property as fallback
+    function resolveDate(key, ticketProp) {
+      return dateByKey[key] || ticketProp || null;
+    }
+
+    const kickoffDate      = resolveDate('kickoff',      p.initial_onboarding_meeting);
+    const checkinDate      = resolveDate('checkin',      p.n2_week_check_in_meeting);
+    const integrationsDate = resolveDate('integrations', p.integrations_meeting);
+    const prepGoliveDate   = resolveDate('prep_golive',  null);
+    const graduationDate   = resolveDate('graduation',   p.graduation_meeting);
+
     // Extract company name from "Onboarding | Company Name" format
     const rawSubject = p.subject || null;
     const clientName = rawSubject ? rawSubject.replace(/^[^|]+\|\s*/, '').trim() : null;
@@ -227,11 +254,13 @@ export default {
         floorzap_url: p.floorzap_url ?? null,
         client_name: clientName,
         last_contacted: lastContactedIso,
+        has_post_golive_meeting: !!dateByKey['post_golive'],
         meetings: [
-          { title: 'Kickoff Meeting',    date: p.initial_onboarding_meeting  ? fmtDate(p.initial_onboarding_meeting)  : null, isoDate: p.initial_onboarding_meeting  || null, zoom: getZoom('kickoff',      p.initial_onboarding_meeting) },
-          { title: '2-Week Check-in',    date: p.n2_week_check_in_meeting    ? fmtDate(p.n2_week_check_in_meeting)    : null, isoDate: p.n2_week_check_in_meeting    || null, zoom: getZoom('checkin',      p.n2_week_check_in_meeting) },
-          { title: 'Integrations',       date: p.integrations_meeting        ? fmtDate(p.integrations_meeting)        : null, isoDate: p.integrations_meeting        || null, zoom: getZoom('integrations', p.integrations_meeting) },
-          { title: 'Graduation Meeting', date: p.graduation_meeting          ? fmtDate(p.graduation_meeting)          : null, isoDate: p.graduation_meeting          || null, zoom: getZoom('graduation',   p.graduation_meeting) },
+          { key: 'kickoff',      title: 'Kickoff',         date: kickoffDate      ? fmtDate(kickoffDate)      : null, isoDate: kickoffDate,      zoom: getZoom('kickoff',      kickoffDate) },
+          { key: 'checkin',      title: '2-Week check-in', date: checkinDate      ? fmtDate(checkinDate)      : null, isoDate: checkinDate,      zoom: getZoom('checkin',      checkinDate) },
+          { key: 'integrations', title: 'Integrations',    date: integrationsDate ? fmtDate(integrationsDate) : null, isoDate: integrationsDate, zoom: getZoom('integrations', integrationsDate) },
+          { key: 'prep_golive',  title: 'Prep go-live',    date: prepGoliveDate   ? fmtDate(prepGoliveDate)   : null, isoDate: prepGoliveDate,   zoom: getZoom('prep_golive',  prepGoliveDate) },
+          { key: 'graduation',   title: 'Graduation',      date: graduationDate   ? fmtDate(graduationDate)   : null, isoDate: graduationDate,   zoom: getZoom('graduation',   graduationDate) },
         ],
       }),
       { headers: CORS }

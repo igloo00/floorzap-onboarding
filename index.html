@@ -88,50 +88,94 @@ body {
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
   color: #9ca3af; margin-bottom: 14px;
 }
-.journey-cards {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+/* stepper track */
+.jc-track {
+  display: flex; align-items: flex-start; margin-bottom: 16px; padding: 0 2px;
 }
-.journey-card {
-  min-height: 180px;
-  border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 14px;
-  display: flex; flex-direction: column; gap: 4px;
+.jc-step {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  flex: 1; position: relative; cursor: default;
 }
-.journey-card.done { background: #f0fdf4; border-color: #bbf7d0; }
-.journey-card.current { background: #eff6ff; border-color: #93c5fd; }
-.jc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.jc-num {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; background: #e5e7eb; color: #9ca3af; flex-shrink: 0;
+.jc-step-node {
+  width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; font-weight: 600; position: relative; z-index: 1;
+  background: #f9fafb; color: #d1d5db; border: 1.5px solid #e5e7eb; transition: all 0.25s;
 }
-.jc-num.done { background: #16a34a; color: #fff; }
-.jc-num.current { background: #2563eb; color: #fff; }
-.jc-pill {
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
-  text-transform: uppercase; letter-spacing: 0.05em;
+.jc-step.done .jc-step-node { background: #116FEA; border-color: #116FEA; color: #fff; }
+.jc-step.current .jc-step-node {
+  background: #fff; border: 2px solid #116FEA; color: #116FEA;
+  box-shadow: 0 0 0 4px rgba(17,111,234,0.12);
 }
-.jc-pill.done { background: #dcfce7; color: #16a34a; }
-.jc-pill.next { background: #dbeafe; color: #2563eb; }
-.jc-pill.upcoming { background: #f3f4f6; color: #9ca3af; }
-.jc-pill.skipped { background: #fef9ec; color: #b45309; }
-.jc-title { font-size: 13px; font-weight: 700; color: #111827; line-height: 1.3; }
-.journey-card.current .jc-title { color: #1d4ed8; }
-.jc-date { font-size: 11.5px; color: #6b7280; }
-.journey-card.current .jc-date { color: #3b82f6; }
-.jc-relative { font-size: 11.5px; color: #9ca3af; }
-.jc-btn {
-  margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 5px;
-  padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
-  cursor: pointer; text-decoration: none; border: 1.5px solid #e5e7eb;
-  transition: background 0.12s, border-color 0.12s; color: #374151; background: #fff;
-  font-family: inherit; white-space: nowrap;
+.jc-step-label {
+  font-size: 10.5px; font-weight: 500; color: #c4c9d4; text-align: center;
+  white-space: nowrap; line-height: 1.3;
 }
-.jc-btn:hover { background: #f3f4f6; }
-.jc-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
-.jc-btn.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
-.jc-btn-text { color: #9ca3af; font-size: 12px; text-align: center; padding: 8px 0; margin-top: auto; }
+.jc-step.done .jc-step-label { color: #6b7280; }
+.jc-step.current .jc-step-label { color: #116FEA; font-weight: 600; }
+.jc-connector {
+  flex: 1; height: 1.5px; margin: 0 -2px; position: relative; top: 14px;
+  background-image: repeating-linear-gradient(90deg, #e2e8f0 0, #e2e8f0 4px, transparent 4px, transparent 8px);
+}
+.jc-connector.done { background-image: none; background: #116FEA; }
+
+/* detail card */
+.jc-detail {
+  border-radius: 14px; background: #f0f7ff;
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 20px;
+}
+.jc-detail-left { flex: 1; min-width: 0; }
+.jc-detail-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: #116FEA; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;
+}
+.jc-detail-eyebrow-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: #22c55e; display: inline-block;
+  animation: jc-pulse 2s infinite;
+}
+@keyframes jc-pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+}
+.jc-detail-title {
+  font-size: 19px; font-weight: 700; color: #0f172a; line-height: 1.15; margin-bottom: 8px;
+  letter-spacing: -0.4px;
+}
+.jc-detail-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jc-detail-date {
+  font-size: 12.5px; color: #374151; font-weight: 500;
+  background: #fff; border: 1px solid #dbeafe; border-radius: 6px;
+  padding: 2px 8px;
+}
+.jc-detail-time {
+  font-size: 12.5px; color: #6b7280; font-weight: 400;
+  display: flex; align-items: center; gap: 4px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;
+  padding: 2px 8px;
+}
+.jc-detail-rel {
+  font-size: 11.5px; font-weight: 600; color: #116FEA;
+  background: #dbeafe; padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+}
+.jc-detail-rel.soon { background: #dbeafe; color: #116FEA; }
+.jc-detail-rel.today { background: #fee2e2; color: #dc2626; }
+.jc-detail-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px;
+  border-radius: 999px; font-size: 12.5px; font-weight: 600; text-decoration: none;
+  white-space: nowrap; flex-shrink: 0; font-family: inherit; letter-spacing: -0.1px;
+  transition: opacity 0.15s, transform 0.12s; border: none; cursor: pointer;
+}
+.jc-detail-btn:hover { opacity: 0.86; transform: translateY(-1px); }
+.jc-detail-btn:active { transform: translateY(0); opacity: 1; }
+.jc-detail-btn.zoom { background: #116FEA; color: #fff; }
+.jc-detail-btn.pending { background: #e5e7eb; color: #9ca3af; cursor: default; }
+.jc-detail-btn.pending:hover { opacity: 1; transform: none; }
+.jc-all-done {
+  text-align: center; padding: 20px; color: #6b7280; font-size: 13px; font-weight: 500;
+}
 @media (max-width: 540px) {
-  .journey-cards { grid-template-columns: repeat(2, 1fr); }
+  .jc-detail { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .jc-step-label { display: none; }
+  .jc-detail-title { font-size: 17px; }
 }
 
 /* ── Meetings ── */
@@ -447,7 +491,7 @@ body {
   <!-- Onboarding Journey (shown only when ?c= param is present) -->
   <div class="journey-wrap hidden" id="journey-wrap">
     <div class="journey-title">Your Onboarding Journey</div>
-    <div class="journey-cards" id="journey-cards"></div>
+    <div id="journey-cards"></div>
   </div>
 
   <!-- Progress ring + Floorzap URL (shown only when ?c= param is present) -->
@@ -958,7 +1002,10 @@ function applyFloorzapUrl() {
 /* ── Meeting relative time ── */
 function relMeetingTime(isoDate) {
   if (!isoDate) return '';
-  var d = new Date(isoDate); d.setHours(0,0,0,0);
+  var num = Number(isoDate);
+  var d = (!isNaN(num) && num > 0) ? new Date(num) : new Date(isoDate);
+  if (isNaN(d.getTime())) return '';
+  d.setHours(0,0,0,0);
   var now = new Date(); now.setHours(0,0,0,0);
   var diff = Math.round((d - now) / 86400000);
   if (diff < 0)  return '';
@@ -979,8 +1026,8 @@ function fmtDateClient(val) {
 }
 
 function buildStatusesFromCache() {
-  var keys   = ['kickoff', 'checkin', 'integrations', 'graduation'];
-  var labels = ['Kickoff', '2-Week', 'Integrations', 'Graduation'];
+  var keys   = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
+  var labels = ['Kickoff', '2-Week check-in', 'Integrations', 'Prep go-live', 'Graduation'];
   var dates  = STATE.hs_meeting_dates || {};
   var now    = new Date();
   return keys.map(function(key, i) {
@@ -1018,8 +1065,8 @@ async function loadHubSpotMeetings() {
       applyClientName();
     }
     if (data.meetings) {
-      var keys = ['kickoff', 'checkin', 'integrations', 'graduation'];
-      var labels = ['Kickoff', '2-Week', 'Integrations', 'Graduation'];
+      var keys   = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
+      var labels = ['Kickoff', '2-Week check-in', 'Integrations', 'Prep go-live', 'Graduation'];
       var today = new Date(); today.setHours(0,0,0,0);
 
       var now = new Date();
@@ -1053,18 +1100,14 @@ function showSkeletonCards() {
   var wrap = document.getElementById('journey-wrap');
   var container = document.getElementById('journey-cards');
   if (!wrap || !container) return;
-  container.innerHTML = '';
-  for (var i = 0; i < 4; i++) {
-    var sk = document.createElement('div');
-    sk.className = 'jc-skeleton';
-    sk.innerHTML =
-      '<div class="jc-skel-line" style="width:55%;height:11px;"></div>' +
-      '<div class="jc-skel-line" style="width:70%;height:20px;margin-top:4px;"></div>' +
-      '<div class="jc-skel-line" style="width:45%;height:11px;"></div>' +
-      '<div class="jc-skel-line" style="width:50%;height:11px;"></div>' +
-      '<div class="jc-skel-line" style="width:38%;height:30px;margin-top:6px;border-radius:8px;"></div>';
-    container.appendChild(sk);
-  }
+  container.innerHTML =
+    '<div class="jc-track">' +
+    [1,2,3,4,5].map(function(n, i) {
+      return (i > 0 ? '<div class="jc-connector"></div>' : '') +
+        '<div class="jc-step"><div class="jc-step-node"><div class="jc-skel-line" style="width:12px;height:12px;border-radius:50%;margin:0;"></div></div>' +
+        '<div class="jc-skel-line" style="width:52px;height:9px;margin:0;"></div></div>';
+    }).join('') + '</div>' +
+    '<div class="jc-skeleton" style="height:90px;border-radius:14px;"></div>';
   wrap.classList.remove('hidden');
   requestAnimationFrame(function() {
     requestAnimationFrame(function() { wrap.classList.add('visible'); });
@@ -1076,9 +1119,6 @@ function renderJourneyCards(statuses) {
   var container = document.getElementById('journey-cards');
   if (!wrap || !container) return;
 
-  // Find the last completed meeting, then NEXT is the first non-done after it.
-  // This handles skipped/rescheduled meetings: if Integrations is done but 2-Week isn't,
-  // Graduation becomes NEXT rather than the stale 2-Week slot.
   var lastDoneIdx = -1;
   for (var i = 0; i < statuses.length; i++) {
     if (statuses[i].isDone) lastDoneIdx = i;
@@ -1087,100 +1127,135 @@ function renderJourneyCards(statuses) {
   for (var i = lastDoneIdx + 1; i < statuses.length; i++) {
     if (!statuses[i].isDone) { nextIdx = i; break; }
   }
-  // Fallback: no meetings done yet — original behaviour (first non-done)
   if (nextIdx === -1 && lastDoneIdx === -1) {
     for (var i = 0; i < statuses.length; i++) {
       if (!statuses[i].isDone) { nextIdx = i; break; }
     }
   }
 
-  // Fade cards out, swap content, fade back in
-  container.classList.add('updating');
   setTimeout(function() {
     container.innerHTML = '';
     _doRenderCards(statuses, wrap, container, nextIdx, lastDoneIdx);
   }, 150);
 }
 
+var CHECK_SVG = '<svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l2.5 2.5L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var VIDEO_SVG = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 7l4-2.5v7L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var PLAY_SVG  = '<svg width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M2 1.5l6 3.5-6 3.5V1.5z" fill="currentColor"/></svg>';
+
 function _doRenderCards(statuses, wrap, container, nextIdx, lastDoneIdx) {
+  /* ── Stepper track ── */
+  var track = document.createElement('div');
+  track.className = 'jc-track';
   statuses.forEach(function(s, i) {
-    var isNext = i === nextIdx;
-    var isSkipped = !s.isDone && i < lastDoneIdx;
-    var card = document.createElement('div');
-    card.className = 'journey-card' + (s.isDone ? ' done' : isNext ? ' current' : '');
-
-    // Top: number circle + pill
-    var top = document.createElement('div');
-    top.className = 'jc-top';
-    var num = document.createElement('div');
-    num.className = 'jc-num' + (s.isDone ? ' done' : isNext ? ' current' : '');
-    num.innerHTML = s.isDone
-      ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l2.5 2.5L10 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      : String(i + 1);
-    var pill = document.createElement('div');
-    pill.className = 'jc-pill ' + (s.isDone ? 'done' : isNext ? 'next' : isSkipped ? 'skipped' : 'upcoming');
-    pill.textContent = s.isDone ? 'DONE' : isNext ? 'NEXT' : isSkipped ? 'SKIPPED' : 'UPCOMING';
-    top.appendChild(num);
-    top.appendChild(pill);
-    card.appendChild(top);
-
-    // Title, date, relative time
-    var title = document.createElement('div');
-    title.className = 'jc-title';
-    title.textContent = s.label;
-    card.appendChild(title);
-
-    if (s.date) {
-      var dateEl = document.createElement('div');
-      dateEl.className = 'jc-date';
-      dateEl.textContent = s.date;
-      card.appendChild(dateEl);
+    if (i > 0) {
+      var conn = document.createElement('div');
+      conn.className = 'jc-connector' + (statuses[i-1].isDone ? ' done' : '');
+      track.appendChild(conn);
     }
-
-    var rel = s.isDone ? 'Completed' : relMeetingTime(s.isoDate);
-    if (rel) {
-      var relEl = document.createElement('div');
-      relEl.className = 'jc-relative';
-      relEl.textContent = rel;
-      card.appendChild(relEl);
-    }
-
-    // Action button
-    if (s.isDone) {
-      if (s.recording) {
-        var btn = document.createElement('a');
-        btn.className = 'jc-btn';
-        btn.href = s.recording;
-        btn.target = '_blank';
-        btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 1.5l6 3.5-6 3.5V1.5z" fill="currentColor"/></svg> Recording';
-        card.appendChild(btn);
-      } else {
-        var noRec = document.createElement('div');
-        noRec.className = 'jc-btn-text';
-        noRec.textContent = 'Recording pending';
-        card.appendChild(noRec);
-      }
-    } else if (s.zoom) {
-      var zBtn = document.createElement('a');
-      zBtn.className = 'jc-btn' + (isNext ? ' primary' : '');
-      zBtn.href = s.zoom;
-      zBtn.target = '_blank';
-      zBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M11 7l4-2.5v7L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ' + (isNext ? 'Join Zoom' : 'Join');
-      card.appendChild(zBtn);
-    } else if (!isSkipped) {
-      var noLink = document.createElement('div');
-      noLink.className = 'jc-btn-text';
-      noLink.textContent = 'Link coming soon';
-      card.appendChild(noLink);
-    }
-
-    container.appendChild(card);
+    var step = document.createElement('div');
+    var cls = s.isDone ? 'done' : (i === nextIdx ? 'current' : '');
+    step.className = 'jc-step' + (cls ? ' ' + cls : '');
+    var node = document.createElement('div');
+    node.className = 'jc-step-node';
+    node.innerHTML = s.isDone ? CHECK_SVG : String(i + 1);
+    var lbl = document.createElement('div');
+    lbl.className = 'jc-step-label';
+    lbl.textContent = s.label;
+    step.appendChild(node);
+    step.appendChild(lbl);
+    track.appendChild(step);
   });
+  container.appendChild(track);
+
+  /* ── Detail card for current / last done ── */
+  var focusIdx = nextIdx !== -1 ? nextIdx : lastDoneIdx;
+  if (focusIdx === -1) {
+    var allDone = document.createElement('div');
+    allDone.className = 'jc-all-done';
+    allDone.textContent = '✓ All meetings complete';
+    container.appendChild(allDone);
+  } else {
+    var s = statuses[focusIdx];
+    var detail = document.createElement('div');
+    detail.className = 'jc-detail';
+
+    var left = document.createElement('div');
+    left.className = 'jc-detail-left';
+
+    /* eyebrow */
+    var eyebrow = document.createElement('div');
+    eyebrow.className = 'jc-detail-eyebrow';
+    if (!s.isDone) {
+      var dot = document.createElement('span');
+      dot.className = 'jc-detail-eyebrow-dot';
+      eyebrow.appendChild(dot);
+    }
+    eyebrow.appendChild(document.createTextNode(s.isDone ? 'Last completed' : 'Up next'));
+
+    /* title */
+    var title = document.createElement('div');
+    title.className = 'jc-detail-title';
+    title.textContent = s.label;
+
+    /* meta row: date + time + rel pill */
+    var meta = document.createElement('div');
+    meta.className = 'jc-detail-meta';
+
+    var dateEl = document.createElement('div');
+    dateEl.className = 'jc-detail-date';
+    dateEl.textContent = s.date || '—';
+    meta.appendChild(dateEl);
+
+    /* time — only show if isoDate is a real ms timestamp with non-midnight time */
+    if (s.isoDate) {
+      var tsNum = Number(s.isoDate);
+      var tsDate = (!isNaN(tsNum) && tsNum > 0) ? new Date(tsNum) : new Date(s.isoDate);
+      var hrs = tsDate.getUTCHours(), mins = tsDate.getUTCMinutes();
+      if (!isNaN(tsDate.getTime()) && (hrs !== 0 || mins !== 0)) {
+        var timeStr = tsDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+        var timeEl = document.createElement('div');
+        timeEl.className = 'jc-detail-time';
+        timeEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="opacity:.5"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' + timeStr;
+        meta.appendChild(timeEl);
+      }
+    }
+
+    if (!s.isDone) {
+      var rel = relMeetingTime(s.isoDate);
+      if (rel) {
+        var relEl = document.createElement('div');
+        var relLower = rel.toLowerCase();
+        relEl.className = 'jc-detail-rel' + (relLower === 'today' ? ' today' : relLower.indexOf('tomorrow') !== -1 || relLower.indexOf('next week') !== -1 ? ' soon' : '');
+        relEl.textContent = rel;
+        meta.appendChild(relEl);
+      }
+    }
+
+    left.appendChild(eyebrow);
+    left.appendChild(title);
+    left.appendChild(meta);
+    detail.appendChild(left);
+
+    /* action button */
+    if (s.zoom && !s.isDone) {
+      var zBtn = document.createElement('a');
+      zBtn.className = 'jc-detail-btn zoom';
+      zBtn.href = s.zoom; zBtn.target = '_blank';
+      zBtn.innerHTML = VIDEO_SVG + ' Join Zoom';
+      detail.appendChild(zBtn);
+    } else if (!s.isDone) {
+      var noLink = document.createElement('div');
+      noLink.className = 'jc-detail-btn pending';
+      noLink.textContent = 'Link coming soon';
+      detail.appendChild(noLink);
+    }
+
+    container.appendChild(detail);
+  }
 
   wrap.classList.remove('hidden');
   wrap.classList.add('visible');
-  container.classList.remove('updating');
-  container.classList.add('updated');
 }
 
 /* ── Fixed tasks ── */
@@ -1322,6 +1397,7 @@ function flashCopyBtn(id, msg) {
 }
 
 loadState();
+
 </script>
 </body>
 </html>

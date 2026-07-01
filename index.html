@@ -266,6 +266,38 @@ body {
 #c-mig .card-body-pad { padding-top: 14px; }
 #c-mig .card-body-pad .note { margin: 0 16px 14px; border-radius: 8px; border: 1px solid #fde68a; border-top: 1px solid #fde68a; }
 
+/* ── Checklist tabs ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1.5px solid #e5e7eb;
+  margin-bottom: 12px;
+}
+.tab-btn {
+  flex: 1;
+  appearance: none;
+  border: none;
+  background: transparent;
+  border-radius: 8px 8px 0 0;
+  padding: 11px 14px;
+  margin-bottom: -1.5px;
+  border-bottom: 2.5px solid transparent;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.tab-btn:hover { color: #334155; background: #f8fafc; }
+.tab-btn.active {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 
 /* ── Notes ── */
 .note { padding: 10px 20px; font-size: 12.5px; color: #1d4ed8; line-height: 1.55; border-top: 1px solid #f3f4f6; background: #eff6ff; }
@@ -520,6 +552,15 @@ body {
     </div>
   </div>
 
+  <!-- Checklist tabs -->
+  <div class="tabs" role="tablist" aria-label="Checklist sections">
+    <button class="tab-btn active" id="tabbtn-setup" role="tab" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
+    <button class="tab-btn" id="tabbtn-training" role="tab" aria-selected="false" aria-controls="tab-training" onclick="switchTab('training')">Training</button>
+  </div>
+
+  <!-- Setup tab -->
+  <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
+
   <!-- System Configuration -->
   <div class="card collapsed" id="c-sys">
     <div class="card-header" onclick="toggleCard('c-sys')">
@@ -548,6 +589,87 @@ body {
       <div class="task"><div class="cb" id="cb-sys-7" onclick="tick('sys',7)"></div><div class="task-body"><div class="task-name" id="tn-sys-7">Contract templates</div><div class="task-desc">Edit the defaults or replace with your own contract language</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/contract-templates" target="_blank">How-to guide ↗</a></div></div></div>
     </div></div>
   </div>
+
+  <!-- Data Migration -->
+  <div class="card collapsed" id="c-mig">
+    <div class="card-header" onclick="toggleCard('c-mig')">
+      <div class="card-left">
+        <div class="card-icon" style="background:#fffbeb;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 7.5h7M3 11h5" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Data migration</div>
+          <div class="card-meta" id="meta-mig">4 tasks</div>
+        </div>
+      </div>
+      <div class="card-right">
+        <span class="pill pill-green done-badge" id="badge-mig">✓ Complete</span>
+        <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="card-body"><div class="card-body-inner"><div class="card-body-pad">
+      <div class="note amber">Download each template below, fill it out, and send the completed file to your onboarding specialist. Start early — processing takes 2–3 weeks after files are received.</div>
+      <div class="task"><div class="cb" id="cb-mig-0" onclick="tick('mig',0)"></div><div class="task-body"><div class="task-name" id="tn-mig-0">Labor cost list</div><div class="task-desc">All labor items (install, tear down, etc.) — include cost, margin, and unit type (sqft, each, LF)</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1pc2tmMpyRHJrx4IQayYFZvCPlxohXe_k/edit?gid=695381032#gid=695381032" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/creating-a-labor-cost-list" target="_blank">How-to guide ↗</a></div></div></div>
+      <div class="task"><div class="cb" id="cb-mig-1" onclick="tick('mig',1)"></div><div class="task-body"><div class="task-name" id="tn-mig-1">Customer list</div><div class="task-desc">First and last name, or company name required at minimum</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1GMRgjz3uDvu540VO-gCMNnL6lXE5KkFS/edit?gid=92032769#gid=92032769" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/how-do-i-create-a-customer-import-list" target="_blank">How-to guide ↗</a></div></div></div>
+      <div class="task"><div class="cb" id="cb-mig-2" onclick="tick('mig',2)"></div><div class="task-body"><div class="task-name" id="tn-mig-2">Vendor list</div><div class="task-desc">Vendor name is required — include any additional contact details you have</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1rng2YFE8rh_vP07yLUIB0J-3u7fYdxww/edit?gid=1292759137#gid=1292759137" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/vendor-import-template" target="_blank">How-to guide ↗</a></div></div></div>
+      <div class="task"><div class="cb" id="cb-mig-3" onclick="tick('mig',3)"></div><div class="task-body"><div class="task-name" id="tn-mig-3">Non-B2B products</div><div class="task-desc">One template per vendor — your specialist reviews and confirms before import</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1STO6eijj02b1f7WRqqZjR6_FVDY7L7OE/edit?gid=1722535537#gid=1722535537" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/adding-non-b2b-vendors-non-b2b-material-import" target="_blank">How-to guide ↗</a></div></div></div>
+    </div></div></div>
+  </div>
+
+  <!-- B2B Integration -->
+  <div class="card collapsed" id="c-b2b">
+    <div class="card-header" onclick="toggleCard('c-b2b')">
+      <div class="card-left">
+        <div class="card-icon" style="background:#f0fdf4;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" stroke="#16a34a" stroke-width="1.5"/><path d="M5.5 8h5M8 5.5v5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="card-title">B2B integration</div>
+          <div class="card-meta" id="meta-b2b">4 tasks</div>
+        </div>
+      </div>
+      <div class="card-right">
+        <span class="pill pill-green done-badge" id="badge-b2b">✓ Complete</span>
+        <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="card-body"><div class="card-body-inner">
+      <div class="task"><div class="cb" id="cb-b2b-0" onclick="tick('b2b',0)"></div><div class="task-body"><div class="task-name" id="tn-b2b-0">Verify your vendor is B2B-enabled</div><div class="task-desc">Check the vendor directory at fcb2b.info/connections before reaching out</div><div class="task-links"><a class="task-link" href="https://fcb2b.info/connections/" target="_blank">Check vendors ↗</a></div></div></div>
+      <div class="task"><div class="cb" id="cb-b2b-1" onclick="tick('b2b',1)"></div><div class="task-body">
+        <div class="task-name" id="tn-b2b-1">Email vendor for B2B credentials</div>
+        <div class="task-desc">Copy the template below, fill in your company details, and send it to your vendor's support team</div>
+        <div class="email-block">
+          <div class="email-block-header">
+            <span class="email-block-label">Email template</span>
+            <button class="copy-btn" id="copy-btn" onclick="copyTemplate()">Copy</button>
+          </div>
+          <div class="email-body">Hello,
+Can you please respond with our B2B credentials?
+
+Please reset our password if we currently have credentials set up and send a new, full catalog.
+
+<span class="email-field">Company Name:
+Company Phone:
+Company Contact Name:
+Company Contact Phone:
+Company Contact Email:
+Account #:</span>
+Software Provider: Floorzap
+B2B File Version: 832
+
+Regards,</div>
+        </div>
+      </div></div>
+      <div class="task"><div class="cb" id="cb-b2b-2" onclick="tick('b2b',2)"></div><div class="task-body"><div class="task-name" id="tn-b2b-2">Enter credentials in Floorzap</div><div class="task-desc">Paste the username and password from the vendor's reply, enable B2B, and save</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/b2b-setup-guide" target="_blank">Setup guide ↗</a></div></div></div>
+      <div class="task"><div class="cb" id="cb-b2b-3" onclick="tick('b2b',3)"></div><div class="task-body"><div class="task-name" id="tn-b2b-3">Import your B2B catalog</div><div class="task-desc">Once credentials are active, import your full product catalog into Floorzap</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/how-to-import-your-b2b-products" target="_blank">Setup guide ↗</a></div></div></div>
+    </div></div>
+  </div>
+
+  </div>
+  <!-- /Setup tab -->
+
+  <!-- Training tab -->
+  <div class="tab-panel" id="tab-training" role="tabpanel" aria-labelledby="tabbtn-training">
 
   <!-- Quick Start Training -->
   <div class="card collapsed" id="c-qs">
@@ -682,80 +804,8 @@ body {
     </div></div></div>
   </div>
 
-  <!-- Data Migration -->
-  <div class="card collapsed" id="c-mig">
-    <div class="card-header" onclick="toggleCard('c-mig')">
-      <div class="card-left">
-        <div class="card-icon" style="background:#fffbeb;">
-          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 7.5h7M3 11h5" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <div class="card-title">Data migration</div>
-          <div class="card-meta" id="meta-mig">4 tasks</div>
-        </div>
-      </div>
-      <div class="card-right">
-        <span class="pill pill-green done-badge" id="badge-mig">✓ Complete</span>
-        <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-    </div>
-    <div class="card-body"><div class="card-body-inner"><div class="card-body-pad">
-      <div class="note amber">Download each template below, fill it out, and send the completed file to your onboarding specialist. Start early — processing takes 2–3 weeks after files are received.</div>
-      <div class="task"><div class="cb" id="cb-mig-0" onclick="tick('mig',0)"></div><div class="task-body"><div class="task-name" id="tn-mig-0">Labor cost list</div><div class="task-desc">All labor items (install, tear down, etc.) — include cost, margin, and unit type (sqft, each, LF)</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1pc2tmMpyRHJrx4IQayYFZvCPlxohXe_k/edit?gid=695381032#gid=695381032" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/creating-a-labor-cost-list" target="_blank">How-to guide ↗</a></div></div></div>
-      <div class="task"><div class="cb" id="cb-mig-1" onclick="tick('mig',1)"></div><div class="task-body"><div class="task-name" id="tn-mig-1">Customer list</div><div class="task-desc">First and last name, or company name required at minimum</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1GMRgjz3uDvu540VO-gCMNnL6lXE5KkFS/edit?gid=92032769#gid=92032769" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/how-do-i-create-a-customer-import-list" target="_blank">How-to guide ↗</a></div></div></div>
-      <div class="task"><div class="cb" id="cb-mig-2" onclick="tick('mig',2)"></div><div class="task-body"><div class="task-name" id="tn-mig-2">Vendor list</div><div class="task-desc">Vendor name is required — include any additional contact details you have</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1rng2YFE8rh_vP07yLUIB0J-3u7fYdxww/edit?gid=1292759137#gid=1292759137" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/vendor-import-template" target="_blank">How-to guide ↗</a></div></div></div>
-      <div class="task"><div class="cb" id="cb-mig-3" onclick="tick('mig',3)"></div><div class="task-body"><div class="task-name" id="tn-mig-3">Non-B2B products</div><div class="task-desc">One template per vendor — your specialist reviews and confirms before import</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1STO6eijj02b1f7WRqqZjR6_FVDY7L7OE/edit?gid=1722535537#gid=1722535537" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/adding-non-b2b-vendors-non-b2b-material-import" target="_blank">How-to guide ↗</a></div></div></div>
-    </div></div></div>
   </div>
-
-  <!-- B2B Integration -->
-  <div class="card collapsed" id="c-b2b">
-    <div class="card-header" onclick="toggleCard('c-b2b')">
-      <div class="card-left">
-        <div class="card-icon" style="background:#f0fdf4;">
-          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" stroke="#16a34a" stroke-width="1.5"/><path d="M5.5 8h5M8 5.5v5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <div class="card-title">B2B integration</div>
-          <div class="card-meta" id="meta-b2b">4 tasks</div>
-        </div>
-      </div>
-      <div class="card-right">
-        <span class="pill pill-green done-badge" id="badge-b2b">✓ Complete</span>
-        <div class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-    </div>
-    <div class="card-body"><div class="card-body-inner">
-      <div class="task"><div class="cb" id="cb-b2b-0" onclick="tick('b2b',0)"></div><div class="task-body"><div class="task-name" id="tn-b2b-0">Verify your vendor is B2B-enabled</div><div class="task-desc">Check the vendor directory at fcb2b.info/connections before reaching out</div><div class="task-links"><a class="task-link" href="https://fcb2b.info/connections/" target="_blank">Check vendors ↗</a></div></div></div>
-      <div class="task"><div class="cb" id="cb-b2b-1" onclick="tick('b2b',1)"></div><div class="task-body">
-        <div class="task-name" id="tn-b2b-1">Email vendor for B2B credentials</div>
-        <div class="task-desc">Copy the template below, fill in your company details, and send it to your vendor's support team</div>
-        <div class="email-block">
-          <div class="email-block-header">
-            <span class="email-block-label">Email template</span>
-            <button class="copy-btn" id="copy-btn" onclick="copyTemplate()">Copy</button>
-          </div>
-          <div class="email-body">Hello,
-Can you please respond with our B2B credentials?
-
-Please reset our password if we currently have credentials set up and send a new, full catalog.
-
-<span class="email-field">Company Name:
-Company Phone:
-Company Contact Name:
-Company Contact Phone:
-Company Contact Email:
-Account #:</span>
-Software Provider: Floorzap
-B2B File Version: 832
-
-Regards,</div>
-        </div>
-      </div></div>
-      <div class="task"><div class="cb" id="cb-b2b-2" onclick="tick('b2b',2)"></div><div class="task-body"><div class="task-name" id="tn-b2b-2">Enter credentials in Floorzap</div><div class="task-desc">Paste the username and password from the vendor's reply, enable B2B, and save</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/b2b-setup-guide" target="_blank">Setup guide ↗</a></div></div></div>
-      <div class="task"><div class="cb" id="cb-b2b-3" onclick="tick('b2b',3)"></div><div class="task-body"><div class="task-name" id="tn-b2b-3">Import your B2B catalog</div><div class="task-desc">Once credentials are active, import your full product catalog into Floorzap</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/how-to-import-your-b2b-products" target="_blank">Setup guide ↗</a></div></div></div>
-    </div></div>
-  </div>
+  <!-- /Training tab -->
 
   <!-- Custom To-Do -->
   <div class="custom-card">
@@ -1353,6 +1403,18 @@ function handleAddKey(e) {
 }
 
 /* ── UI helpers ── */
+function switchTab(name) {
+  ['setup', 'training'].forEach(function(t) {
+    var isActive = (t === name);
+    var panel = document.getElementById('tab-' + t);
+    var btn = document.getElementById('tabbtn-' + t);
+    if (panel) panel.classList.toggle('active', isActive);
+    if (btn) {
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    }
+  });
+}
 function toggleCard(id) {
   var card = document.getElementById(id);
   var inner = card.querySelector('.card-body-inner');

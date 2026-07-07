@@ -990,9 +990,9 @@ async function syncHubSpotDates() {
           updates.last_contact_date = data.last_contacted;
         }
       }
-      if (Array.isArray(data.addons) && JSON.stringify(data.addons) !== JSON.stringify(client.addons || [])) {
-        updates.addons = data.addons;
-      }
+      // Add-ons are sourced from Supabase (populated by the worker's daily cron),
+      // never written from this per-request worker response — writing them here
+      // previously wiped data whenever the worker returned an empty list.
       if (Object.keys(updates).length === 0) continue;
       Object.assign(_clients[id], updates);
       await _sb.from('clients').update(updates).eq('id', id);

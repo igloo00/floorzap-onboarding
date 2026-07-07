@@ -1,0 +1,12 @@
+{
+  // Floorzap HubSpot proxy worker.
+  // Secrets (HUBSPOT_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY) are set via
+  // `wrangler secret put` and are NOT stored here.
+  "name": "fz-hubspot",
+  "main": "worker.js",
+  "compatibility_date": "2025-01-01",
+  "triggers": {
+    // Daily add-on sync from HubSpot line items → Supabase, 08:00 UTC.
+    "crons": ["0 8 * * *"]
+  }
+}

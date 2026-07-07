@@ -293,6 +293,51 @@ body {
   padding: 5px 8px; display: flex; align-items: center; gap: 6px;
 }
 
+.kcard-addons {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid #EEF1F4;
+}
+.kcard-addons-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #94A3B8;
+  margin-bottom: 7px;
+}
+.kcard-addons-pills { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.kcard-addon-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid; font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 999px; cursor: pointer;
+  transition: opacity 0.1s; user-select: none;
+}
+.kcard-addon-pill:hover { opacity: 0.8; }
+.kcard-addon-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.kcard-addons-add {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px dashed #d1d5db;
+  color: #9ca3af; cursor: pointer; font-size: 14px; line-height: 1;
+  transition: border-color 0.1s, color 0.1s; background: none;
+}
+.kcard-addons-add:hover { border-color: #116FEA; color: #116FEA; }
+
+/* Add-on status popup */
+.addon-popup {
+  position: fixed; background: #fff; border: 1px solid #e5e7eb;
+  border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  z-index: 600; min-width: 158px; overflow: hidden; display: none;
+}
+.addon-popup.open { display: block; }
+.addon-popup-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 13px;
+  font-size: 12.5px; font-weight: 500; color: #374151; cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+  font-family: inherit; transition: background 0.1s;
+}
+.addon-popup-item:hover { background: #f3f4f6; }
+.addon-popup-item.active { font-weight: 700; }
+.addon-popup-item.active .addon-popup-dot { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px currentColor; }
+.addon-popup-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.addon-popup-sep { height: 1px; background: #f3f4f6; margin: 3px 0; }
+.addon-popup-item.danger { color: #dc2626; }
+.addon-popup-item.danger:hover { background: #fef2f2; }
+
 /* 3-dot menu on card */
 .kcard-menu-wrap { position: relative; flex-shrink: 0; }
 .kcard-menu-btn {
@@ -689,6 +734,33 @@ body {
   </div>
 </div>
 
+<!-- Add-on status popup (singleton, repositioned on open) -->
+<div class="addon-popup" id="addon-popup">
+  <button class="addon-popup-item" onclick="setAddonStatusFromPopup('not_started')">
+    <span class="addon-popup-dot" style="background:#94A3B8;"></span>Not started
+  </button>
+  <button class="addon-popup-item" onclick="setAddonStatusFromPopup('in_progress')">
+    <span class="addon-popup-dot" style="background:#2563EB;"></span>In progress
+  </button>
+  <button class="addon-popup-item" onclick="setAddonStatusFromPopup('live')">
+    <span class="addon-popup-dot" style="background:#059669;"></span>Live
+  </button>
+  <div class="addon-popup-sep"></div>
+  <button class="addon-popup-item danger" onclick="removeAddonFromPopup()">Remove add-on</button>
+</div>
+
+<!-- Manage add-ons modal -->
+<div class="modal-backdrop" id="addons-backdrop" onclick="addonsBackdropClick(event)">
+  <div class="modal" style="max-width:440px;">
+    <h3>Add-on products</h3>
+    <p id="addons-modal-subtext" style="margin-bottom:16px;"></p>
+    <div id="addons-modal-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeManageAddonsModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ── Config ── */
 var WORKER_URL = 'https://fz-hubspot.valentinfernandez1994.workers.dev';
@@ -711,6 +783,30 @@ var _newClientUrl = '';
 var _currentUser = null; // { name, initials, color }
 var FIXED_TOTAL = 20;
 var _renderTimer = null;
+
+var ADDON_CATALOG = [
+  { key: 'floorzap_payments',   name: 'Payments',   full: 'Floorzap Payments',    color: '#059669',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg>' },
+  { key: 'two_way_sms',         name: '2-Way SMS',  full: '2-Way SMS',             color: '#0284C7',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg>' },
+  { key: 'email_marketing',     name: 'Email',      full: 'Email Marketing',       color: '#7C3AED',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>' },
+  { key: 'growth_sites',        name: 'Website',    full: 'Website (Growth Sites)',color: '#4F46E5',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.5 2.6 15.5 0 18M12 3c-2.6 2.5-2.6 15.5 0 18"/></svg>' },
+  { key: 'consumer_finance',    name: 'Finance',    full: 'Consumer Finance',      color: '#D97706',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21v-8M10 21v-8M14 21v-8M19 21v-8M12 3l8 5H4z"/></svg>' },
+  { key: 'floorzap_accounting', name: 'Accounting', full: 'Floorzap Accounting',   color: '#0D9488',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8M8 11h5M8 15h3"/></svg>' },
+  { key: 'zapAssist_ai',        name: 'ZapAssist', full: 'ZapAssist AI',          color: '#0EA5E9',
+    icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 4-3 6-3 9H8c0-3-3-5-3-9a7 7 0 0 1 7-7z"/><path d="M9 21h6M12 21v2"/></svg>' },
+];
+
+var ADDON_STATUS_MAP = {
+  not_started: { label: 'Not started', bg: '#F1F5F9', fg: '#64748B', dot: '#94A3B8', ring: '#E2E8F0' },
+  included:     { label: 'Included',    bg: '#EEF2FF', fg: '#4338CA', dot: '#6366F1', ring: '#C7D2FE' },
+  in_progress:  { label: 'In progress', bg: '#EFF4FE', fg: '#2563EB', dot: '#2563EB', ring: '#BFD4FB' },
+  live:         { label: 'Live',        bg: '#E7F6EF', fg: '#047857', dot: '#059669', ring: '#BBE9D2' },
+};
 var _syncing = false;
 
 /* ── Onboarders (persisted to localStorage) ── */
@@ -827,6 +923,7 @@ function closeUserMenu() {
 }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.user-menu-wrap')) closeUserMenu();
+  if (!e.target.closest('.addon-popup') && !e.target.closest('.kcard-addon-pill')) closeAddonPopup();
 });
 
 /* ── Init ── */
@@ -892,6 +989,9 @@ async function syncHubSpotDates() {
         if (!current || data.last_contacted > current) {
           updates.last_contact_date = data.last_contacted;
         }
+      }
+      if (Array.isArray(data.addons) && JSON.stringify(data.addons) !== JSON.stringify(client.addons || [])) {
+        updates.addons = data.addons;
       }
       if (Object.keys(updates).length === 0) continue;
       Object.assign(_clients[id], updates);
@@ -1152,7 +1252,6 @@ function buildKanbanCard(row, stage) {
   var ob = getOnboarder(row.onboarder || '');
   var meeting = getMeetingDisplay(row, stage);
   var warn = getAttentionWarning(row, stage);
-  var contact = getContactDisplay(row);
   var state = row.state || {};
   var done = (state.sys ? state.sys.length : 0)
            + (state.b2b ? state.b2b.length : 0)
@@ -1182,17 +1281,28 @@ function buildKanbanCard(row, stage) {
   var stageLabel = stage === 'onboarding' ? 'Onboarding' : stage === 'post_go_live' ? 'Post Go-Live' : 'Graduated';
   var taskText = complete ? '✓ All tasks' : done + ' / ' + FIXED_TOTAL + ' tasks';
 
-  // Contact row
-  var contactHtml = '';
-  if (stage !== 'graduated') {
-    contactHtml = '<div class="kcard-contact">'
-      + '<span>Last contact: ' + (contact.text || '—') + (contact.ageStr ? ' <span class="contact-age ' + contact.ageCls + '">' + contact.ageStr + '</span>' : '') + '</span>'
-      + '</div>';
-  }
-
   var warnHtml = warn
     ? '<div class="kcard-warn"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5L11 10H1L6 1.5z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 5v2.5M6 9h.01" stroke="#d97706" stroke-width="1.3" stroke-linecap="round"/></svg>' + escHtml(warn) + '</div>'
     : '';
+
+  var addonsHtml = '';
+  var rowAddons = row.addons || [];
+  if (rowAddons.length > 0) {
+    var pillsHtml = rowAddons.map(function(a) {
+      var cat = ADDON_CATALOG.find(function(c) { return c.key === a.product; });
+      if (!cat) return '';
+      var s = ADDON_STATUS_MAP[a.status] || ADDON_STATUS_MAP.not_started;
+      return '<span class="kcard-addon-pill" style="background:' + s.bg + ';color:' + s.fg + ';border-color:' + s.ring + ';cursor:default;">'
+        + '<span class="kcard-addon-dot" style="background:' + s.dot + ';"></span>'
+        + escHtml(cat.name)
+        + '</span>';
+    }).join('');
+    addonsHtml = '<div class="kcard-addons">'
+      + '<div class="kcard-addons-label">ADD-ON PRODUCTS</div>'
+      + '<div class="kcard-addons-pills">'
+      + pillsHtml
+      + '</div></div>';
+  }
 
   // Menu items by stage
   var menuItems = '';
@@ -1240,7 +1350,7 @@ function buildKanbanCard(row, stage) {
     +   '<span class="stage-badge ' + stage + '">' + stageLabel + '</span>'
     +   '<span class="kcard-tasks' + (complete ? ' complete' : '') + '">' + taskText + '</span>'
     + '</div>'
-    + contactHtml
+    + addonsHtml
     + warnHtml;
 
   // Event listeners
@@ -1440,6 +1550,136 @@ function openDeleteModal(id, name) {
 }
 function closeDeleteModal() { document.getElementById('delete-backdrop').classList.remove('open'); _deleteTargetId = null; }
 function deleteBackdropClick(e) { if (e.target === e.currentTarget) closeDeleteModal(); }
+
+/* ── Add-on status popup ── */
+var _addonPopupClientId = null;
+var _addonPopupProduct  = null;
+
+function openAddonPopup(e, clientId, product) {
+  e.stopPropagation();
+  var popup = document.getElementById('addon-popup');
+  _addonPopupClientId = clientId;
+  _addonPopupProduct  = product;
+
+  // Mark active status
+  var client  = _clients[clientId] || {};
+  var addons  = client.addons || [];
+  var current = (addons.find(function(a) { return a.product === product; }) || {}).status || 'not_started';
+  popup.querySelectorAll('.addon-popup-item').forEach(function(btn) {
+    btn.classList.remove('active');
+    var act = btn.getAttribute('onclick') || '';
+    if (act.indexOf("'" + current + "'") !== -1) btn.classList.add('active');
+  });
+
+  // Position near the pill
+  var rect = e.currentTarget.getBoundingClientRect();
+  popup.style.top  = (rect.bottom + 4 + window.scrollY) + 'px';
+  popup.style.left = rect.left + 'px';
+  popup.classList.add('open');
+}
+
+function closeAddonPopup() {
+  document.getElementById('addon-popup').classList.remove('open');
+  _addonPopupClientId = null;
+  _addonPopupProduct  = null;
+}
+
+function setAddonStatusFromPopup(status) {
+  if (!_addonPopupClientId || !_addonPopupProduct) return;
+  setAddonStatus(_addonPopupClientId, _addonPopupProduct, status);
+  closeAddonPopup();
+}
+
+function removeAddonFromPopup() {
+  if (!_addonPopupClientId || !_addonPopupProduct) return;
+  var id = _addonPopupClientId, product = _addonPopupProduct;
+  closeAddonPopup();
+  var client = _clients[id];
+  if (!client) return;
+  var addons = (client.addons || []).filter(function(a) { return a.product !== product; });
+  client.addons = addons;
+  renderKanban();
+  _sb.from('clients').update({ addons: addons, updated_at: new Date().toISOString() }).eq('id', id);
+}
+
+async function setAddonStatus(clientId, product, status) {
+  var client = _clients[clientId];
+  if (!client) return;
+  var addons = (client.addons || []).map(function(a) {
+    return a.product === product ? { product: a.product, status: status } : a;
+  });
+  client.addons = addons;
+  renderKanban();
+  await _sb.from('clients').update({ addons: addons, updated_at: new Date().toISOString() }).eq('id', clientId);
+}
+
+/* ── Manage add-ons modal ── */
+var _addonsModalClientId = null;
+
+function openManageAddonsModal(id, name) {
+  _addonsModalClientId = id;
+  document.getElementById('addons-modal-subtext').textContent = 'Choose which add-ons to track for ' + name + '.';
+  renderManageAddonsList();
+  document.getElementById('addons-backdrop').classList.add('open');
+}
+
+function closeManageAddonsModal() {
+  document.getElementById('addons-backdrop').classList.remove('open');
+  _addonsModalClientId = null;
+}
+
+function addonsBackdropClick(e) { if (e.target === e.currentTarget) closeManageAddonsModal(); }
+
+function renderManageAddonsList() {
+  var id = _addonsModalClientId;
+  var client = _clients[id] || {};
+  var current = client.addons || [];
+  var list = document.getElementById('addons-modal-list');
+  list.innerHTML = ADDON_CATALOG.map(function(cat) {
+    var entry = current.find(function(a) { return a.product === cat.key; });
+    var attached = !!entry;
+    var status   = entry ? entry.status : 'not_started';
+    var s = ADDON_STATUS_MAP[status] || ADDON_STATUS_MAP.not_started;
+    return '<div style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:9px;border:1px solid #e5e7eb;background:#fafafa;">'
+      + '<span style="color:' + cat.color + ';display:flex;align-items:center;">' + cat.icon + '</span>'
+      + '<span style="flex:1;font-size:13px;font-weight:600;color:#111827;">' + escHtml(cat.full) + '</span>'
+      + (attached
+          ? '<select onchange="changeAddonStatusModal(\'' + cat.key + '\',this.value)" style="font-size:12px;font-family:inherit;border:1px solid ' + s.ring + ';border-radius:6px;padding:3px 6px;color:' + s.fg + ';background:' + s.bg + ';cursor:pointer;outline:none;">'
+            + ['not_started','in_progress','live'].map(function(k) {
+                return '<option value="' + k + '"' + (k === status ? ' selected' : '') + '>' + ADDON_STATUS_MAP[k].label + '</option>';
+              }).join('')
+            + '</select>'
+          : '')
+      + '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#6b7280;">'
+      + '<input type="checkbox"' + (attached ? ' checked' : '') + ' onchange="toggleAddonModal(\'' + cat.key + '\',this.checked)" style="cursor:pointer;">'
+      + (attached ? 'Remove' : 'Add')
+      + '</label>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleAddonModal(productKey, add) {
+  var id = _addonsModalClientId;
+  var client = _clients[id];
+  if (!client) return;
+  var addons = client.addons || [];
+  if (add) {
+    if (!addons.find(function(a) { return a.product === productKey; })) {
+      addons = addons.concat([{ product: productKey, status: 'not_started' }]);
+    }
+  } else {
+    addons = addons.filter(function(a) { return a.product !== productKey; });
+  }
+  client.addons = addons;
+  renderKanban();
+  renderManageAddonsList();
+  _sb.from('clients').update({ addons: addons, updated_at: new Date().toISOString() }).eq('id', id);
+}
+
+function changeAddonStatusModal(productKey, status) {
+  setAddonStatus(_addonsModalClientId, productKey, status);
+  renderManageAddonsList();
+}
 async function confirmDelete() {
   if (!_deleteTargetId) return;
   var btn = document.getElementById('confirm-delete-btn');
@@ -1521,6 +1761,7 @@ async function confirmSetHubSpot() {
           state.hs_meeting_dates = dates;
           updates.state = state;
         }
+        if (Array.isArray(data.addons)) updates.addons = data.addons;
         await _sb.from('clients').update(updates).eq('id', _setHsClientId);
         if (_clients[_setHsClientId]) Object.assign(_clients[_setHsClientId], updates);
       }

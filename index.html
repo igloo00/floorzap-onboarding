@@ -298,6 +298,17 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* Premium Features tab */
+.addons-grid { display: flex; flex-direction: column; gap: 10px; }
+.addon-card { display: flex; align-items: center; gap: 13px; padding: 14px 16px; background: #fff; border: 1px solid #E7EBF2; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+.addon-ic { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.addon-main { flex: 1; min-width: 0; }
+.addon-name { font-size: 14px; font-weight: 700; color: #1E293B; }
+.addon-desc { font-size: 12px; color: #64748B; margin-top: 2px; line-height: 1.4; }
+.addon-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+.addon-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+.addons-empty { text-align: center; color: #94A3B8; font-size: 13px; line-height: 1.5; padding: 34px 22px; border: 1px dashed #D9E0EA; border-radius: 14px; background: #FBFCFE; }
+
 
 /* ── Notes ── */
 .note { padding: 10px 20px; font-size: 12.5px; color: #1d4ed8; line-height: 1.55; border-top: 1px solid #f3f4f6; background: #eff6ff; }
@@ -556,9 +567,10 @@ body {
   <div class="tabs" role="tablist" aria-label="Checklist sections">
     <button class="tab-btn active" id="tabbtn-setup" role="tab" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
     <button class="tab-btn" id="tabbtn-training" role="tab" aria-selected="false" aria-controls="tab-training" onclick="switchTab('training')">Training</button>
+    <button class="tab-btn" id="tabbtn-premium" role="tab" aria-selected="false" aria-controls="tab-premium" onclick="switchTab('premium')">Premium Features</button>
   </div>
 
-  <!-- Setup tab -->
+  <!-- Setup fundamentals tab -->
   <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
 
   <!-- System Configuration -->
@@ -666,7 +678,7 @@ Regards,</div>
   </div>
 
   </div>
-  <!-- /Setup tab -->
+  <!-- /Setup fundamentals tab -->
 
   <!-- Training tab -->
   <div class="tab-panel" id="tab-training" role="tabpanel" aria-labelledby="tabbtn-training">
@@ -810,6 +822,17 @@ Regards,</div>
   </div>
   <!-- /Training tab -->
 
+  <!-- Premium Features tab -->
+  <div class="tab-panel" id="tab-premium" role="tabpanel" aria-labelledby="tabbtn-premium">
+    <div class="qs-banner">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="10" cy="10" r="8" stroke="#3b82f6" stroke-width="1.5"/><path d="M10 9v5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="6.5" r=".85" fill="#3b82f6"/></svg>
+      <span>Premium features add extra power to your Floorzap account. Here's what's on your plan — some may need a quick setup with your onboarding specialist before they're ready to use.</span>
+    </div>
+    <div id="addons-list" class="addons-grid"></div>
+    <div id="addons-empty" class="addons-empty" style="display:none;">No premium features on your account yet.<br>Ask your onboarding specialist about add-ons like Floorzap Payments, 2-Way SMS, and more.</div>
+  </div>
+  <!-- /Premium Features tab -->
+
   <!-- Custom To-Do -->
   <div class="custom-card">
     <div class="custom-header">
@@ -865,6 +888,39 @@ try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e)
 var TOTALS = { sys: 8, b2b: 4, mig: 4, qs: 6 };
 var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [], hs_meetings: {}, hs_meeting_dates: {} };
 var CLIENT_NAME = null;
+var ADDONS = [];
+
+var ADDON_CATALOG = [
+  { key: 'floorzap_payments',   name: 'Floorzap Payments',    color: '#059669',
+    desc: 'Accept card & ACH payments right inside Floorzap.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg>' },
+  { key: 'two_way_sms',         name: '2-Way SMS',             color: '#0284C7',
+    desc: 'Text customers and get their replies in your inbox.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg>' },
+  { key: 'email_marketing',     name: 'Email Marketing',       color: '#7C3AED',
+    desc: 'Send branded email campaigns and automations.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>' },
+  { key: 'growth_sites',        name: 'Website (Growth Sites)',color: '#4F46E5',
+    desc: 'A professional website built to capture leads.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.5 2.6 15.5 0 18M12 3c-2.6 2.5-2.6 15.5 0 18"/></svg>' },
+  { key: 'consumer_finance',    name: 'Consumer Finance',      color: '#D97706',
+    desc: 'Offer financing at checkout, powered by Wisetack.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21v-8M10 21v-8M14 21v-8M19 21v-8M12 3l8 5H4z"/></svg>' },
+  { key: 'floorzap_accounting', name: 'Floorzap Accounting',   color: '#0D9488',
+    desc: 'Built-in bookkeeping and accounting tools.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8M8 11h5M8 15h3"/></svg>' },
+  { key: 'zapAssist_ai',        name: 'ZapAssist AI',          color: '#0EA5E9',
+    desc: 'AI assistant for quotes, follow-ups, and support.',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 4-3 6-3 9H8c0-3-3-5-3-9a7 7 0 0 1 7-7z"/><path d="M9 21h6M12 21v2"/></svg>' },
+];
+function addonTint(hex, a) { var h = hex.replace('#',''); var n = parseInt(h, 16); return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')'; }
+
+var ADDON_STATUS_MAP = {
+  not_started: { label: 'Not started', bg: '#F1F5F9', fg: '#64748B', dot: '#94A3B8', ring: '#E2E8F0' },
+  included:     { label: 'Included',    bg: '#EEF2FF', fg: '#4338CA', dot: '#6366F1', ring: '#C7D2FE' },
+  in_progress:  { label: 'In progress', bg: '#EFF4FE', fg: '#2563EB', dot: '#2563EB', ring: '#BFD4FB' },
+  live:         { label: 'Live',        bg: '#E7F6EF', fg: '#047857', dot: '#059669', ring: '#BBE9D2' },
+};
 var FLOORZAP_URL = null;
 
 var EMAIL_TEMPLATE = "Hello,\nCan you please respond with our B2B credentials?\n\nPlease reset our password if we currently have credentials set up and send a new, full catalog.\n\nCompany Name:\nCompany Phone:\nCompany Contact Name:\nCompany Contact Phone:\nCompany Contact Email:\nAccount #:\nSoftware Provider: Floorzap\nB2B File Version: 832\n\nRegards,";
@@ -976,7 +1032,7 @@ async function loadState() {
   // Step 2: Supabase (async — overrides localStorage with authoritative state)
   if (CLIENT_ID && _sb) {
     try {
-      var res = await _sb.from('clients').select('state, name, floorzap_url').eq('id', CLIENT_ID).maybeSingle();
+      var res = await _sb.from('clients').select('state, name, floorzap_url, addons').eq('id', CLIENT_ID).maybeSingle();
       if (res.data) {
         if (res.data.state) {
           var s = res.data.state;
@@ -998,6 +1054,10 @@ async function loadState() {
         if (res.data.floorzap_url) {
           FLOORZAP_URL = res.data.floorzap_url;
           applyFloorzapUrl();
+        }
+        if (Array.isArray(res.data.addons)) {
+          ADDONS = res.data.addons;
+          renderAddons();
         }
       }
     } catch(e) {}
@@ -1050,6 +1110,41 @@ function applyFloorzapUrl() {
   if (card) card.style.display = 'flex';
   if (divider) divider.style.display = 'block';
   if (link) link.href = 'https://' + FLOORZAP_URL;
+}
+
+/* ── Add-on products section ── */
+function renderAddons() {
+  var list = document.getElementById('addons-list');
+  var empty = document.getElementById('addons-empty');
+  if (!list) return;
+
+  var attached = ADDONS.filter(function(a) {
+    return ADDON_CATALOG.some(function(c) { return c.key === a.product; });
+  });
+
+  // Sort: live first, then in progress, then catalog order
+  var order = {}; ADDON_CATALOG.forEach(function(c, i) { order[c.key] = i; });
+  var rank = { live: 0, included: 0, in_progress: 1, not_started: 2 };
+  attached.sort(function(a, b) {
+    var r = (rank[a.status] != null ? rank[a.status] : 9) - (rank[b.status] != null ? rank[b.status] : 9);
+    return r !== 0 ? r : (order[a.product] - order[b.product]);
+  });
+
+  if (empty) empty.style.display = attached.length ? 'none' : '';
+
+  list.innerHTML = attached.map(function(a) {
+    var cat = ADDON_CATALOG.find(function(c) { return c.key === a.product; });
+    if (!cat) return '';
+    // Status pill intentionally omitted for now — the right side is reserved
+    // for a future "where you are in setup" status per add-on.
+    return '<div class="addon-card">'
+      + '<span class="addon-ic" style="background:' + addonTint(cat.color, 0.12) + ';color:' + cat.color + ';">' + cat.icon + '</span>'
+      + '<div class="addon-main">'
+      +   '<div class="addon-name">' + cat.name + '</div>'
+      +   (cat.desc ? '<div class="addon-desc">' + cat.desc + '</div>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
 }
 
 /* ── Meeting relative time ── */
@@ -1116,6 +1211,10 @@ async function loadHubSpotMeetings() {
     if (data.client_name && !CLIENT_NAME) {
       CLIENT_NAME = data.client_name;
       applyClientName();
+    }
+    if (Array.isArray(data.addons) && data.addons.length > 0) {
+      ADDONS = data.addons;
+      renderAddons();
     }
     if (data.meetings) {
       var keys   = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
@@ -1407,7 +1506,7 @@ function handleAddKey(e) {
 
 /* ── UI helpers ── */
 function switchTab(name) {
-  ['setup', 'training'].forEach(function(t) {
+  ['setup', 'training', 'premium'].forEach(function(t) {
     var isActive = (t === name);
     var panel = document.getElementById('tab-' + t);
     var btn = document.getElementById('tabbtn-' + t);
@@ -1417,6 +1516,9 @@ function switchTab(name) {
       btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     }
   });
+  // "My tasks" belongs to Setup/Training only — hide it on Premium Features.
+  var cc = document.querySelector('.custom-card');
+  if (cc) cc.style.display = (name === 'premium') ? 'none' : '';
 }
 function toggleCard(id) {
   var card = document.getElementById(id);
@@ -1462,6 +1564,7 @@ function flashCopyBtn(id, msg) {
 }
 
 loadState();
+renderAddons();
 
 </script>
 </body>

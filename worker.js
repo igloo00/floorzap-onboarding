@@ -112,43 +112,27 @@ export default {
         meetingDetails = await Promise.all(
           meetingIds.map(id =>
             fetch(
-              `https://api.hubapi.com/crm/v3/objects/meetings/${id}?properties=hs_meeting_body,hs_timestamp,hs_meeting_title`,
+              `https://api.hubapi.com/crm/v3/objects/meetings/${id}?properties=hs_meeting_body,hs_timestamp,hs_meeting_title,hs_meeting_location,hs_meeting_external_url`,
               { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }
             ).then(r => r.ok ? r.json() : null).catch(() => null)
           )
         );
-        const zoomRe = /https:\/\/[a-z0-9.-]*zoom\.us\/j\/[^\s\n"<>]+/i;
-
-        // Title keyword → slot key
-        const titleKeywords = [
-          { key: 'kickoff',      words: ['kickoff', 'kick-off', 'initial onboarding'] },
-          { key: 'checkin',      words: ['2-week', '2 week', 'check-in', 'check in', 'checkin'] },
-          { key: 'integrations', words: ['integration'] },
-          { key: 'prep_golive',  words: ['prep go-live', 'prep golive', 'pre go-live', 'pregolive', 'prep for go live', 'prep for golive'] },
-          { key: 'graduation',   words: ['graduation'] },
-          { key: 'post_golive',  words: ['post go-live', 'post golive', 'post-go-live', 'postgolive'] },
-        ];
-
         for (const m of meetingDetails) {
           if (!m?.properties) continue;
-          const body = m.properties.hs_meeting_body || '';
           const title = (m.properties.hs_meeting_title || '').toLowerCase();
-          const ts = Number(m.properties.hs_timestamp);
-          const match = body.match(zoomRe);
-          const zoomUrl = match ? match[0] : null;
+          const ts = parseHsTs(m.properties.hs_timestamp);
+          const zoomUrl = extractZoom(m.properties);
 
-          // Try title-based match
-          let matched = false;
-          for (const { key, words } of titleKeywords) {
+          // Try title-based match → remember the Zoom URL for that slot
+          for (const { key, words } of MEETING_SLOT_KEYWORDS) {
             if (words.some(w => title.includes(w))) {
               if (zoomUrl && !zoomByTitle[key]) zoomByTitle[key] = zoomUrl;
-              matched = true;
               break;
             }
           }
 
           // Store by date for fallback (Zoom links only)
-          if (zoomUrl && ts) {
+          if (zoomUrl && !isNaN(ts)) {
             const dayKey = new Date(ts).toISOString().split('T')[0];
             if (!zoomByDay[dayKey]) zoomByDay[dayKey] = zoomUrl;
           }
@@ -205,25 +189,21 @@ export default {
     for (const m of meetingDetails) {
       if (!m?.properties) continue;
       const title = (m.properties.hs_meeting_title || '').toLowerCase();
-      const ts = Number(m.properties.hs_timestamp);
-      if (!ts) continue;
-      const titleKeywordsForDate = [
-        { key: 'kickoff',      words: ['kickoff', 'kick-off', 'initial onboarding'] },
-        { key: 'checkin',      words: ['2-week', '2 week', 'check-in', 'check in', 'checkin'] },
-        { key: 'integrations', words: ['integration'] },
-        { key: 'prep_golive',  words: ['prep go-live', 'prep golive', 'pre go-live', 'pregolive', 'prep for go live', 'prep for golive'] },
-        { key: 'graduation',   words: ['graduation'] },
-        { key: 'post_golive',  words: ['post go-live', 'post golive', 'post-go-live', 'postgolive'] },
-      ];
-      for (const { key, words } of titleKeywordsForDate) {
+      const ts = parseHsTs(m.properties.hs_timestamp);
+      if (isNaN(ts)) continue;
+      for (const { key, words } of MEETING_SLOT_KEYWORDS) {
         if (words.some(w => title.includes(w)) && !dateByKey[key]) {
-          dateByKey[key] = String(ts);
+          dateByKey[key] = String(ts); // Unix ms — engagement time wins over ticket props
           break;
         }
       }
     }
 
-    // Zoom link helper — title match first, then date fallback (±2 days)
+    // Zoom URLs already claimed by a title-matched slot — never reuse these in
+    // the date fallback, so a ghost slot can't borrow another meeting's link.
+    const claimedZooms = new Set(Object.values(zoomByTitle));
+
+    // Zoom link helper — title match first, then date fallback (±2 days).
     function getZoom(slotKey, isoDateVal) {
       if (zoomByTitle[slotKey]) return zoomByTitle[slotKey];
       if (!isoDateVal) return null;
@@ -235,7 +215,8 @@ export default {
           const d = new Date(base);
           d.setUTCDate(d.getUTCDate() + sign * offset);
           const key = d.toISOString().split('T')[0];
-          if (zoomByDay[key]) return zoomByDay[key];
+          const z = zoomByDay[key];
+          if (z && !claimedZooms.has(z)) return z;
         }
       }
       return null;
@@ -494,6 +475,39 @@ async function fetchHubSpotAddonsDebug(ticketId, env) {
   )].map(product => ({ product, status: 'included' }));
 
   return debug;
+}
+
+// Maps meeting-title keywords to onboarding slots. Order-tolerant variants
+// (e.g. "go-live prep" AND "prep go-live") so title wording doesn't break matching.
+const MEETING_SLOT_KEYWORDS = [
+  { key: 'kickoff',      words: ['kickoff', 'kick-off', 'initial onboarding'] },
+  { key: 'checkin',      words: ['2-week', '2 week', 'check-in', 'check in', 'checkin'] },
+  { key: 'integrations', words: ['integration'] },
+  { key: 'prep_golive',  words: ['prep go-live', 'prep golive', 'pre go-live', 'pregolive', 'prep for go live', 'prep for golive', 'go-live prep', 'go live prep', 'golive prep'] },
+  { key: 'graduation',   words: ['graduation'] },
+  { key: 'post_golive',  words: ['post go-live', 'post golive', 'post-go-live', 'postgolive'] },
+];
+
+// HubSpot timestamps arrive either as Unix-ms strings ("1748476800000") or as
+// ISO 8601 strings ("2026-07-30T19:45:00Z"). Return Unix ms, or NaN if unparseable.
+function parseHsTs(v) {
+  if (v == null) return NaN;
+  const s = String(v);
+  if (/^\d+$/.test(s)) return Number(s);
+  const t = Date.parse(s);
+  return isNaN(t) ? NaN : t;
+}
+
+// Extract a Zoom URL from a meeting, preferring the reliable location field,
+// then the external conferencing URL, then anything in the body text.
+const ZOOM_RE = /https:\/\/[a-z0-9.-]*zoom\.us\/[^\s\n"'<>]+/i;
+function extractZoom(props) {
+  for (const field of [props.hs_meeting_location, props.hs_meeting_external_url, props.hs_meeting_body]) {
+    if (!field) continue;
+    const m = String(field).match(ZOOM_RE);
+    if (m) return m[0];
+  }
+  return null;
 }
 
 /**

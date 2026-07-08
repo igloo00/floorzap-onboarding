@@ -222,16 +222,19 @@ export default {
       return null;
     }
 
-    // Resolve date for a slot: engagement timestamp wins, ticket property as fallback
-    function resolveDate(key, ticketProp) {
-      return dateByKey[key] || ticketProp || null;
+    // Build a meeting slot. A slot is only surfaced when there's an actual
+    // meeting behind it — either a matched calendar engagement, or a Zoom link.
+    // A date that exists only as a (possibly stale) ticket property with no
+    // real meeting is hidden, so ghost slots don't show as "upcoming".
+    function buildSlot(key, title, ticketProp) {
+      const eng = dateByKey[key];            // engagement time (ms) if a real meeting matched
+      const iso = eng || ticketProp || null;
+      const zoom = getZoom(key, iso);
+      if (!eng && !zoom) {
+        return { key, title, date: null, isoDate: null, zoom: null };
+      }
+      return { key, title, date: iso ? fmtDate(iso) : null, isoDate: iso, zoom };
     }
-
-    const kickoffDate      = resolveDate('kickoff',      p.initial_onboarding_meeting);
-    const checkinDate      = resolveDate('checkin',      p.n2_week_check_in_meeting);
-    const integrationsDate = resolveDate('integrations', p.integrations_meeting);
-    const prepGoliveDate   = resolveDate('prep_golive',  null);
-    const graduationDate   = resolveDate('graduation',   p.graduation_meeting);
 
     // Extract company name from "Onboarding | Company Name" format
     const rawSubject = p.subject || null;
@@ -244,11 +247,11 @@ export default {
         last_contacted: lastContactedIso,
         has_post_golive_meeting: !!dateByKey['post_golive'],
         meetings: [
-          { key: 'kickoff',      title: 'Kickoff',         date: kickoffDate      ? fmtDate(kickoffDate)      : null, isoDate: kickoffDate,      zoom: getZoom('kickoff',      kickoffDate) },
-          { key: 'checkin',      title: '2-Week check-in', date: checkinDate      ? fmtDate(checkinDate)      : null, isoDate: checkinDate,      zoom: getZoom('checkin',      checkinDate) },
-          { key: 'integrations', title: 'Integrations',    date: integrationsDate ? fmtDate(integrationsDate) : null, isoDate: integrationsDate, zoom: getZoom('integrations', integrationsDate) },
-          { key: 'prep_golive',  title: 'Prep go-live',    date: prepGoliveDate   ? fmtDate(prepGoliveDate)   : null, isoDate: prepGoliveDate,   zoom: getZoom('prep_golive',  prepGoliveDate) },
-          { key: 'graduation',   title: 'Graduation',      date: graduationDate   ? fmtDate(graduationDate)   : null, isoDate: graduationDate,   zoom: getZoom('graduation',   graduationDate) },
+          buildSlot('kickoff',      'Kickoff',         p.initial_onboarding_meeting),
+          buildSlot('checkin',      '2-Week check-in', p.n2_week_check_in_meeting),
+          buildSlot('integrations', 'Integrations',    p.integrations_meeting),
+          buildSlot('prep_golive',  'Prep go-live',    null),
+          buildSlot('graduation',   'Graduation',      p.graduation_meeting),
         ],
       }),
       { headers: CORS }

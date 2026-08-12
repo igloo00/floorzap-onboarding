@@ -611,7 +611,7 @@ body {
         </div>
         <div>
           <div class="card-title">Data migration</div>
-          <div class="card-meta" id="meta-mig">4 tasks</div>
+          <div class="card-meta" id="meta-mig">5 tasks</div>
         </div>
       </div>
       <div class="card-right">
@@ -621,6 +621,7 @@ body {
     </div>
     <div class="card-body"><div class="card-body-inner"><div class="card-body-pad">
       <div class="note amber">Download each template below, fill it out, and send the completed file to your onboarding specialist. Start early — processing takes 2–3 weeks after files are received.</div>
+      <div class="task"><div class="cb" id="cb-mig-4" onclick="tick('mig',4)"></div><div class="task-body"><div class="task-name" id="tn-mig-4">Import products to inventory</div><div class="task-desc">Bring your product catalog into Floorzap in bulk — fill out the Excel template with your stock areas and product details</div><div class="task-links"><a class="task-link" href="floorzap-inventory-import-template.xlsx" download>Download template</a><a class="task-link" href="https://help.floorzap.com/en/articles/14457587-how-to-import-products-into-inventory" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-0" onclick="tick('mig',0)"></div><div class="task-body"><div class="task-name" id="tn-mig-0">Labor cost list</div><div class="task-desc">All labor items (install, tear down, etc.) — include cost, margin, and unit type (sqft, each, LF)</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1pc2tmMpyRHJrx4IQayYFZvCPlxohXe_k/edit?gid=695381032#gid=695381032" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/creating-a-labor-cost-list" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-1" onclick="tick('mig',1)"></div><div class="task-body"><div class="task-name" id="tn-mig-1">Customer list</div><div class="task-desc">First and last name, or company name required at minimum</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1GMRgjz3uDvu540VO-gCMNnL6lXE5KkFS/edit?gid=92032769#gid=92032769" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/how-do-i-create-a-customer-import-list" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-mig-2" onclick="tick('mig',2)"></div><div class="task-body"><div class="task-name" id="tn-mig-2">Vendor list</div><div class="task-desc">Vendor name is required — include any additional contact details you have</div><div class="task-links"><a class="task-link" href="https://docs.google.com/spreadsheets/d/1rng2YFE8rh_vP07yLUIB0J-3u7fYdxww/edit?gid=1292759137#gid=1292759137" target="_blank">Template ↗</a><a class="task-link" href="https://help.floorzap.com/vendor-import-template" target="_blank">How-to guide ↗</a></div></div></div>
@@ -887,7 +888,7 @@ var CLIENT_ID = new URLSearchParams(window.location.search).get('c') || null;
 var _sb = null;
 try { _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
 
-var TOTALS = { sys: 8, b2b: 4, mig: 4, qs: 6 };
+var TOTALS = { sys: 8, b2b: 4, mig: 5, qs: 6 };
 var STATE = { sys: [], b2b: [], mig: [], qs: [], custom: [], meetings: [], hs_meetings: {}, hs_meeting_dates: {} };
 var CLIENT_NAME = null;
 var ADDONS = [];

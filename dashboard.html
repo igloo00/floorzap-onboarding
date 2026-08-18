@@ -1289,20 +1289,14 @@ function getMeetingCell(client, stage) {
 /* ── Attention flags ── */
 function getAttentionWarning(client, stage) {
   if (stage === 'graduated') return null;
-  var dates = (client.state || {}).hs_meeting_dates || {};
-  var state = client.state || {};
-  var done = (state.sys ? state.sys.length : 0)
-           + (state.b2b ? state.b2b.length : 0)
-           + (state.mig ? state.mig.length : 0)
-           + (state.qs  ? state.qs.length  : 0);
-
   if (stage === 'onboarding') {
     if (!client.hubspot_ticket_id) return 'No HubSpot ID — meeting dates unknown';
     var next = getNextMeeting(client);
-    if (next) {
-      if (next.diffDays < 0) return 'Meeting overdue by ' + Math.abs(next.diffDays) + ' day' + (Math.abs(next.diffDays) !== 1 ? 's' : '');
-      if (next.diffDays === 1 && done === 0) return next.label + ' is tomorrow · nothing set up yet';
-      if (next.diffDays === 0 && done === 0) return next.label + ' is today · nothing set up yet';
+    // Deliberately not flagging "meeting is today/tomorrow and nothing's
+    // set up yet" here — that's the onboarder's own judgment call to track,
+    // not something the dashboard should nudge about.
+    if (next && next.diffDays < 0) {
+      return 'Meeting overdue by ' + Math.abs(next.diffDays) + ' day' + (Math.abs(next.diffDays) !== 1 ? 's' : '');
     }
   }
   return null;

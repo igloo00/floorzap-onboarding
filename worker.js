@@ -281,8 +281,14 @@ export default {
 };
 
 /**
- * Resolve HubSpot's current { stageId -> label } map for the tickets
- * "hs_pipeline_stage" property (portal-wide, shared across every pipeline).
+ * Resolve HubSpot's current { stageId -> label } map for ticket pipeline
+ * stages, across every pipeline. Ticket stage IDs come from the Pipelines
+ * API, not the Properties API — "hs_pipeline_stage" is declared with
+ * externalOptions:true, meaning HubSpot deliberately doesn't return its
+ * option labels from /crm/v3/properties/tickets/hs_pipeline_stage (that
+ * endpoint returns an empty options: [] for it). The stage labels actually
+ * live on /crm/v3/pipelines/tickets, one stage list per pipeline, which is
+ * what we flatten here.
  * Cached for an hour via the Cache API — this map is identical for every
  * ticket, so we don't want to re-fetch it once per client on every dashboard
  * load. A one-hour TTL means a status rename in HubSpot shows up within the
@@ -290,19 +296,21 @@ export default {
  */
 async function getTicketStageLabelMap(env) {
   const cache = caches.default;
-  const cacheKey = new Request('https://internal-cache.floorzap/hs-ticket-stage-labels');
+  const cacheKey = new Request('https://internal-cache.floorzap/hs-ticket-stage-labels-v2');
   const cached = await cache.match(cacheKey);
   if (cached) return cached.json();
 
   try {
     const res = await fetch(
-      'https://api.hubapi.com/crm/v3/properties/tickets/hs_pipeline_stage',
+      'https://api.hubapi.com/crm/v3/pipelines/tickets',
       { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }
     );
     if (!res.ok) return {};
     const data = await res.json();
     const map = {};
-    for (const opt of (data.options || [])) map[opt.value] = opt.label;
+    for (const pipeline of (data.results || [])) {
+      for (const stage of (pipeline.stages || [])) map[stage.id] = stage.label;
+    }
     const response = new Response(JSON.stringify(map), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=3600' },
     });

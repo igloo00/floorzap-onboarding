@@ -50,6 +50,12 @@ rename, or restructure a field, update this file in the same change.
                                 // getNotesList() in dashboard.html normalizes a
                                 // string into a single entry with at/author null
                                 // (shown as "Earlier note") so nothing is lost.
+  archived_at: "2026-08-20T16:00:00.000Z"
+                                // set by dashboard.html's "Archive" action;
+                                // absent/undefined when not archived. Orthogonal
+                                // to `stage` — an archived account keeps whatever
+                                // stage it was in and returns to it on unarchive.
+                                // See "Archived" below.
 }
 ```
 
@@ -99,6 +105,15 @@ stale) ticket property.
   sync). Cleared by the onboarder (via "Clear ghost status" / "Done, clear")
   once they've logged contact or updated HubSpot, which deletes
   `ghost_since` from `state`.
+
+`isArchived(client)` in `dashboard.html` — `true` when `state.archived_at` is
+set. Archived accounts are excluded from every filter/stat except the
+dedicated "Archived" pill (which shows only archived accounts, most-recently-
+archived first). Ghost/Stuck and attention flags are suppressed once
+archived — the account is done, not in need of a nudge. Toggled via the row
+menu's "Archive" / "Unarchive" actions (`archiveClient` / `unarchiveClient`),
+which only set/delete `state.archived_at` — nothing else about the row
+changes, so unarchiving returns it to whatever `stage` it was already in.
 
 So a client's Kanban column is a mix of one stored flag (`stage`) and two
 computed fallbacks — there's no single "status" column to query directly.

@@ -157,13 +157,12 @@ body {
 .user-dropdown-item.danger:hover { background: #fef2f2; }
 
 /* ── Stats bar ── */
+.page-header { padding: 24px 28px 0; }
+.page-title { font-size: 28px; font-weight: 800; color: #111827; margin: 0 0 10px; }
 .stats-bar {
-  background: #fff; border-bottom: 1px solid #e5e7eb;
-  padding: 12px 28px; display: flex; align-items: center; gap: 24px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
 }
-.stats-title { font-size: 16px; font-weight: 700; color: #111827; margin-right: 8px; }
-.stat-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280; }
+.stat-item { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: #6b7280; }
 .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .stat-dot.active { background: #116FEA; }
 .stat-dot.attention { background: #f59e0b; }
@@ -172,6 +171,8 @@ body {
 .stat-dot.stuck { background: #dc2626; }
 .stat-dot.archived { background: #94a3b8; }
 .stat-count { font-weight: 700; color: #111827; }
+.stat-item.zero { color: #9ca3af; }
+.stat-item.zero .stat-count { color: #9ca3af; }
 
 /* ── Search + actions bar ── */
 .toolbar {
@@ -216,107 +217,76 @@ body {
 }
 .add-client-btn:hover { background: #0f5fd4; }
 
-/* ── Client list ── */
-.list-container {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 16px 28px 60px;
-  min-height: calc(100vh - 160px);
+/* ── Office table ── */
+.office-table-wrap {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
+  margin: 16px 28px 60px;
 }
+.list-container { min-height: 80px; }
 .list-empty {
   text-align: center; padding: 60px 16px;
   color: #9ca3af; font-size: 13.5px;
 }
 
-/* ── List row (one account) ── */
-.list-row {
-  background: #fff; border-radius: 12px; padding: 14px 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
-  cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
-  position: relative;
+/* One shared grid template keeps the header row and every data row aligned. */
+.office-row {
+  display: grid;
+  grid-template-columns: minmax(170px,1.3fr) 150px 165px 120px minmax(190px,1.6fr) 72px;
+  align-items: center; gap: 16px;
+  padding: 14px 20px;
 }
-.list-row:hover {
-  box-shadow: 0 4px 16px rgba(17,111,234,0.1), 0 0 0 1.5px #93c5fd;
-  transform: translateY(-1px);
+.office-row-head {
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 11px 20px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: #94a3b8;
 }
-.list-row.has-alert {
-  border-left: 3px solid #f59e0b;
-  padding-left: 13px;
+#list-container .office-row {
+  background: #fff; cursor: pointer; transition: background 0.12s;
+  border-bottom: 1px solid #f3f4f6;
 }
-.list-row.is-stuck {
-  background: #fdf3f3;
-  border-left: 3px solid #e8a6a6;
-  padding-left: 13px;
-}
-.list-row.is-stuck:hover {
-  background: #fcebeb;
-}
-.list-row.is-archived {
-  background: #fafafa;
-}
-.list-row.is-archived:hover {
-  background: #f3f4f6;
-}
-.list-row.is-archived .kcard-name {
-  color: #6b7280;
-}
+#list-container .office-row:last-child { border-radius: 0 0 12px 12px; border-bottom: none; }
+#list-container .office-row:hover { background: #f8faff; }
+.office-row.has-alert { box-shadow: inset 3px 0 0 #f59e0b; }
+.office-row.is-stuck { background: #fdf7f7; }
+#list-container .office-row.is-stuck:hover { background: #fcebeb; }
+.office-row.is-archived { background: #fafafa; }
+#list-container .office-row.is-archived:hover { background: #f3f4f6; }
+.office-row.is-archived .kcard-name { color: #6b7280; }
 
-.kcard-top {
-  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
-}
-.kcard-avatar {
-  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #fff;
-}
-.kcard-info { flex: 1; min-width: 0; }
+.kcard-info { min-width: 0; }
 .kcard-name {
   font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-bottom: 3px;
 }
-.kcard-meeting {
-  font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px;
-}
-.kcard-meeting.overdue { color: #dc2626; }
-.kcard-meeting.today { color: #d97706; }
-.kcard-meeting.soon { color: #116FEA; }
-.kcard-meeting.normal { color: #6b7280; }
-.kcard-meeting.none { color: #d1d5db; }
-.kcard-alert-icon { flex-shrink: 0; margin-top: 2px; }
+.kcard-since { font-size: 12px; color: #9ca3af; margin-top: 2px; }
 
-.kcard-bottom {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding-top: 10px; border-top: 1px solid #f3f4f6;
-}
+.kcard-stage-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
 .stage-badge {
-  font-size: 10px; font-weight: 700; border-radius: 5px;
-  padding: 3px 7px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+  font-size: 10.5px; font-weight: 700; border-radius: 5px;
+  padding: 3px 8px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
 }
 .stage-badge.onboarding { background: #eff6ff; color: #116FEA; }
 .stage-badge.post_go_live { background: #f5f3ff; color: #7c3aed; }
 .stage-badge.graduated { background: #f0fdf4; color: #16a34a; }
 .ghost-badge, .stuck-badge, .archived-badge {
-  font-size: 10px; font-weight: 700; border-radius: 5px;
-  padding: 3px 7px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+  font-size: 10.5px; font-weight: 700; border-radius: 5px;
+  padding: 3px 8px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
 }
 .ghost-badge { background: #f1f5f9; color: #64748b; }
 .stuck-badge { background: #fbe4e4; color: #be5252; }
 .archived-badge { background: #e5e7eb; color: #4b5563; }
-.kcard-tasks { font-size: 12px; color: #9ca3af; font-weight: 500; white-space: nowrap; margin-left: auto; }
-.kcard-tasks.complete { color: #16a34a; font-weight: 600; }
 
-.kcard-contact {
-  margin-top: 8px; font-size: 12.5px; color: #6b7280;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-}
-.log-contact-btn {
-  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
-  background: #eff6ff; color: #116FEA; border: 1px solid #bfdbfe;
-  border-radius: 7px; padding: 5px 11px; font-size: 12px; font-weight: 700;
-  font-family: inherit; cursor: pointer; transition: background 0.12s, border-color 0.12s;
-  white-space: nowrap;
-}
-.log-contact-btn:hover { background: #dbeafe; border-color: #93c5fd; }
+.kcard-meeting-cell { min-width: 0; }
+.kcard-meeting-date { font-size: 13px; font-weight: 600; color: #111827; }
+.kcard-meeting-sub { font-size: 12px; font-weight: 500; color: #6b7280; margin-top: 2px; }
+.kcard-meeting-date.overdue, .kcard-meeting-sub.overdue { color: #dc2626; }
+.kcard-meeting-date.today, .kcard-meeting-sub.today { color: #d97706; }
+.kcard-meeting-sub.soon { color: #116FEA; }
+.kcard-meeting-date.none, .kcard-meeting-sub.none { color: #d1d5db; }
+
+.kcard-contact-cell { font-size: 13px; }
 .contact-age { font-weight: 600; }
 .contact-age.ok { color: #16a34a; }
 .contact-age.warn { color: #d97706; }
@@ -324,21 +294,12 @@ body {
 .contact-age.never { color: #9ca3af; }
 
 .kcard-warn {
-  margin-top: 7px; font-size: 11.5px; color: #b45309;
+  margin-top: 6px; font-size: 11px; color: #b45309;
   background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;
-  padding: 5px 8px; display: flex; align-items: center; gap: 6px;
+  padding: 3px 7px; display: flex; align-items: center; gap: 5px; width: fit-content;
 }
-.kcard-stuck {
-  margin-top: 7px; font-size: 11.5px; color: #991b1b; font-weight: 600;
-  background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;
-  padding: 5px 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px;
-}
-.kcard-stuck-hs-btn {
-  background: #dc2626; color: #fff; border: none; border-radius: 5px;
-  padding: 3px 8px; font-size: 10.5px; font-weight: 700; font-family: inherit;
-  cursor: pointer; white-space: nowrap; flex-shrink: 0;
-}
-.kcard-stuck-hs-btn:hover { background: #b91c1c; }
+
+.kcard-actions-cell { display: flex; align-items: center; gap: 6px; justify-self: end; }
 
 .notes-btn {
   background: none; border: none; cursor: pointer; color: #9ca3af;
@@ -403,13 +364,7 @@ body {
 .notes-send-btn:hover { background: #0f5fd4; }
 .notes-send-btn:disabled { background: #93c5fd; cursor: default; }
 
-.kcard-addons {
-  margin-top: 10px; padding-top: 10px; border-top: 1px solid #EEF1F4;
-}
-.kcard-addons-label {
-  font-size: 10px; font-weight: 700; letter-spacing: .06em; color: #94A3B8;
-  margin-bottom: 7px;
-}
+.kcard-addons-cell { min-width: 0; }
 .kcard-addons-pills { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .kcard-addon-pill {
   display: inline-flex; align-items: center; gap: 5px;
@@ -419,11 +374,15 @@ body {
 }
 .kcard-addon-pill:hover { opacity: 0.8; }
 .kcard-addon-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.kcard-addon-overflow {
+  font-size: 11px; font-weight: 600; color: #94a3b8;
+  background: #f1f5f9; padding: 3px 8px; border-radius: 999px;
+}
 .kcard-addons-add {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%; border: 1.5px dashed #d1d5db;
-  color: #9ca3af; cursor: pointer; font-size: 14px; line-height: 1;
-  transition: border-color 0.1s, color 0.1s; background: none;
+  width: 26px; height: 26px; border-radius: 7px; border: 1.5px solid #e5e7eb;
+  color: #9ca3af; cursor: pointer; font-size: 15px; line-height: 1; flex-shrink: 0;
+  transition: border-color 0.1s, color 0.1s; background: #fff;
 }
 .kcard-addons-add:hover { border-color: #116FEA; color: #116FEA; }
 
@@ -478,6 +437,7 @@ body {
 .kcard-menu-item.success:hover { background: #f0fdf4; }
 .kcard-menu-item.danger { color: #dc2626; }
 .kcard-menu-item.danger:hover { background: #fef2f2; }
+.kcard-menu-divider { height: 1px; background: #e5e7eb; margin: 4px 0; }
 
 /* ── Skeleton loader ── */
 @keyframes skeleton-pulse {
@@ -640,15 +600,17 @@ body {
     </div>
   </div>
 
-  <!-- Stats bar -->
-  <div class="stats-bar">
-    <span class="stats-title" id="stats-title">My Offices</span>
-    <span class="stat-item"><span class="stat-dot active"></span><span class="stat-count" id="stat-active">0</span> active</span>
-    <span class="stat-item"><span class="stat-dot attention"></span><span class="stat-count" id="stat-attention">0</span> need attention</span>
-    <span class="stat-item"><span class="stat-dot stuck"></span><span class="stat-count" id="stat-stuck">0</span> stuck</span>
-    <span class="stat-item"><span class="stat-dot postlive"></span><span class="stat-count" id="stat-postlive">0</span> post go-live</span>
-    <span class="stat-item"><span class="stat-dot graduated"></span><span class="stat-count" id="stat-graduated">0</span> graduated</span>
-    <span class="stat-item"><span class="stat-dot archived"></span><span class="stat-count" id="stat-archived">0</span> archived</span>
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">My Offices</h1>
+    <div class="stats-bar">
+      <span class="stat-item"><span class="stat-dot active"></span><span class="stat-count" id="stat-active">0</span> active</span>
+      <span class="stat-item"><span class="stat-dot attention"></span><span class="stat-count" id="stat-attention">0</span> need attention</span>
+      <span class="stat-item"><span class="stat-dot stuck"></span><span class="stat-count" id="stat-stuck">0</span> stuck</span>
+      <span class="stat-item"><span class="stat-dot postlive"></span><span class="stat-count" id="stat-postlive">0</span> post go-live</span>
+      <span class="stat-item"><span class="stat-dot graduated"></span><span class="stat-count" id="stat-graduated">0</span> graduated</span>
+      <span class="stat-item" id="stat-archived-item"><span class="stat-dot archived"></span><span class="stat-count" id="stat-archived">0</span> archived</span>
+    </div>
   </div>
 
   <!-- Toolbar -->
@@ -659,7 +621,7 @@ body {
         <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <input class="search-input" id="search-input" type="text"
-             placeholder="Search offices by name…" oninput="renderList()">
+             placeholder="Search offices" oninput="renderList()">
     </div>
     <div class="filter-pills" id="filter-pills">
       <button class="filter-pill active" data-filter="all" onclick="setListFilter('all')">All</button>
@@ -683,8 +645,18 @@ body {
     </button>
   </div>
 
-  <!-- Client list -->
-  <div class="list-container" id="list-container"></div>
+  <!-- Office table -->
+  <div class="office-table-wrap">
+    <div class="office-row office-row-head">
+      <span>OFFICE</span>
+      <span>STAGE</span>
+      <span>NEXT MEETING</span>
+      <span>LAST CONTACT</span>
+      <span>ADD-ONS</span>
+      <span></span>
+    </div>
+    <div class="list-container" id="list-container"></div>
+  </div>
 
 </div>
 
@@ -875,6 +847,10 @@ body {
 <script>
 /* ── Config ── */
 var WORKER_URL = 'https://fz-hubspot.valentinfernandez1994.workers.dev';
+var HUBSPOT_PORTAL_ID = '47970774';
+function buildHubSpotTicketUrl(ticketId) {
+  return 'https://app.hubspot.com/contacts/' + HUBSPOT_PORTAL_ID + '/record/0-5/' + encodeURIComponent(ticketId);
+}
 var SUPABASE_URL = 'https://abszmmrjaxqpnjomfbxd.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFic3ptbXJqYXhxcG5qb21mYnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzUxMTYsImV4cCI6MjA5NDk1MTExNn0.5aPz4IHoINh1sgRixDwI4S5-KykJCuYMQOiONYVqkC4';
 var DASHBOARD_PASSWORD = 'floorzap2026';
@@ -1075,24 +1051,41 @@ async function syncHubSpotDates() {
       var data = await res.json();
       var client = _clients[id];
       var updates = {};
+      // Shared, lazily-cloned state object for this client — every block below
+      // that needs to touch `state` mutates the SAME clone, so one block's
+      // change can't get clobbered by another block re-cloning from the
+      // original client.state later in this pass.
+      var state = null;
+      function ensureState() { if (!state) state = Object.assign({}, client.state || {}); return state; }
+
       if (data.client_name && data.client_name !== client.name) updates.name = data.client_name;
       if (data.floorzap_url && data.floorzap_url !== client.floorzap_url) updates.floorzap_url = data.floorzap_url;
       if (data.meetings) {
-        var keys = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
-        var dates = {};
-        data.meetings.forEach(function(m, j) { if (keys[j]) dates[keys[j]] = m.isoDate || null; });
-        var existing = JSON.stringify((client.state || {}).hs_meeting_dates || {});
-        if (existing !== JSON.stringify(dates)) {
-          var state = Object.assign({}, client.state || {});
-          state.hs_meeting_dates = dates;
-          updates.state = state;
-        }
+        var mKeys = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
+        var mDates = {};
+        data.meetings.forEach(function(m, j) { if (mKeys[j]) mDates[mKeys[j]] = m.isoDate || null; });
+        var existingDates = JSON.stringify((client.state || {}).hs_meeting_dates || {});
+        if (existingDates !== JSON.stringify(mDates)) ensureState().hs_meeting_dates = mDates;
       }
-      if (data.has_post_golive_meeting) {
-        var state = Object.assign({}, client.state || {});
-        if (!state.has_post_golive_meeting) {
-          state.has_post_golive_meeting = true;
-          updates.state = Object.assign(updates.state || {}, state);
+      if (data.has_post_golive_meeting && !(client.state || {}).has_post_golive_meeting) {
+        ensureState().has_post_golive_meeting = true;
+      }
+      // Ticket status — the STAGE column and Stuck badge both key off this.
+      if (data.ticket_stage && data.ticket_stage.label) {
+        var existingStage = (client.state || {}).ticket_stage || {};
+        if (existingStage.id !== data.ticket_stage.id || existingStage.label !== data.ticket_stage.label) {
+          ensureState().ticket_stage = {
+            id: data.ticket_stage.id,
+            label: data.ticket_stage.label,
+            synced_at: new Date().toISOString(),
+          };
+        }
+        // Cancelled / OB Incomplete aren't a Kanban stage — they're "done,
+        // just not successfully." Auto-archive the same way the manual
+        // Archive action does, so all the existing archived behavior (hidden
+        // from the main view, restorable via Unarchive) applies for free.
+        if (TICKET_STAGE_AUTO_ARCHIVE.indexOf(data.ticket_stage.label) !== -1 && !(client.state || {}).archived_at) {
+          ensureState().archived_at = new Date().toISOString();
         }
       }
       if (data.last_contacted) {
@@ -1101,6 +1094,7 @@ async function syncHubSpotDates() {
           updates.last_contact_date = data.last_contacted;
         }
       }
+      if (state) updates.state = state;
       // Add-ons are sourced from Supabase (populated by the worker's daily cron),
       // never written from this per-request worker response — writing them here
       // previously wiped data whenever the worker returned an empty list.
@@ -1157,9 +1151,37 @@ function subscribeRealtime() {
     .subscribe();
 }
 
-/* ── Stage logic ── */
+/* ── Stage logic ──
+   Driven by the live HubSpot ticket status (state.ticket_stage.label, synced
+   in syncHubSpotDates()) rather than inferring from meeting-detection flags.
+   This is a lookup table, not scattered if/else, on purpose: if HubSpot
+   renames or adds a stage, fixing the mapping is a one-line edit here, not a
+   hunt through the file. An unrecognized label (renamed stage we haven't
+   added yet, or no ticket_stage synced) falls back to the old meeting-based
+   heuristic so a HubSpot-side rename degrades gracefully instead of
+   silently miscategorizing the card. */
+var TICKET_STAGE_BUCKET = {
+  'Discovery':           'onboarding',
+  'Kickoff Meeting':     'onboarding',
+  '2-Week Meeting':      'onboarding',
+  'Integrations Meeting':'onboarding',
+  'Final Grad Prep':     'onboarding',
+  'New':                 'onboarding',
+  'Pending Payment':     'onboarding',
+  'Live/Graduated':      'post_go_live',
+  'OB Complete':         'graduated',
+};
+// Statuses that mean the account isn't actively onboarding anymore, but not
+// via a successful graduation — treated like a manually-Archived account
+// (see syncHubSpotDates()) rather than shown as any of the three stages.
+var TICKET_STAGE_AUTO_ARCHIVE = ['Cancelled', 'OB Incomplete'];
+
 function getStage(client) {
   if (client.stage === 'graduated') return 'graduated';
+  var ticketStage = (client.state || {}).ticket_stage;
+  if (ticketStage && ticketStage.label && TICKET_STAGE_BUCKET[ticketStage.label]) {
+    return TICKET_STAGE_BUCKET[ticketStage.label];
+  }
   var state = client.state || {};
   // Post go-live meeting detected in HubSpot → flip immediately
   if (state.has_post_golive_meeting) return 'post_go_live';
@@ -1175,10 +1197,25 @@ function getStage(client) {
   return now > gradDate ? 'post_go_live' : 'onboarding';
 }
 
+/* Badge text for the STAGE column. During onboarding, the specific live
+   sub-stage (Kickoff / Integrations / Final Grad Prep / …) is the useful
+   signal, so we show it as-is (trimmed of a trailing "Meeting"). Once live
+   or fully done, the sub-stage stops mattering — show the milestone name. */
+function getStageBadgeText(client, stage) {
+  var ticketStage = (client.state || {}).ticket_stage;
+  if (stage === 'onboarding' && ticketStage && ticketStage.label
+      && TICKET_STAGE_BUCKET[ticketStage.label] === 'onboarding') {
+    return ticketStage.label.replace(/ Meeting$/, '');
+  }
+  if (stage === 'post_go_live') return 'Post Go-Live';
+  if (stage === 'graduated') return 'Graduated';
+  return 'Onboarding';
+}
+
 /* ── Next meeting ── */
 var MEETING_DEFS = [
   { key: 'kickoff',      label: 'Kickoff' },
-  { key: 'checkin',      label: '2-Week check-in' },
+  { key: 'checkin',      label: 'Check-in' },
   { key: 'integrations', label: 'Integrations' },
   { key: 'prep_golive',  label: 'Prep go-live' },
   { key: 'graduation',   label: 'Graduation' },
@@ -1193,13 +1230,14 @@ function getNextMeeting(client) {
     var iso = dates[m.key];
     if (!iso) continue;
     var raw = Number(iso);
-    var d = (!isNaN(raw) && raw > 0) ? new Date(raw) : new Date(iso + 'T00:00:00');
+    var hasTime = !isNaN(raw) && raw > 0;
+    var d = hasTime ? new Date(raw) : new Date(iso + 'T00:00:00');
     if (isNaN(d.getTime())) continue;
     var dayStr = d.toISOString().split('T')[0];
     var endOfDay = new Date(d); endOfDay.setHours(23, 59, 59, 999);
     if (now > endOfDay) continue; // already passed
     var diffDays = Math.round((new Date(dayStr) - new Date(todayStr)) / 86400000);
-    return { label: m.label, date: d, diffDays: diffDays };
+    return { label: m.label, date: d, diffDays: diffDays, hasTime: hasTime };
   }
   // All meetings passed — find the last one
   return null;
@@ -1214,40 +1252,38 @@ function getLastMeeting(client) {
     var iso = dates[m.key];
     if (!iso) continue;
     var raw = Number(iso);
-    var d = (!isNaN(raw) && raw > 0) ? new Date(raw) : new Date(iso + 'T00:00:00');
+    var hasTime = !isNaN(raw) && raw > 0;
+    var d = hasTime ? new Date(raw) : new Date(iso + 'T00:00:00');
     if (isNaN(d.getTime())) continue;
     var endOfDay = new Date(d); endOfDay.setHours(23, 59, 59, 999);
-    if (now > endOfDay) last = { label: m.label, date: d };
+    if (now > endOfDay) last = { label: m.label, date: d, hasTime: hasTime };
   }
   return last;
 }
 
-function getMeetingDisplay(client, stage) {
+/* Two-line NEXT MEETING cell: bold date on top, time + label underneath. */
+function getMeetingCell(client, stage) {
+  function fmtDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function fmtTime(d) { return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
+
   if (stage === 'post_go_live' || stage === 'graduated') {
     var last = getLastMeeting(client);
-    if (!last) return { text: 'No meetings on record', cls: 'none' };
-    return {
-      text: 'Graduated ' + last.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      cls: 'normal'
-    };
+    if (!last) return { dateText: 'No meetings on record', subText: '', cls: 'none' };
+    return { dateText: fmtDate(last.date), subText: 'Graduated', cls: 'normal' };
   }
   if (!client.hubspot_ticket_id) {
-    return { text: 'No HubSpot ID set', cls: 'none' };
+    return { dateText: 'No HubSpot ID', subText: 'meeting dates unknown', cls: 'none' };
   }
   var next = getNextMeeting(client);
-  if (!next) {
-    // Graduation should have just passed — handled by stage logic
-    return { text: 'All meetings complete', cls: 'normal' };
-  }
-  var dateStr = next.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  if (!next) return { dateText: 'All meetings complete', subText: '', cls: 'normal' };
+  var timePrefix = next.hasTime ? fmtTime(next.date) + ' · ' : '';
   if (next.diffDays < 0) {
     var overdueDays = Math.abs(next.diffDays);
-    return { text: 'Overdue ' + overdueDays + 'd · ' + next.label, cls: 'overdue' };
+    return { dateText: fmtDate(next.date), subText: 'Overdue ' + overdueDays + 'd · ' + next.label, cls: 'overdue' };
   }
-  if (next.diffDays === 0) return { text: 'Today · ' + next.label, cls: 'today' };
-  if (next.diffDays === 1) return { text: 'Tomorrow · ' + next.label, cls: 'soon' };
-  if (next.diffDays <= 7)  return { text: dateStr + ' · ' + next.label, cls: 'soon' };
-  return { text: dateStr + ' · ' + next.label, cls: 'normal' };
+  if (next.diffDays === 0) return { dateText: 'Today', subText: timePrefix + next.label, cls: 'today' };
+  if (next.diffDays === 1) return { dateText: 'Tomorrow', subText: timePrefix + next.label, cls: 'soon' };
+  return { dateText: fmtDate(next.date), subText: timePrefix + next.label, cls: next.diffDays <= 7 ? 'soon' : 'normal' };
 }
 
 /* ── Attention flags ── */
@@ -1292,18 +1328,44 @@ function getContactDisplay(client) {
   return { text: dateStr, ageStr: ageStr, ageCls: cls, isAlert: isAlert };
 }
 
-/* ── Ghost / Stuck status ──
+/* ── Ghost status ──
    An onboarder manually flags an account as "ghosted" when it's gone quiet.
-   After GHOST_STUCK_DAYS with no reply (i.e. no fresh contact logged and the
-   flag never cleared), it's promoted to "stuck" — a nudge to go update the
-   deal/ticket stage in HubSpot by hand. This dashboard never writes to
-   HubSpot itself (see CLAUDE.md — only worker.js holds those credentials). */
-var GHOST_STUCK_DAYS = 14;
+   Purely a dashboard-side flag — this never writes to HubSpot (see CLAUDE.md
+   — only worker.js holds those credentials). Alongside ghost_since, we
+   snapshot the ticket stage the account was at when it went quiet
+   (state.ghost_stage_label, set in markGhosted()) — worth keeping even
+   though "Stuck" itself is no longer derived from this, because HubSpot's
+   hs_pipeline_stage is a single value: the moment someone moves the ticket
+   to "Stuck" in HubSpot, the prior stage ("Integrations Meeting", etc.) is
+   gone from HubSpot's side. This snapshot is the only place it survives. */
 function getGhostState(client) {
   var since = (client.state || {}).ghost_since;
   if (!since) return null;
   var days = Math.floor((new Date() - new Date(since + 'T00:00:00')) / 86400000);
-  return { since: since, days: days, stuck: days >= GHOST_STUCK_DAYS };
+  return { since: since, days: days, stageLabel: (client.state || {}).ghost_stage_label || null };
+}
+
+/* ── Stuck status ──
+   No longer a day-count we compute — Stuck is whatever HubSpot's ticket
+   pipeline currently says. It can appear at any point in the funnel, and
+   clears itself on the next sync as soon as the ticket moves off "Stuck" in
+   HubSpot — nothing to manually clear on our side. */
+function isStuck(client) {
+  var ticketStage = (client.state || {}).ticket_stage;
+  return !!(ticketStage && ticketStage.label === 'Stuck');
+}
+
+/* Duration shown next to the STUCK badge — how long since we last actually
+   heard from them, which is the context that matters regardless of whether
+   they're also manually flagged Ghosted. Falls back to ghost duration when
+   there's no logged contact date at all. */
+function getStuckDays(client) {
+  var lc = client.last_contact_date;
+  if (lc) return Math.floor((new Date() - new Date(lc + 'T00:00:00')) / 86400000);
+  var ghost = getGhostState(client);
+  if (ghost) return ghost.days;
+  var createdAt = client.created_at ? new Date(client.created_at) : new Date();
+  return Math.floor((new Date() - createdAt) / 86400000);
 }
 
 /* ── Archived ──
@@ -1350,10 +1412,11 @@ function renderList() {
     var stage = getStage(c);
     var archived = isArchived(c);
     var ghost = archived ? null : getGhostState(c);
+    var stuck = archived ? false : isStuck(c);
     var contact = getContactDisplay(c);
     var warn = archived ? null : getAttentionWarning(c, stage);
-    var needsAttention = !archived && stage !== 'graduated' && (!!warn || contact.isAlert || (ghost && !ghost.stuck));
-    return { client: c, stage: stage, archived: archived, ghost: ghost, contact: contact, warn: warn, needsAttention: needsAttention };
+    var needsAttention = !archived && stage !== 'graduated' && (!!warn || contact.isAlert || (ghost && !stuck));
+    return { client: c, stage: stage, archived: archived, ghost: ghost, stuck: stuck, contact: contact, warn: warn, needsAttention: needsAttention };
   });
 
   // Archived accounts are tucked away everywhere except the Archived filter.
@@ -1364,7 +1427,7 @@ function renderList() {
   if (_listFilter === 'archived') {
     meta = archivedMeta;
   } else if (_listFilter === 'stuck') {
-    meta = liveMeta.filter(function(m) { return m.ghost && m.ghost.stuck; });
+    meta = liveMeta.filter(function(m) { return m.stuck; });
   } else if (_listFilter !== 'all') {
     meta = liveMeta.filter(function(m) { return m.stage === _listFilter; });
   } else {
@@ -1387,8 +1450,8 @@ function renderList() {
       return bAt.localeCompare(aAt);
     }
     // default: attention-first — stuck, then ghosted, then other attention flags, then by recency
-    var aRank = (a.ghost && a.ghost.stuck) ? 0 : a.ghost ? 1 : a.needsAttention ? 2 : 3;
-    var bRank = (b.ghost && b.ghost.stuck) ? 0 : b.ghost ? 1 : b.needsAttention ? 2 : 3;
+    var aRank = a.stuck ? 0 : a.ghost ? 1 : a.needsAttention ? 2 : 3;
+    var bRank = b.stuck ? 0 : b.ghost ? 1 : b.needsAttention ? 2 : 3;
     if (aRank !== bRank) return aRank - bRank;
     return new Date(b.client.created_at) - new Date(a.client.created_at);
   });
@@ -1399,7 +1462,7 @@ function renderList() {
   liveMeta.forEach(function(m) {
     if (m.stage === 'post_go_live') postlive++;
     if (m.stage === 'graduated') graduated++;
-    if (m.ghost && m.ghost.stuck) stuckCount++;
+    if (m.stuck) stuckCount++;
     if (m.needsAttention) attention++;
   });
   document.getElementById('stat-active').textContent = active;
@@ -1408,6 +1471,8 @@ function renderList() {
   document.getElementById('stat-postlive').textContent = postlive;
   document.getElementById('stat-graduated').textContent = graduated;
   document.getElementById('stat-archived').textContent = archivedMeta.length;
+  var archivedStatEl = document.getElementById('stat-archived-item');
+  if (archivedStatEl) archivedStatEl.classList.toggle('zero', archivedMeta.length === 0);
 
   // Render list
   var container = document.getElementById('list-container');
@@ -1423,62 +1488,55 @@ function renderList() {
 
 /* ── Build row ── */
 function buildListRow(row, stage) {
-  var ob = getOnboarder(row.onboarder || '');
   var archived = isArchived(row);
-  var meeting = getMeetingDisplay(row, stage);
+  var meetingCell = getMeetingCell(row, stage);
   var warn = archived ? null : getAttentionWarning(row, stage);
   var ghost = archived ? null : getGhostState(row);
+  var stuck = archived ? false : isStuck(row);
   var contact = getContactDisplay(row);
   var notesCount = getNotesList(row).length;
-  var state = row.state || {};
-  var done = (state.sys ? state.sys.length : 0)
-           + (state.b2b ? state.b2b.length : 0)
-           + (state.mig ? state.mig.length : 0)
-           + (state.qs  ? state.qs.length  : 0);
-  var complete = done === FIXED_TOTAL;
-  var isStuck = !!(ghost && ghost.stuck);
-  var hasAlert = !!warn && !isStuck;
+  var hasAlert = !!warn && !stuck;
 
   var card = document.createElement('div');
-  card.className = 'list-row' + (hasAlert ? ' has-alert' : '') + (isStuck ? ' is-stuck' : '') + (archived ? ' is-archived' : '');
+  card.className = 'office-row' + (hasAlert ? ' has-alert' : '') + (stuck ? ' is-stuck' : '') + (archived ? ' is-archived' : '');
   card.id = 'card-' + row.id;
 
   var safeId = escHtml(row.id);
+  var sinceDate = row.created_at
+    ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
 
-  // Meeting icon
-  var mtgIcon = '';
-  if (meeting.cls === 'overdue' || meeting.cls === 'today') {
-    mtgIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
-  } else if (meeting.cls !== 'none') {
-    mtgIcon = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;opacity:.6"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
-  }
-
-  var alertIcon = (hasAlert || isStuck)
-    ? '<svg class="kcard-alert-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L14.5 13H1.5L8 2z" fill="' + (isStuck ? '#fee2e2' : '#fef3c7') + '" stroke="' + (isStuck ? '#dc2626' : '#f59e0b') + '" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3M8 11h.01" stroke="' + (isStuck ? '#991b1b' : '#d97706') + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
-    : '';
-
-  var stageLabel = stage === 'onboarding' ? 'Onboarding' : stage === 'post_go_live' ? 'Post Go-Live' : 'Graduated';
-  var taskText = complete ? '✓ All tasks' : done + ' / ' + FIXED_TOTAL + ' tasks';
-
-  var ghostBadgeHtml = '';
+  // STAGE column — bucket badge plus any Stuck / Ghost badges stacked below.
+  var stageBadgeHtml = '<span class="stage-badge ' + stage + '">' + escHtml(getStageBadgeText(row, stage)) + '</span>';
+  var extraBadges = '';
   if (archived) {
-    ghostBadgeHtml = '<span class="archived-badge">📦 Archived</span>';
-  } else if (isStuck) {
-    ghostBadgeHtml = '<span class="stuck-badge">Stuck · ' + ghost.days + 'd</span>';
-  } else if (ghost) {
-    ghostBadgeHtml = '<span class="ghost-badge">👻 Ghosted · ' + ghost.days + 'd</span>';
+    extraBadges += '<span class="archived-badge">📦 Archived</span>';
+  } else {
+    if (stuck) extraBadges += '<span class="stuck-badge">Stuck · ' + getStuckDays(row) + 'd</span>';
+    if (ghost) {
+      extraBadges += '<span class="ghost-badge">👻 Ghosted'
+        + (ghost.stageLabel ? ' · ' + escHtml(ghost.stageLabel) : '') + ' · ' + ghost.days + 'd</span>';
+    }
   }
+  var stageCellHtml = '<div class="kcard-stage-cell">' + stageBadgeHtml + extraBadges + '</div>';
 
-  var warnHtml = (warn && !isStuck)
-    ? '<div class="kcard-warn"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5L11 10H1L6 1.5z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 5v2.5M6 9h.01" stroke="#d97706" stroke-width="1.3" stroke-linecap="round"/></svg>' + escHtml(warn) + '</div>'
-    : '';
+  // NEXT MEETING column
+  var meetingCellHtml = '<div class="kcard-meeting-cell">'
+    + '<div class="kcard-meeting-date ' + meetingCell.cls + '">' + escHtml(meetingCell.dateText) + '</div>'
+    + (meetingCell.subText ? '<div class="kcard-meeting-sub ' + meetingCell.cls + '">' + escHtml(meetingCell.subText) + '</div>' : '')
+    + (warn && !stuck ? '<div class="kcard-warn"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1.5L11 10H1L6 1.5z" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 5v2.5M6 9h.01" stroke="#d97706" stroke-width="1.3" stroke-linecap="round"/></svg>' + escHtml(warn) + '</div>' : '')
+    + '</div>';
 
-  var stuckHtml = isStuck
-    ? '<div class="kcard-stuck"><span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="vertical-align:-1px;margin-right:4px;"><path d="M6 1.5L11 10H1L6 1.5z" fill="#fee2e2" stroke="#dc2626" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 5v2.5M6 9h.01" stroke="#991b1b" stroke-width="1.3" stroke-linecap="round"/></svg>Gone quiet ' + ghost.days + ' days — update the stage in HubSpot</span>'
-      + '<button class="kcard-stuck-hs-btn" id="stuckdonebtn-' + safeId + '">Done, clear</button></div>'
-    : '';
+  // LAST CONTACT column
+  var contactCellHtml = (stage !== 'graduated' && !archived)
+    ? '<div class="kcard-contact-cell"><span class="contact-age ' + contact.ageCls + '">'
+      + escHtml(contact.text) + (contact.ageStr ? ' (' + contact.ageStr + ')' : '') + '</span></div>'
+    : '<div class="kcard-contact-cell">—</div>';
 
-  var addonsPills = (row.addons || []).map(function(a) {
+  // ADD-ONS column — cap visible pills, roll the rest into a "+N" chip.
+  var ADDONS_SHOWN = 3;
+  var addonsList = row.addons || [];
+  var addonsPills = addonsList.slice(0, ADDONS_SHOWN).map(function(a) {
     var cat = ADDON_CATALOG.find(function(c) { return c.key === a.product; });
     if (!cat) return '';
     var s = ADDON_STATUS_MAP[a.status] || ADDON_STATUS_MAP.not_started;
@@ -1487,21 +1545,14 @@ function buildListRow(row, stage) {
       + escHtml(cat.name)
       + '</span>';
   }).join('');
-  var addonsHtml = '<div class="kcard-addons">'
-    + '<div class="kcard-addons-label">ADD-ON PRODUCTS</div>'
-    + '<div class="kcard-addons-pills">'
-    + addonsPills
-    + '<button class="kcard-addons-add" id="addonaddbtn-' + safeId + '" title="Add / manage add-ons">+</button>'
-    + '</div></div>';
-
-  var contactHtml = (stage !== 'graduated' && !archived)
-    ? '<div class="kcard-contact"><span>Last contact: <span class="contact-age ' + contact.ageCls + '">'
-      + escHtml(contact.text) + (contact.ageStr ? ' (' + contact.ageStr + ')' : '') + '</span></span>'
-      + '<button class="log-contact-btn" id="quicklogbtn-' + safeId + '">'
-      + '<svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v2.5l1.5 1"/></svg>Log contact</button></div>'
+  var addonsOverflow = addonsList.length > ADDONS_SHOWN
+    ? '<span class="kcard-addon-overflow">+' + (addonsList.length - ADDONS_SHOWN) + '</span>'
     : '';
+  var addonsCellHtml = '<div class="kcard-addons-cell"><div class="kcard-addons-pills">' + addonsPills + addonsOverflow + '</div></div>';
 
-  // Menu items by stage
+  // Menu — grouped to match the reviewed design: contact/notes/addons, then
+  // links out (checklist / HubSpot / copy / meetings), then identity actions,
+  // then stage transitions, then delete.
   var menuItems = '';
   if (stage !== 'graduated' && !archived) {
     menuItems += '<button class="kcard-menu-item highlight" id="logbtn-' + safeId + '">'
@@ -1517,11 +1568,23 @@ function buildListRow(row, stage) {
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1.5" width="9" height="10" rx="1.2"/><path d="M4.5 4.5h4M4.5 7h4M4.5 9h2.5"/></svg>' + (notesCount ? 'View notes (' + notesCount + ')' : 'Add notes') + '</button>';
   menuItems += '<button class="kcard-menu-item" id="addonsbtn-' + safeId + '">'
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 1v11M1 6.5h11"/></svg>Manage add-ons</button>';
+
+  menuItems += '<div class="kcard-menu-divider"></div>';
+  menuItems += '<button class="kcard-menu-item" id="checklistbtn-' + safeId + '">'
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="10" height="10" rx="1.5"/><path d="M4 6.5l1.5 1.5 3-3.5"/></svg>View checklist</button>';
+  if (row.hubspot_ticket_id) {
+    menuItems += '<button class="kcard-menu-item" id="hsopenbtn-' + safeId + '">'
+      + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6-6M11 5V2H8"/><path d="M9.5 7v3.5a1 1 0 01-1 1H2.5a1 1 0 01-1-1V4.5a1 1 0 011-1H6"/></svg>Open in HubSpot</button>';
+  }
   menuItems += '<button class="kcard-menu-item" id="copybtn-' + safeId + '">'
     + '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V2.5A.5.5 0 012.5 2H10"/></svg>Copy link</button>';
   if (!archived) {
     menuItems += '<button class="kcard-menu-item" id="mtgbtn-' + safeId + '">'
       + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="11" height="10" rx="1.5"/><path d="M1 5.5h11M4 1v2M9 1v2"/></svg>Meetings</button>';
+  }
+
+  menuItems += '<div class="kcard-menu-divider"></div>';
+  if (!archived) {
     menuItems += '<button class="kcard-menu-item" id="hsbtn-' + safeId + '">'
       + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v2.5l1.5 1.5"/></svg>HubSpot ID</button>';
   }
@@ -1529,6 +1592,8 @@ function buildListRow(row, stage) {
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10.5h9"/><path d="M8.5 2.5l2 2-5.5 5.5H3v-2L8.5 2.5z"/></svg>Rename</button>';
   menuItems += '<button class="kcard-menu-item" id="reassignbtn-' + safeId + '">'
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="4" r="2.5"/><path d="M1 11.5c0-2 1.8-3.5 4-3.5"/><path d="M9.5 8v4M7.5 10h4"/></svg>Reassign</button>';
+
+  menuItems += '<div class="kcard-menu-divider"></div>';
   if (!archived && stage === 'post_go_live') {
     menuItems += '<button class="kcard-menu-item success" id="donebtn-' + safeId + '">'
       + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6"/></svg>Done with support</button>';
@@ -1544,36 +1609,28 @@ function buildListRow(row, stage) {
     menuItems += '<button class="kcard-menu-item" id="archivebtn-' + safeId + '">'
       + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2" width="10" height="2.6" rx="0.6"/><path d="M2.2 4.6v5.4a1 1 0 001 1h5.6a1 1 0 001-1V4.6"/><path d="M5.2 7h2.6"/></svg>Archive</button>';
   }
+  menuItems += '<div class="kcard-menu-divider"></div>';
   menuItems += '<button class="kcard-menu-item danger" id="delbtn-' + safeId + '">'
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="1,3 12,3"/><path d="M3 3V11a1 1 0 001 1h5a1 1 0 001-1V3"/><path d="M4.5 3V2a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1"/></svg>Delete</button>';
 
   card.innerHTML =
-    '<div class="kcard-top">'
-    + '<div class="kcard-avatar" style="background:' + ob.color + '">' + escHtml(ob.initials) + '</div>'
-    + '<div class="kcard-info">'
+    '<div class="kcard-info">'
     +   '<div class="kcard-name" title="' + escHtml(row.name) + '">' + escHtml(row.name) + '</div>'
-    +   '<div class="kcard-meeting ' + meeting.cls + '">' + mtgIcon + escHtml(meeting.text) + '</div>'
+    +   (sinceDate ? '<div class="kcard-since">Since ' + sinceDate + '</div>' : '')
     + '</div>'
-    + alertIcon
-    + '<button class="notes-btn' + (notesCount ? ' has-notes' : '') + '" id="notesiconbtn-' + safeId + '" title="' + (notesCount ? notesCount + ' note' + (notesCount === 1 ? '' : 's') : 'Add a personal note') + '">'
-    +   '<svg width="15" height="15" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1.5" width="9" height="10" rx="1.2"/><path d="M4.5 4.5h4M4.5 7h4M4.5 9h2.5"/></svg>'
-    + '</button>'
-    + '<div class="kcard-menu-wrap">'
-    +   '<button class="kcard-menu-btn" id="menubtn-' + safeId + '" title="More options">'
-    +     '<svg width="14" height="14" viewBox="0 0 15 15" fill="currentColor"><circle cx="7.5" cy="3" r="1.2"/><circle cx="7.5" cy="7.5" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/></svg>'
-    +   '</button>'
-    +   '<div class="kcard-menu-dropdown" id="menu-' + safeId + '">' + menuItems + '</div>'
-    + '</div>'
-    + '</div>'
-    + '<div class="kcard-bottom">'
-    +   '<span class="stage-badge ' + stage + '">' + stageLabel + '</span>'
-    +   ghostBadgeHtml
-    +   '<span class="kcard-tasks' + (complete ? ' complete' : '') + '">' + taskText + '</span>'
-    + '</div>'
-    + contactHtml
-    + addonsHtml
-    + stuckHtml
-    + warnHtml;
+    + stageCellHtml
+    + meetingCellHtml
+    + contactCellHtml
+    + addonsCellHtml
+    + '<div class="kcard-actions-cell">'
+    +   '<button class="kcard-addons-add" id="addonaddbtn-' + safeId + '" title="Add / manage add-ons">+</button>'
+    +   '<div class="kcard-menu-wrap">'
+    +     '<button class="kcard-menu-btn" id="menubtn-' + safeId + '" title="More options">'
+    +       '<svg width="14" height="14" viewBox="0 0 15 15" fill="currentColor"><circle cx="7.5" cy="3" r="1.2"/><circle cx="7.5" cy="7.5" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/></svg>'
+    +     '</button>'
+    +     '<div class="kcard-menu-dropdown" id="menu-' + safeId + '">' + menuItems + '</div>'
+    +   '</div>'
+    + '</div>';
 
   // Event listeners
   card.querySelector('#menubtn-' + row.id).addEventListener('click', function(e) {
@@ -1582,9 +1639,6 @@ function buildListRow(row, stage) {
   if (stage !== 'graduated' && !archived) {
     card.querySelector('#logbtn-' + row.id).addEventListener('click', function(e) {
       e.stopPropagation(); closeAllMenus(); logContact(row.id);
-    });
-    card.querySelector('#quicklogbtn-' + row.id).addEventListener('click', function(e) {
-      e.stopPropagation(); e.preventDefault(); logContact(row.id);
     });
     if (ghost) {
       card.querySelector('#clearghostbtn-' + row.id).addEventListener('click', function(e) {
@@ -1596,16 +1650,8 @@ function buildListRow(row, stage) {
       });
     }
   }
-  if (isStuck) {
-    card.querySelector('#stuckdonebtn-' + row.id).addEventListener('click', function(e) {
-      e.stopPropagation(); clearGhosted(row.id);
-    });
-  }
   card.querySelector('#notesbtn-' + row.id).addEventListener('click', function(e) {
     e.stopPropagation(); closeAllMenus(); openNotesModal(row.id, row.name);
-  });
-  card.querySelector('#notesiconbtn-' + row.id).addEventListener('click', function(e) {
-    e.stopPropagation(); openNotesModal(row.id, row.name);
   });
   card.querySelector('#addonsbtn-' + row.id).addEventListener('click', function(e) {
     e.stopPropagation(); closeAllMenus(); openManageAddonsModal(row.id, row.name);
@@ -1613,13 +1659,23 @@ function buildListRow(row, stage) {
   card.querySelector('#addonaddbtn-' + row.id).addEventListener('click', function(e) {
     e.stopPropagation(); openManageAddonsModal(row.id, row.name);
   });
-  (row.addons || []).forEach(function(a) {
+  addonsList.slice(0, ADDONS_SHOWN).forEach(function(a) {
     var pill = card.querySelector('#addonpill-' + row.id + '-' + a.product);
     if (!pill) return;
     pill.addEventListener('click', function(e) {
       e.stopPropagation(); openAddonPopup(e, row.id, a.product);
     });
   });
+  card.querySelector('#checklistbtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); closeAllMenus();
+    window.open(buildClientUrl(row.id), '_blank');
+  });
+  if (row.hubspot_ticket_id) {
+    card.querySelector('#hsopenbtn-' + row.id).addEventListener('click', function(e) {
+      e.stopPropagation(); closeAllMenus();
+      window.open(buildHubSpotTicketUrl(row.hubspot_ticket_id), '_blank');
+    });
+  }
   card.querySelector('#copybtn-' + row.id).addEventListener('click', function(e) {
     e.stopPropagation(); closeAllMenus();
     copyCardUrl(this, buildClientUrl(row.id));
@@ -1662,7 +1718,7 @@ function buildListRow(row, stage) {
   }
 
   card.addEventListener('click', function(e) {
-    if (e.target.closest('.kcard-menu-wrap') || e.target.closest('.notes-btn') || e.target.closest('.kcard-addons') || e.target.closest('.kcard-contact')) return;
+    if (e.target.closest('.kcard-menu-wrap') || e.target.closest('.kcard-addons-cell') || e.target.closest('.kcard-addons-add')) return;
     window.open(buildClientUrl(row.id), '_blank');
   });
 
@@ -1687,6 +1743,10 @@ async function markGhosted(id) {
   var today = new Date().toISOString().split('T')[0];
   var state = Object.assign({}, client.state || {});
   state.ghost_since = today;
+  // Freeze the ticket stage they were at when they went quiet — see the
+  // getGhostState() comment for why this can't just be read live later.
+  state.ghost_stage_label = (state.ticket_stage && state.ticket_stage.label)
+    || getStageBadgeText(client, getStage(client));
   var res = await _sb.from('clients')
     .update({ state: state, updated_at: new Date().toISOString() })
     .eq('id', id);
@@ -1700,6 +1760,7 @@ async function clearGhosted(id) {
   if (!client) return;
   var state = Object.assign({}, client.state || {});
   delete state.ghost_since;
+  delete state.ghost_stage_label;
   var res = await _sb.from('clients')
     .update({ state: state, updated_at: new Date().toISOString() })
     .eq('id', id);
@@ -1863,7 +1924,7 @@ function toggleKcardMenu(id) {
 }
 function closeAllMenus() {
   document.querySelectorAll('.kcard-menu-dropdown.open').forEach(function(el) { el.classList.remove('open'); });
-  document.querySelectorAll('.list-row').forEach(function(el) { el.style.zIndex = ''; });
+  document.querySelectorAll('.office-row').forEach(function(el) { el.style.zIndex = ''; });
 }
 document.addEventListener('click', closeAllMenus);
 

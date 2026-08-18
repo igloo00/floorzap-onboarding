@@ -75,6 +75,7 @@ export default {
       'n2_week_check_in_meeting',
       'integrations_meeting',
       'graduation_meeting',
+      'hs_pipeline_stage',
     ].join(',');
 
     let p;
@@ -240,12 +241,23 @@ export default {
     const rawSubject = p.subject || null;
     const clientName = rawSubject ? rawSubject.replace(/^[^|]+\|\s*/, '').trim() : null;
 
+    // Resolve the ticket's current pipeline-stage label. Never hardcoded — if
+    // HubSpot renames a stage, the next dashboard sync picks up the new label
+    // with no code change. Label lookup is cached (see getTicketStageLabelMap)
+    // since it's the same portal-wide map for every ticket.
+    let ticketStage = null;
+    if (p.hs_pipeline_stage) {
+      const labelMap = await getTicketStageLabelMap(env);
+      ticketStage = { id: p.hs_pipeline_stage, label: labelMap[p.hs_pipeline_stage] || null };
+    }
+
     return new Response(
       JSON.stringify({
         floorzap_url: p.floorzap_url ?? null,
         client_name: clientName,
         last_contacted: lastContactedIso,
         has_post_golive_meeting: !!dateByKey['post_golive'],
+        ticket_stage: ticketStage,
         meetings: [
           buildSlot('kickoff',      'Kickoff',         p.initial_onboarding_meeting),
           buildSlot('checkin',      '2-Week check-in', p.n2_week_check_in_meeting),
@@ -267,6 +279,39 @@ export default {
     ctx.waitUntil(runDailyAddonSync(env));
   },
 };
+
+/**
+ * Resolve HubSpot's current { stageId -> label } map for the tickets
+ * "hs_pipeline_stage" property (portal-wide, shared across every pipeline).
+ * Cached for an hour via the Cache API — this map is identical for every
+ * ticket, so we don't want to re-fetch it once per client on every dashboard
+ * load. A one-hour TTL means a status rename in HubSpot shows up within the
+ * hour with zero deploys, not instantly but close enough for this use case.
+ */
+async function getTicketStageLabelMap(env) {
+  const cache = caches.default;
+  const cacheKey = new Request('https://internal-cache.floorzap/hs-ticket-stage-labels');
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached.json();
+
+  try {
+    const res = await fetch(
+      'https://api.hubapi.com/crm/v3/properties/tickets/hs_pipeline_stage',
+      { headers: { Authorization: `Bearer ${env.HUBSPOT_API_KEY}` } }
+    );
+    if (!res.ok) return {};
+    const data = await res.json();
+    const map = {};
+    for (const opt of (data.options || [])) map[opt.value] = opt.label;
+    const response = new Response(JSON.stringify(map), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=3600' },
+    });
+    await cache.put(cacheKey, response.clone());
+    return map;
+  } catch (_) {
+    return {};
+  }
+}
 
 /**
  * Read all clients from Supabase and write each one's add-ons back, sourced from

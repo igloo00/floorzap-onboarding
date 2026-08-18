@@ -34,9 +34,16 @@ rename, or restructure a field, update this file in the same change.
   hs_meetings:      { checkin: { zoom: "https://...", recording: "" } },
   hs_meeting_dates: { kickoff: "1755000000000", checkin: "2026-08-20" },
   has_post_golive_meeting: true,
+  ticket_stage: {               // synced by dashboard.html's syncHubSpotDates(), sourced
+    id: "1101420075",           // from worker.js reading the ticket's hs_pipeline_stage.
+    label: "Final Grad Prep",   // Never hardcoded — label is whatever HubSpot currently
+    synced_at: "2026-08-18T18:00:00.000Z"  // calls that stage, resolved live each sync.
+  },                             // Drives getStage() and isStuck() — see below.
   ghost_since: "2026-08-04",   // set by dashboard.html when an onboarder manually
                                 // flags the account as gone quiet; absent/undefined
                                 // when not ghosted. See "Ghost / Stuck" below.
+  ghost_stage_label: "Integrations Meeting",  // snapshot of ticket_stage.label taken
+                                // at the moment markGhosted() ran — see "Ghost / Stuck".
   notes: [                     // append-only log, dashboard-only — never shown to
     { text: "Waiting on their accountant to confirm QBO mapping.",
       at: "2026-08-18T18:02:00.000Z", author: "Valentin" },
@@ -87,33 +94,67 @@ stale) ticket property.
 
 ## Derived state (not stored, computed on read)
 
-`getStage(client)` in `dashboard.html`:
-- `stage === 'graduated'` → `graduated`
-- else `state.has_post_golive_meeting` → `post_go_live`
-- else fallback: graduation date (from `hs_meeting_dates.graduation`) has
-  passed → `post_go_live`
-- else → `onboarding`
+`getStage(client)` in `dashboard.html` — driven by the live HubSpot ticket
+status, not meeting-detection heuristics:
+- `stage === 'graduated'` → `graduated` (manual override, still wins first)
+- else `state.ticket_stage.label` is looked up in `TICKET_STAGE_BUCKET` (a
+  plain object, not scattered `if`s, so a HubSpot rename is a one-line fix):
+  - Discovery / Kickoff Meeting / 2-Week Meeting / Integrations Meeting /
+    Final Grad Prep / New / Pending Payment → `onboarding`
+  - Live/Graduated → `post_go_live`
+  - OB Complete → `graduated`
+- else (no `ticket_stage` synced yet, or an unrecognized/renamed label —
+  degrades gracefully instead of miscategorizing) falls back to the old
+  heuristic: `state.has_post_golive_meeting`, then whether the graduation
+  date in `hs_meeting_dates.graduation` has passed, then `onboarding`.
 
-`getGhostState(client)` in `dashboard.html` — the "Ghost / Stuck" workflow:
+Two ticket statuses aren't a Kanban stage at all — `Cancelled` and
+`OB Incomplete` mean the account isn't onboarding anymore, just not via a
+successful graduation. `syncHubSpotDates()` auto-sets `state.archived_at`
+for these (see `TICKET_STAGE_AUTO_ARCHIVE`), the same as a manual Archive —
+so all the archived behavior below applies with no special-casing. An
+onboarder can still manually Unarchive if a status turns out to be wrong.
+
+The STAGE column badge text (`getStageBadgeText()`) isn't always the bucket
+name — while `onboarding`, it shows the live sub-stage (e.g. "Integrations
+Meeting") since that's the useful signal during a long onboarding; once
+`post_go_live` or `graduated` it shows the milestone name instead, since the
+sub-stage stops mattering.
+
+`isStuck(client)` in `dashboard.html` — `true` when
+`state.ticket_stage.label === 'Stuck'`. This is a live HubSpot read, not a
+computed day-count — it can appear at any point in the funnel, and clears
+itself on the next sync as soon as the ticket moves off "Stuck" in HubSpot.
+Nothing to manually clear on the dashboard side for this one.
+
+`getGhostState(client)` in `dashboard.html` — a separate, purely manual flag:
 - No `state.ghost_since` → not ghosted, returns `null`.
-- `state.ghost_since` set, days-since < `GHOST_STUCK_DAYS` (14) → `ghost`
-  (onboarder manually flagged the account as gone quiet).
-- days-since >= `GHOST_STUCK_DAYS` → `stuck` (surfaced as a red banner
-  nudging the onboarder to go update the deal/ticket stage in HubSpot by
-  hand — **the dashboard never writes this to HubSpot itself**; only
-  `worker.js` holds HubSpot credentials, and this flag isn't part of its
-  sync). Cleared by the onboarder (via "Clear ghost status" / "Done, clear")
-  once they've logged contact or updated HubSpot, which deletes
-  `ghost_since` from `state`.
+- `state.ghost_since` set → ghosted; `days` is days-since for display, and
+  `stageLabel` (from `state.ghost_stage_label`) is whatever the ticket
+  stage was *at the moment the onboarder flagged it* — frozen on purpose.
+  HubSpot's `hs_pipeline_stage` is a single value, so once someone (or the
+  onboarder) moves the ticket to "Stuck," the prior stage is gone from
+  HubSpot's side; this snapshot is the only place "was at Integrations
+  Meeting when they went quiet" survives. Set in `markGhosted()`, cleared
+  (both `ghost_since` and `ghost_stage_label`) in `clearGhosted()` — **the
+  dashboard never writes either of these to HubSpot itself**; only
+  `worker.js` holds HubSpot credentials.
+
+Ghost and Stuck are independent and can both be true at once (e.g. manually
+flagged Ghosted three weeks ago, and HubSpot's ticket has since been moved
+to "Stuck") — the dashboard stacks both badges when that happens.
 
 `isArchived(client)` in `dashboard.html` — `true` when `state.archived_at` is
-set. Archived accounts are excluded from every filter/stat except the
-dedicated "Archived" pill (which shows only archived accounts, most-recently-
-archived first). Ghost/Stuck and attention flags are suppressed once
-archived — the account is done, not in need of a nudge. Toggled via the row
-menu's "Archive" / "Unarchive" actions (`archiveClient` / `unarchiveClient`),
-which only set/delete `state.archived_at` — nothing else about the row
-changes, so unarchiving returns it to whatever `stage` it was already in.
+set (manually via Archive, or automatically per the Cancelled/OB Incomplete
+sync above). Archived accounts are excluded from every filter/stat except
+the dedicated "Archived" pill (most-recently-archived first). Ghost/Stuck
+and attention flags are suppressed once archived — the account is done, not
+in need of a nudge. Toggled via the row menu's "Archive" / "Unarchive"
+actions (`archiveClient` / `unarchiveClient`), which only set/delete
+`state.archived_at` — nothing else about the row changes, so unarchiving
+returns it to whatever `stage` it was already in.
 
-So a client's Kanban column is a mix of one stored flag (`stage`) and two
-computed fallbacks — there's no single "status" column to query directly.
+So a client's Kanban column is a mix of one stored override (`stage`), a
+live HubSpot read (`state.ticket_stage`), and a meeting-based fallback for
+clients that predate the sync or have an unrecognized ticket status — there's
+no single "status" column to query directly.

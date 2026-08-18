@@ -339,13 +339,22 @@ body {
 .notes-btn.has-notes { color: #116FEA; }
 
 /* ── Notes chat log ── */
+.modal-close-x {
+  position: absolute; top: 18px; right: 18px;
+  background: none; border: none; cursor: pointer; color: #9ca3af;
+  padding: 4px; border-radius: 6px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.modal-close-x:hover { background: #f3f4f6; color: #374151; }
 .notes-log {
   display: flex; flex-direction: column; gap: 12px;
-  max-height: 300px; overflow-y: auto;
+  height: 420px; overflow-y: auto;
   padding: 12px; margin-bottom: 12px;
   background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px;
 }
 .notes-empty {
+  flex: 1; display: flex; align-items: center; justify-content: center;
   text-align: center; color: #9ca3af; font-size: 12.5px; padding: 20px 8px;
 }
 .notes-entry-head {
@@ -369,7 +378,8 @@ body {
 .notes-input {
   flex: 1; font-size: 13.5px; font-family: inherit; color: #111827;
   border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 9px 12px;
-  outline: none; resize: none; max-height: 110px; line-height: 1.4;
+  outline: none; resize: none; box-sizing: border-box;
+  height: 38px; max-height: 110px; line-height: 1.4;
   transition: border-color 0.15s, box-shadow 0.15s; background: #fafafa;
 }
 .notes-input:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); background: #fff; }
@@ -831,9 +841,12 @@ body {
 
 <!-- Personal notes (chat-style log) -->
 <div class="modal-backdrop" id="notes-backdrop" onclick="notesBackdropClick(event)">
-  <div class="modal" style="max-width:440px;">
-    <h3 id="notes-modal-title">Notes</h3>
-    <p style="margin-bottom:14px;">Only visible to you on this dashboard — not shared with the client or HubSpot.</p>
+  <div class="modal" style="max-width:440px;position:relative;">
+    <button class="modal-close-x" onclick="closeNotesModal()" title="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg>
+    </button>
+    <h3 id="notes-modal-title" style="padding-right:22px;">Notes</h3>
+    <p style="margin-bottom:14px;">Only visible to you on this dashboard.</p>
     <div class="notes-log" id="notes-log"></div>
     <div class="notes-input-row">
       <textarea class="notes-input" id="notes-input" rows="1"
@@ -842,9 +855,6 @@ body {
       <button class="notes-send-btn" id="notes-send-btn" onclick="sendNoteEntry()" title="Send">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 1.5L7.5 8.5M14.5 1.5L10 14.5l-2.5-6-6-2.5L14.5 1.5z"/></svg>
       </button>
-    </div>
-    <div class="modal-actions" style="margin-top:12px;">
-      <button class="btn-cancel" onclick="closeNotesModal()">Close</button>
     </div>
   </div>
 </div>
@@ -1702,8 +1712,8 @@ function notesInputKey(e) {
   }
 }
 function autoGrowNotesInput(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+  el.style.height = '38px'; // matches .notes-send-btn's fixed height
+  el.style.height = Math.max(38, Math.min(el.scrollHeight, 110)) + 'px';
 }
 
 async function sendNoteEntry() {

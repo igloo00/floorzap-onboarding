@@ -6,6 +6,18 @@ go — doesn't need to be formal, just enough to remember what was decided and w
 
 ## Shipped
 
+- 2026-08-18 — Dashboard redesign (OS side): replaced the 3-column Kanban
+  board with a single sortable/filterable list (filter pills for
+  All/Onboarding/Post Go-Live/Graduated/Stuck + a sort dropdown). Added a
+  "Ghost" status an onboarder can set manually when an account goes quiet;
+  after 14 days (`GHOST_STUCK_DAYS`) it auto-promotes to "Stuck" with a red
+  banner nudging a manual HubSpot stage update (dashboard never writes to
+  HubSpot itself — see SCHEMA.md "Ghost / Stuck"). Added a private
+  per-account notes field (dashboard-only, not shown to the client). Also
+  fixed dead code: `openManageAddonsModal`/`openAddonPopup` existed but were
+  never wired to anything — the "+" add-on button and status pills are now
+  clickable. Surfaced `getContactDisplay()` (last-contact age/color), which
+  was fully implemented but never rendered anywhere before this.
 - 2026-08-12 — Added "Import products to inventory" task to Data migration
   (client side). Self-hosts the `.xlsx` template in-repo instead of an external
   CloudFront link that was returning a 403.

@@ -33,7 +33,12 @@ rename, or restructure a field, update this file in the same change.
   meetings: [],           // LEGACY — no longer rendered, see note below
   hs_meetings:      { checkin: { zoom: "https://...", recording: "" } },
   hs_meeting_dates: { kickoff: "1755000000000", checkin: "2026-08-20" },
-  has_post_golive_meeting: true
+  has_post_golive_meeting: true,
+  ghost_since: "2026-08-04",   // set by dashboard.html when an onboarder manually
+                                // flags the account as gone quiet; absent/undefined
+                                // when not ghosted. See "Ghost / Stuck" below.
+  notes: "Waiting on their accountant to confirm QBO mapping."
+         // free-text, dashboard-only. Not shown to the client, not synced to HubSpot.
 }
 ```
 
@@ -58,10 +63,10 @@ renders tasks in. This means:
 journey cards). Safe to ignore; not worth cleaning up unless you're already
 touching that code.
 
-`hs_meeting_dates` is the authoritative source for "next meeting" / Kanban
-stage — it's synced from the Worker's response (`data.meetings[].isoDate`),
-which itself prefers the real HubSpot meeting engagement time over the
-(possibly stale) ticket property.
+`hs_meeting_dates` is the authoritative source for "next meeting" / status —
+it's synced from the Worker's response (`data.meetings[].isoDate`), which
+itself prefers the real HubSpot meeting engagement time over the (possibly
+stale) ticket property.
 
 ## Derived state (not stored, computed on read)
 
@@ -71,6 +76,18 @@ which itself prefers the real HubSpot meeting engagement time over the
 - else fallback: graduation date (from `hs_meeting_dates.graduation`) has
   passed → `post_go_live`
 - else → `onboarding`
+
+`getGhostState(client)` in `dashboard.html` — the "Ghost / Stuck" workflow:
+- No `state.ghost_since` → not ghosted, returns `null`.
+- `state.ghost_since` set, days-since < `GHOST_STUCK_DAYS` (14) → `ghost`
+  (onboarder manually flagged the account as gone quiet).
+- days-since >= `GHOST_STUCK_DAYS` → `stuck` (surfaced as a red banner
+  nudging the onboarder to go update the deal/ticket stage in HubSpot by
+  hand — **the dashboard never writes this to HubSpot itself**; only
+  `worker.js` holds HubSpot credentials, and this flag isn't part of its
+  sync). Cleared by the onboarder (via "Clear ghost status" / "Done, clear")
+  once they've logged contact or updated HubSpot, which deletes
+  `ghost_since` from `state`.
 
 So a client's Kanban column is a mix of one stored flag (`stage`) and two
 computed fallbacks — there's no single "status" column to query directly.

@@ -245,6 +245,12 @@ body {
 #list-container .office-row {
   background: #fff; cursor: pointer; transition: background 0.12s;
   border-bottom: 1px solid #f3f4f6;
+  /* Fixed so every row matches regardless of how much a given cell renders —
+     otherwise a row with a Stuck+Ghosted badge stack, or a meeting warning
+     banner, ends up visibly taller than a plain row next to it. Tall enough
+     for the worst case (3 stacked badges in the STAGE cell); align-items:
+     center on the row (below) centers shorter cells within it. */
+  min-height: 96px;
 }
 #list-container .office-row:last-child { border-radius: 0 0 12px 12px; border-bottom: none; }
 #list-container .office-row:hover { background: #f8faff; }
@@ -364,7 +370,9 @@ body {
 .notes-send-btn:disabled { background: #93c5fd; cursor: default; }
 
 .kcard-addons-cell { min-width: 0; }
-.kcard-addons-pills { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+/* nowrap — pills are already capped at 3 (+overflow chip), so wrapping only
+   ever meant one row's add-ons cell was taller than its neighbors. */
+.kcard-addons-pills { display: flex; flex-wrap: nowrap; overflow: hidden; gap: 5px; align-items: center; }
 .kcard-addon-pill {
   display: inline-flex; align-items: center; gap: 5px;
   border: 1px solid; font-size: 11px; font-weight: 600;
@@ -1099,7 +1107,14 @@ async function syncHubSpotDates() {
       // previously wiped data whenever the worker returned an empty list.
       if (Object.keys(updates).length === 0) continue;
       Object.assign(_clients[id], updates);
-      await _sb.from('clients').update(updates).eq('id', id);
+      var syncRes = await _sb.from('clients').update(updates).eq('id', id);
+      // Supabase's client resolves (doesn't reject) on a write error, so without
+      // this check a failed save is invisible — the in-memory client above still
+      // looks updated for the rest of this page session, but nothing persisted,
+      // and the next reload silently reverts to stale data.
+      if (syncRes.error) {
+        console.error('syncHubSpotDates: failed to save client ' + id, syncRes.error);
+      }
     } catch(e) {}
   }
   _syncing = false;
@@ -1255,7 +1270,12 @@ function getLastMeeting(client) {
     var d = hasTime ? new Date(raw) : new Date(iso + 'T00:00:00');
     if (isNaN(d.getTime())) continue;
     var endOfDay = new Date(d); endOfDay.setHours(23, 59, 59, 999);
-    if (now > endOfDay) last = { label: m.label, date: d, hasTime: hasTime };
+    // Compare against the current `last`'s actual date, not just iteration
+    // order — MEETING_DEFS is in onboarding-stage order, not necessarily
+    // chronological order, so a rescheduled earlier-stage meeting (e.g. a
+    // "Prep go-live" pushed past the graduation date) must still win if it's
+    // genuinely the most recent one.
+    if (now > endOfDay && (!last || d > last.date)) last = { label: m.label, date: d, hasTime: hasTime };
   }
   return last;
 }

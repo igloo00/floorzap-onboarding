@@ -101,6 +101,8 @@ export default {
     // zoomByDay maps "YYYY-MM-DD" -> first Zoom URL found in that meeting's body
     const zoomByDay = {};
     const zoomByTitle = {};
+    const zoomTsByTitle = {}; // tracks the timestamp behind each zoomByTitle entry, so a
+                               // later reschedule's zoom link can replace an earlier one
     let meetingDetails = [];
     try {
       const assocRes = await fetch(
@@ -124,10 +126,15 @@ export default {
           const ts = parseHsTs(m.properties.hs_timestamp);
           const zoomUrl = extractZoom(m.properties);
 
-          // Try title-based match → remember the Zoom URL for that slot
+          // Try title-based match → remember the Zoom URL for that slot. If a slot
+          // was rescheduled and matches multiple meetings, keep the latest one's
+          // link so it stays in sync with the date dateByKey resolves to below.
           for (const { key, words } of MEETING_SLOT_KEYWORDS) {
             if (words.some(w => title.includes(w))) {
-              if (zoomUrl && !zoomByTitle[key]) zoomByTitle[key] = zoomUrl;
+              if (zoomUrl && !isNaN(ts) && (!zoomByTitle[key] || ts > zoomTsByTitle[key])) {
+                zoomByTitle[key] = zoomUrl;
+                zoomTsByTitle[key] = ts;
+              }
               break;
             }
           }
@@ -186,6 +193,11 @@ export default {
 
     // Build date map from engagement timestamps (authoritative — reflects rescheduling)
     // Falls back to ticket properties for the 4 legacy slots
+    // When a slot has been rescheduled more than once (e.g. a "Go-Live Prep"
+    // meeting moved from one date to another), multiple engagements can match
+    // the same slot's keywords. Keep the LATEST one — the association list
+    // order from HubSpot isn't chronological, so picking the first match found
+    // would lock onto a stale, superseded date instead of the current one.
     const dateByKey = {};
     for (const m of meetingDetails) {
       if (!m?.properties) continue;
@@ -193,8 +205,10 @@ export default {
       const ts = parseHsTs(m.properties.hs_timestamp);
       if (isNaN(ts)) continue;
       for (const { key, words } of MEETING_SLOT_KEYWORDS) {
-        if (words.some(w => title.includes(w)) && !dateByKey[key]) {
-          dateByKey[key] = String(ts); // Unix ms — engagement time wins over ticket props
+        if (words.some(w => title.includes(w))) {
+          if (!dateByKey[key] || ts > Number(dateByKey[key])) {
+            dateByKey[key] = String(ts); // Unix ms — engagement time wins over ticket props
+          }
           break;
         }
       }

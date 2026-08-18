@@ -37,8 +37,19 @@ rename, or restructure a field, update this file in the same change.
   ghost_since: "2026-08-04",   // set by dashboard.html when an onboarder manually
                                 // flags the account as gone quiet; absent/undefined
                                 // when not ghosted. See "Ghost / Stuck" below.
-  notes: "Waiting on their accountant to confirm QBO mapping."
-         // free-text, dashboard-only. Not shown to the client, not synced to HubSpot.
+  notes: [                     // append-only log, dashboard-only — never shown to
+    { text: "Waiting on their accountant to confirm QBO mapping.",
+      at: "2026-08-18T18:02:00.000Z", author: "Valentin" },
+    { text: "Followed up — accountant confirmed, ready for Integrations call.",
+      at: "2026-08-19T14:11:00.000Z", author: "Valentin" }
+  ]                            // the client or synced to HubSpot. Rendered as a
+                                // chat-style log in dashboard.html — `at`/`author`
+                                // are stamped automatically on send, never typed
+                                // by the onboarder. LEGACY: some rows may still
+                                // hold a plain string from before this was a log;
+                                // getNotesList() in dashboard.html normalizes a
+                                // string into a single entry with at/author null
+                                // (shown as "Earlier note") so nothing is lost.
 }
 ```
 

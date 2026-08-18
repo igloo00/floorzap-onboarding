@@ -338,6 +338,50 @@ body {
 .notes-btn:hover { background: #f3f4f6; color: #374151; }
 .notes-btn.has-notes { color: #116FEA; }
 
+/* ── Notes chat log ── */
+.notes-log {
+  display: flex; flex-direction: column; gap: 12px;
+  max-height: 300px; overflow-y: auto;
+  padding: 12px; margin-bottom: 12px;
+  background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px;
+}
+.notes-empty {
+  text-align: center; color: #9ca3af; font-size: 12.5px; padding: 20px 8px;
+}
+.notes-entry-head {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
+}
+.notes-entry-avatar {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; color: #fff;
+}
+.notes-entry-author { font-size: 11.5px; font-weight: 700; color: #374151; }
+.notes-entry-time { font-size: 11px; color: #9ca3af; }
+.notes-entry-bubble {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 8px 11px; font-size: 13px; color: #111827; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word; margin-left: 24px;
+}
+.notes-input-row {
+  display: flex; align-items: flex-end; gap: 8px;
+}
+.notes-input {
+  flex: 1; font-size: 13.5px; font-family: inherit; color: #111827;
+  border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 9px 12px;
+  outline: none; resize: none; max-height: 110px; line-height: 1.4;
+  transition: border-color 0.15s, box-shadow 0.15s; background: #fafafa;
+}
+.notes-input:focus { border-color: #116FEA; box-shadow: 0 0 0 3px rgba(17,111,234,0.1); background: #fff; }
+.notes-send-btn {
+  background: #116FEA; color: #fff; border: none; border-radius: 10px;
+  width: 38px; height: 38px; flex-shrink: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s;
+}
+.notes-send-btn:hover { background: #0f5fd4; }
+.notes-send-btn:disabled { background: #93c5fd; cursor: default; }
+
 .kcard-addons {
   margin-top: 10px; padding-top: 10px; border-top: 1px solid #EEF1F4;
 }
@@ -785,17 +829,22 @@ body {
   </div>
 </div>
 
-<!-- Personal notes -->
+<!-- Personal notes (chat-style log) -->
 <div class="modal-backdrop" id="notes-backdrop" onclick="notesBackdropClick(event)">
   <div class="modal" style="max-width:440px;">
-    <h3>Your notes</h3>
-    <p id="notes-modal-subtext" style="margin-bottom:16px;"></p>
-    <textarea class="modal-input" id="notes-textarea" rows="7"
-      placeholder="Only visible to you on this dashboard — not shared with the client or HubSpot."
-      style="resize:vertical;font-family:inherit;line-height:1.5;"></textarea>
-    <div class="modal-actions">
+    <h3 id="notes-modal-title">Notes</h3>
+    <p style="margin-bottom:14px;">Only visible to you on this dashboard — not shared with the client or HubSpot.</p>
+    <div class="notes-log" id="notes-log"></div>
+    <div class="notes-input-row">
+      <textarea class="notes-input" id="notes-input" rows="1"
+        placeholder="Add a note… (Enter to send, Shift+Enter for a new line)"
+        onkeydown="notesInputKey(event)" oninput="autoGrowNotesInput(this)"></textarea>
+      <button class="notes-send-btn" id="notes-send-btn" onclick="sendNoteEntry()" title="Send">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 1.5L7.5 8.5M14.5 1.5L10 14.5l-2.5-6-6-2.5L14.5 1.5z"/></svg>
+      </button>
+    </div>
+    <div class="modal-actions" style="margin-top:12px;">
       <button class="btn-cancel" onclick="closeNotesModal()">Close</button>
-      <button class="btn-submit" onclick="saveNotesModal()">Save</button>
     </div>
   </div>
 </div>
@@ -1330,7 +1379,7 @@ function buildListRow(row, stage) {
   var warn = getAttentionWarning(row, stage);
   var ghost = getGhostState(row);
   var contact = getContactDisplay(row);
-  var notes = (row.state || {}).notes || '';
+  var notesCount = getNotesList(row).length;
   var state = row.state || {};
   var done = (state.sys ? state.sys.length : 0)
            + (state.b2b ? state.b2b.length : 0)
@@ -1413,7 +1462,7 @@ function buildListRow(row, stage) {
     }
   }
   menuItems += '<button class="kcard-menu-item" id="notesbtn-' + safeId + '">'
-    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1.5" width="9" height="10" rx="1.2"/><path d="M4.5 4.5h4M4.5 7h4M4.5 9h2.5"/></svg>' + (notes ? 'Edit notes' : 'Add notes') + '</button>';
+    + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1.5" width="9" height="10" rx="1.2"/><path d="M4.5 4.5h4M4.5 7h4M4.5 9h2.5"/></svg>' + (notesCount ? 'View notes (' + notesCount + ')' : 'Add notes') + '</button>';
   menuItems += '<button class="kcard-menu-item" id="addonsbtn-' + safeId + '">'
     + '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 1v11M1 6.5h11"/></svg>Manage add-ons</button>';
   menuItems += '<button class="kcard-menu-item" id="copybtn-' + safeId + '">'
@@ -1445,7 +1494,7 @@ function buildListRow(row, stage) {
     +   '<div class="kcard-meeting ' + meeting.cls + '">' + mtgIcon + escHtml(meeting.text) + '</div>'
     + '</div>'
     + alertIcon
-    + '<button class="notes-btn' + (notes ? ' has-notes' : '') + '" id="notesiconbtn-' + safeId + '" title="' + (notes ? 'View/edit your notes' : 'Add a personal note') + '">'
+    + '<button class="notes-btn' + (notesCount ? ' has-notes' : '') + '" id="notesiconbtn-' + safeId + '" title="' + (notesCount ? notesCount + ' note' + (notesCount === 1 ? '' : 's') : 'Add a personal note') + '">'
     +   '<svg width="15" height="15" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1.5" width="9" height="10" rx="1.2"/><path d="M4.5 4.5h4M4.5 7h4M4.5 9h2.5"/></svg>'
     + '</button>'
     + '<div class="kcard-menu-wrap">'
@@ -1587,34 +1636,98 @@ async function clearGhosted(id) {
   renderList();
 }
 
-/* ── Personal notes ── */
+/* ── Personal notes (chat-style log) ──
+   state.notes is an array of { text, at (ISO datetime), author } entries,
+   append-only from the dashboard — each "Send" adds one entry with the date
+   stamped automatically. Older clients may still have the pre-chat shape
+   (a single plain string) from before this existed; getNotesList() below
+   normalizes that into a one-entry list so nothing is lost. */
+function getNotesList(client) {
+  var notes = (client.state || {}).notes;
+  if (Array.isArray(notes)) return notes;
+  if (typeof notes === 'string' && notes.trim()) {
+    return [{ text: notes, at: null, author: null }];
+  }
+  return [];
+}
+
 var _notesClientId = null;
 function openNotesModal(id, name) {
   _notesClientId = id;
-  var client = _clients[id] || {};
-  document.getElementById('notes-modal-subtext').textContent = 'Private notes for "' + name + '" — only you see these on the dashboard.';
-  document.getElementById('notes-textarea').value = (client.state || {}).notes || '';
+  document.getElementById('notes-modal-title').textContent = 'Notes — ' + name;
+  document.getElementById('notes-input').value = '';
+  autoGrowNotesInput(document.getElementById('notes-input'));
+  renderNotesLog();
   document.getElementById('notes-backdrop').classList.add('open');
-  setTimeout(function() { document.getElementById('notes-textarea').focus(); }, 50);
+  setTimeout(function() { document.getElementById('notes-input').focus(); }, 50);
 }
 function closeNotesModal() {
-  saveNotesModal();
+  var draft = document.getElementById('notes-input').value.trim();
+  if (draft && !confirm('Discard this unsent note?')) return;
   document.getElementById('notes-backdrop').classList.remove('open');
   _notesClientId = null;
 }
 function notesBackdropClick(e) { if (e.target === e.currentTarget) closeNotesModal(); }
-async function saveNotesModal() {
+
+function renderNotesLog() {
+  var log = document.getElementById('notes-log');
+  var client = _clients[_notesClientId] || {};
+  var entries = getNotesList(client);
+  if (entries.length === 0) {
+    log.innerHTML = '<div class="notes-empty">No notes yet — add one below.</div>';
+    return;
+  }
+  log.innerHTML = entries.map(function(e) {
+    var ob = getOnboarder(e.author || _currentUser.name);
+    var when = e.at
+      ? new Date(e.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        + ' · ' + new Date(e.at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      : 'Earlier note';
+    return '<div class="notes-entry">'
+      + '<div class="notes-entry-head">'
+      +   '<span class="notes-entry-avatar" style="background:' + ob.color + '">' + escHtml(ob.initials) + '</span>'
+      +   '<span class="notes-entry-author">' + escHtml(e.author || ob.name) + '</span>'
+      +   '<span class="notes-entry-time">' + when + '</span>'
+      + '</div>'
+      + '<div class="notes-entry-bubble">' + escHtml(e.text) + '</div>'
+      + '</div>';
+  }).join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+function notesInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendNoteEntry();
+  }
+}
+function autoGrowNotesInput(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+async function sendNoteEntry() {
   if (!_notesClientId) return;
   var id = _notesClientId;
   var client = _clients[id];
   if (!client) return;
-  var text = document.getElementById('notes-textarea').value;
+  var input = document.getElementById('notes-input');
+  var text = input.value.trim();
+  if (!text) return;
+
+  var entry = { text: text, at: new Date().toISOString(), author: _currentUser.name };
   var state = Object.assign({}, client.state || {});
-  if (text.trim()) state.notes = text; else delete state.notes;
+  var entries = getNotesList(client).concat([entry]);
+  state.notes = entries;
   client.state = state;
+
+  input.value = '';
+  autoGrowNotesInput(input);
+  renderNotesLog();
   renderList();
+
   var res = await _sb.from('clients').update({ state: state, updated_at: new Date().toISOString() }).eq('id', id);
-  if (res.error) alert('Error saving notes: ' + res.error.message);
+  if (res.error) alert('Error saving note: ' + res.error.message);
 }
 
 /* ── Done with support / undo ── */

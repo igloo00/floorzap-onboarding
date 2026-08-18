@@ -260,7 +260,6 @@ body {
   font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.kcard-since { font-size: 12px; color: #9ca3af; margin-top: 2px; }
 
 .kcard-stage-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
 .stage-badge {
@@ -1496,9 +1495,6 @@ function buildListRow(row, stage) {
   card.id = 'card-' + row.id;
 
   var safeId = escHtml(row.id);
-  var sinceDate = row.created_at
-    ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : null;
 
   // STAGE column — bucket badge plus any Stuck / Ghost badges stacked below.
   var stageBadgeHtml = '<span class="stage-badge ' + stage + '">' + escHtml(getStageBadgeText(row, stage)) + '</span>';
@@ -1610,7 +1606,6 @@ function buildListRow(row, stage) {
   card.innerHTML =
     '<div class="kcard-info">'
     +   '<div class="kcard-name" title="' + escHtml(row.name) + '">' + escHtml(row.name) + '</div>'
-    +   (sinceDate ? '<div class="kcard-since">Since ' + sinceDate + '</div>' : '')
     + '</div>'
     + stageCellHtml
     + meetingCellHtml

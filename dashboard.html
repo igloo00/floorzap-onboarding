@@ -378,13 +378,13 @@ body {
   font-size: 11px; font-weight: 600; color: #94a3b8;
   background: #f1f5f9; padding: 3px 8px; border-radius: 999px;
 }
-.kcard-addons-add {
+.kcard-quickadd-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 26px; height: 26px; border-radius: 7px; border: 1.5px solid #e5e7eb;
   color: #9ca3af; cursor: pointer; font-size: 15px; line-height: 1; flex-shrink: 0;
   transition: border-color 0.1s, color 0.1s; background: #fff;
 }
-.kcard-addons-add:hover { border-color: #116FEA; color: #116FEA; }
+.kcard-quickadd-btn:hover { border-color: #116FEA; color: #116FEA; }
 
 /* Add-on status popup */
 .addon-popup {
@@ -1617,7 +1617,7 @@ function buildListRow(row, stage) {
     + contactCellHtml
     + addonsCellHtml
     + '<div class="kcard-actions-cell">'
-    +   '<button class="kcard-addons-add" id="addonaddbtn-' + safeId + '" title="Add / manage add-ons">+</button>'
+    +   '<button class="kcard-quickadd-btn" id="quicknotebtn-' + safeId + '" title="Add a note">+</button>'
     +   '<div class="kcard-menu-wrap">'
     +     '<button class="kcard-menu-btn" id="menubtn-' + safeId + '" title="More options">'
     +       '<svg width="14" height="14" viewBox="0 0 15 15" fill="currentColor"><circle cx="7.5" cy="3" r="1.2"/><circle cx="7.5" cy="7.5" r="1.2"/><circle cx="7.5" cy="12" r="1.2"/></svg>'
@@ -1650,8 +1650,8 @@ function buildListRow(row, stage) {
   card.querySelector('#addonsbtn-' + row.id).addEventListener('click', function(e) {
     e.stopPropagation(); closeAllMenus(); openManageAddonsModal(row.id, row.name);
   });
-  card.querySelector('#addonaddbtn-' + row.id).addEventListener('click', function(e) {
-    e.stopPropagation(); openManageAddonsModal(row.id, row.name);
+  card.querySelector('#quicknotebtn-' + row.id).addEventListener('click', function(e) {
+    e.stopPropagation(); openNotesModal(row.id, row.name);
   });
   addonsList.slice(0, ADDONS_SHOWN).forEach(function(a) {
     var pill = card.querySelector('#addonpill-' + row.id + '-' + a.product);
@@ -1712,7 +1712,7 @@ function buildListRow(row, stage) {
   }
 
   card.addEventListener('click', function(e) {
-    if (e.target.closest('.kcard-menu-wrap') || e.target.closest('.kcard-addons-cell') || e.target.closest('.kcard-addons-add')) return;
+    if (e.target.closest('.kcard-menu-wrap') || e.target.closest('.kcard-addons-cell') || e.target.closest('.kcard-quickadd-btn')) return;
     window.open(buildClientUrl(row.id), '_blank');
   });
 

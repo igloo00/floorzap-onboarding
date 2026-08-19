@@ -298,16 +298,24 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* Premium Features tab */
-.addons-grid { display: flex; flex-direction: column; gap: 10px; }
-.addon-card { display: flex; align-items: center; gap: 13px; padding: 14px 16px; background: #fff; border: 1px solid #E7EBF2; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-.addon-ic { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.addon-main { flex: 1; min-width: 0; }
-.addon-name { font-size: 14px; font-weight: 700; color: #1E293B; }
-.addon-desc { font-size: 12px; color: #64748B; margin-top: 2px; line-height: 1.4; }
-.addon-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
-.addon-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
-.addons-empty { text-align: center; color: #94A3B8; font-size: 13px; line-height: 1.5; padding: 34px 22px; border: 1px dashed #D9E0EA; border-radius: 14px; background: #FBFCFE; }
+/* Add-on rows, appended under System configuration's real tasks. Left
+   accent stripe carries the "this is a custom add-on" signal (same pattern
+   the dashboard uses for its alert rows) — no separate dot/icon needed
+   since the stripe is already the color break. Padding-left is 51px, not
+   the usual 20px, so the name lines up with the checklist rows above it —
+   those are indented by a 20px checkbox + 14px gap that this row doesn't have. */
+.addon-task {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 20px 12px 51px; border-top: 1px solid #f3f4f6;
+  border-left: 3px solid transparent;
+}
+.addon-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.addon-tag {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px; white-space: nowrap; background: #F1F5F9; color: #64748B;
+}
+.addon-status { font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.addon-status .dot { width: 5px; height: 5px; border-radius: 50%; }
 
 
 /* ── Notes ── */
@@ -567,7 +575,6 @@ body {
   <div class="tabs" role="tablist" aria-label="Checklist sections">
     <button class="tab-btn active" id="tabbtn-setup" role="tab" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
     <button class="tab-btn" id="tabbtn-training" role="tab" aria-selected="false" aria-controls="tab-training" onclick="switchTab('training')">Training</button>
-    <button class="tab-btn" id="tabbtn-premium" role="tab" aria-selected="false" aria-controls="tab-premium" onclick="switchTab('premium')">Premium Features</button>
   </div>
 
   <!-- Setup fundamentals tab -->
@@ -599,6 +606,7 @@ body {
       <div class="task"><div class="cb" id="cb-sys-5" onclick="tick('sys',5)"></div><div class="task-body"><div class="task-name" id="tn-sys-5">Warehouses</div><div class="task-desc">Any location you send an installer to pick up materials — onsite, offsite, will call, third party</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/what-is-the-warehouse-section-for" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-6" onclick="tick('sys',6)"></div><div class="task-body"><div class="task-name" id="tn-sys-6">Completion checklist</div><div class="task-desc">Personalize the default template — add, edit, or remove questions for your workflow</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/completion-checklist" target="_blank">How-to guide ↗</a></div></div></div>
       <div class="task"><div class="cb" id="cb-sys-7" onclick="tick('sys',7)"></div><div class="task-body"><div class="task-name" id="tn-sys-7">Contract templates</div><div class="task-desc">Edit the defaults or replace with your own contract language</div><div class="task-links"><a class="task-link" href="https://help.floorzap.com/contract-templates" target="_blank">How-to guide ↗</a></div></div></div>
+      <div id="addons-sys-list"></div>
     </div></div>
   </div>
 
@@ -824,17 +832,6 @@ Regards,</div>
 
   </div>
   <!-- /Training tab -->
-
-  <!-- Premium Features tab -->
-  <div class="tab-panel" id="tab-premium" role="tabpanel" aria-labelledby="tabbtn-premium">
-    <div class="qs-banner">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="10" cy="10" r="8" stroke="#3b82f6" stroke-width="1.5"/><path d="M10 9v5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="6.5" r=".85" fill="#3b82f6"/></svg>
-      <span>Premium features add extra power to your Floorzap account. Here's what's on your plan — some may need a quick setup with your onboarding specialist before they're ready to use.</span>
-    </div>
-    <div id="addons-list" class="addons-grid"></div>
-    <div id="addons-empty" class="addons-empty" style="display:none;">No premium features on your account yet.<br>Ask your onboarding specialist about add-ons like Floorzap Payments, 2-Way SMS, and more.</div>
-  </div>
-  <!-- /Premium Features tab -->
 
   <!-- Custom To-Do -->
   <div class="custom-card">
@@ -1115,10 +1112,11 @@ function applyFloorzapUrl() {
   if (link) link.href = 'https://' + FLOORZAP_URL;
 }
 
-/* ── Add-on products section ── */
+/* ── Add-on rows, appended under System configuration's real tasks.
+   Read-only — this page must never write `addons` (see CLAUDE.md); the
+   dashboard and the worker's cron are the only writers. ── */
 function renderAddons() {
-  var list = document.getElementById('addons-list');
-  var empty = document.getElementById('addons-empty');
+  var list = document.getElementById('addons-sys-list');
   if (!list) return;
 
   var attached = ADDONS.filter(function(a) {
@@ -1133,21 +1131,26 @@ function renderAddons() {
     return r !== 0 ? r : (order[a.product] - order[b.product]);
   });
 
-  if (empty) empty.style.display = attached.length ? 'none' : '';
-
   list.innerHTML = attached.map(function(a) {
     var cat = ADDON_CATALOG.find(function(c) { return c.key === a.product; });
     if (!cat) return '';
-    // Status pill intentionally omitted for now — the right side is reserved
-    // for a future "where you are in setup" status per add-on.
-    return '<div class="addon-card">'
-      + '<span class="addon-ic" style="background:' + addonTint(cat.color, 0.12) + ';color:' + cat.color + ';">' + cat.icon + '</span>'
-      + '<div class="addon-main">'
-      +   '<div class="addon-name">' + cat.name + '</div>'
-      +   (cat.desc ? '<div class="addon-desc">' + cat.desc + '</div>' : '')
+    var s = ADDON_STATUS_MAP[a.status] || ADDON_STATUS_MAP.not_started;
+    return '<div class="addon-task" style="border-left-color:' + cat.color + ';background:' + addonTint(cat.color, 0.03) + ';">'
+      + '<div class="task-body">'
+      +   '<div class="addon-name-row"><span class="task-name">' + cat.name + '</span><span class="addon-tag">Add-on</span></div>'
+      +   (cat.desc ? '<div class="task-desc">' + cat.desc + '</div>' : '')
       + '</div>'
+      + '<span class="addon-status" style="color:' + s.fg + ';"><span class="dot" style="background:' + s.dot + ';"></span>' + s.label + '</span>'
       + '</div>';
   }).join('');
+
+  // If System configuration is already expanded, its height was fixed in
+  // px by toggleCard() — recompute it so newly-added rows aren't clipped
+  // by card-body-inner's overflow:hidden (addons load async and can land
+  // after the client has already opened the card).
+  var card = document.getElementById('c-sys');
+  var inner = card ? card.querySelector('.card-body-inner') : null;
+  if (inner && !card.classList.contains('collapsed')) inner.style.height = inner.scrollHeight + 'px';
 }
 
 /* ── Meeting relative time ── */
@@ -1509,7 +1512,7 @@ function handleAddKey(e) {
 
 /* ── UI helpers ── */
 function switchTab(name) {
-  ['setup', 'training', 'premium'].forEach(function(t) {
+  ['setup', 'training'].forEach(function(t) {
     var isActive = (t === name);
     var panel = document.getElementById('tab-' + t);
     var btn = document.getElementById('tabbtn-' + t);
@@ -1519,9 +1522,6 @@ function switchTab(name) {
       btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     }
   });
-  // "My tasks" belongs to Setup/Training only — hide it on Premium Features.
-  var cc = document.querySelector('.custom-card');
-  if (cc) cc.style.display = (name === 'premium') ? 'none' : '';
 }
 function toggleCard(id) {
   var card = document.getElementById(id);

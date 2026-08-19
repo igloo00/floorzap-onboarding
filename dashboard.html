@@ -306,15 +306,6 @@ body {
 
 .kcard-actions-cell { display: flex; align-items: center; gap: 6px; justify-self: end; }
 
-.notes-btn {
-  background: none; border: none; cursor: pointer; color: #9ca3af;
-  padding: 3px 4px; border-radius: 5px; line-height: 1;
-  transition: background 0.12s, color 0.12s;
-  display: flex; align-items: center; flex-shrink: 0;
-}
-.notes-btn:hover { background: #f3f4f6; color: #374151; }
-.notes-btn.has-notes { color: #116FEA; }
-
 /* ── Notes chat log ── */
 .modal-close-x {
   position: absolute; top: 18px; right: 18px;
@@ -889,7 +880,6 @@ var _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 var _clients = {};
 var _newClientUrl = '';
 var _currentUser = null; // { name, initials, color }
-var FIXED_TOTAL = 20;
 var _renderTimer = null;
 
 var ADDON_CATALOG = [

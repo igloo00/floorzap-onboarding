@@ -1528,8 +1528,8 @@ function buildListRow(row, stage) {
   } else {
     if (stuck) extraBadges += '<span class="stuck-badge">Stuck · ' + getStuckDays(row) + 'd</span>';
     if (ghost) {
-      extraBadges += '<span class="ghost-badge">👻 Ghosted'
-        + (ghost.stageLabel ? ' · ' + escHtml(ghost.stageLabel) : '') + ' · ' + ghost.days + 'd</span>';
+      // Stage label omitted here — the stage-badge above already shows it.
+      extraBadges += '<span class="ghost-badge">👻 Ghosted · ' + ghost.days + 'd</span>';
     }
   }
   var stageCellHtml = '<div class="kcard-stage-cell">' + stageBadgeHtml + extraBadges + '</div>';

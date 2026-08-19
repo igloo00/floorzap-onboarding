@@ -286,8 +286,13 @@ export default {
 
   /**
    * Daily cron: refresh every client's add-ons in Supabase from HubSpot line items.
-   * Configured via wrangler.jsonc triggers.crons. Clients whose HubSpot lookup
-   * fails (e.g. missing scope) are skipped, never overwritten with an empty list.
+   * DISABLED as of 2026-08-19 — wrangler.jsonc no longer declares a
+   * triggers.crons entry, so Cloudflare never calls this. Add-ons are now
+   * onboarder-managed only, via dashboard.html's "Manage add-ons" modal.
+   * This handler and runDailyAddonSync() below are kept working and
+   * untouched so the HubSpot-driven sync can be turned back on later by
+   * restoring the cron trigger — see CLAUDE.md and IDEAS.md for why this
+   * was turned off and what "bringing it back" should look like.
    */
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runDailyAddonSync(env));
@@ -339,6 +344,11 @@ async function getTicketStageLabelMap(env) {
  * Read all clients from Supabase and write each one's add-ons back, sourced from
  * their HubSpot deal line items. Best-effort and safe: a client is only updated
  * when fetchHubSpotAddons returns a definite result (array), never on null.
+ *
+ * Currently unreachable — see the DISABLED note on `scheduled()` above.
+ * Left intact (not deleted) specifically so this can be wired back up
+ * without rewriting it, once there's appetite to automate add-ons from
+ * HubSpot objects again.
  */
 async function runDailyAddonSync(env) {
   const SB = env.SUPABASE_URL;

@@ -1218,10 +1218,11 @@ async function loadHubSpotMeetings() {
       CLIENT_NAME = data.client_name;
       applyClientName();
     }
-    if (Array.isArray(data.addons) && data.addons.length > 0) {
-      ADDONS = data.addons;
-      renderAddons();
-    }
+    // Add-ons come only from Supabase's `clients.addons` column (set by the
+    // onboarder in dashboard.html — see loadState() above), never from this
+    // worker endpoint, which doesn't return an `addons` field. There used to
+    // be a HubSpot-driven daily cron that wrote `addons` into Supabase too;
+    // it's disabled now (see CLAUDE.md), so this is the one source of truth.
     if (data.meetings) {
       var keys   = ['kickoff', 'checkin', 'integrations', 'prep_golive', 'graduation'];
       var labels = ['Kickoff', '2-Week check-in', 'Integrations', 'Prep go-live', 'Graduation'];

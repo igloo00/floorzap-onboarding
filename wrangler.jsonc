@@ -4,9 +4,12 @@
   // `wrangler secret put` and are NOT stored here.
   "name": "fz-hubspot",
   "main": "worker.js",
-  "compatibility_date": "2025-01-01",
-  "triggers": {
-    // Daily add-on sync from HubSpot line items → Supabase, 08:00 UTC.
-    "crons": ["0 8 * * *"]
-  }
+  "compatibility_date": "2025-01-01"
+  // Add-on sync from HubSpot line items → Supabase used to run daily via a
+  // "crons": ["0 8 * * *"] trigger here. Disabled 2026-08-19 — add-ons are
+  // onboarder-managed only now (dashboard.html's "Manage add-ons" modal).
+  // The sync code (runDailyAddonSync in worker.js) is still there, just
+  // unreachable without a trigger. To bring it back: restore
+  // "triggers": { "crons": ["0 8 * * *"] } above. See CLAUDE.md and
+  // IDEAS.md for the full context on why this was turned off.
 }

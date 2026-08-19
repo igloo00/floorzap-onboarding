@@ -13,8 +13,11 @@ model:
 - `dashboard.html` — internal Kanban dashboard for onboarding specialists.
 - `worker.js` — Cloudflare Worker. The *only* thing with HubSpot credentials;
   both HTML pages call it (or Supabase directly) but never call HubSpot
-  themselves. Also runs a daily cron (`wrangler.jsonc` → `triggers.crons`) that
-  syncs add-ons from HubSpot deal line items into Supabase.
+  themselves. It *used to* also run a daily cron syncing add-ons from
+  HubSpot deal line items into Supabase — **disabled as of 2026-08-19**, see
+  the add-ons gotcha below and `IDEAS.md`. The sync code is still in
+  `worker.js`, just unreachable without a `triggers.crons` entry in
+  `wrangler.jsonc`.
 
 ## Deploy model — read this before pushing
 
@@ -58,12 +61,21 @@ Only skip the branch step if explicitly told to push straight to `main`.
   client's saved checkboxes silently point at the wrong task. New tasks get
   a new, unused index — even if they display first.
 - **The client-facing page must never write `addons`.** It caused data loss
-  once (commit `84fb205`) — `index.html` only *reads* add-on status; only
-  `dashboard.html` and the Worker's cron write it.
+  once (commit `84fb205`) — `index.html` only *reads* add-on status.
+- **Add-ons are onboarder-managed only, by design, as of 2026-08-19.**
+  `dashboard.html`'s "Manage add-ons" modal is currently the *only* writer of
+  `clients.addons`. `worker.js` still has a HubSpot-deal-line-item sync
+  (`runDailyAddonSync`) that used to run on a daily cron and write `addons`
+  too, but that cron trigger was removed from `wrangler.jsonc` on purpose —
+  see `IDEAS.md` for why and what bringing it back should look like. If
+  you're re-enabling it: restore `"triggers": { "crons": [...] }` in
+  `wrangler.jsonc`, re-read the two gotchas below (both still apply, code
+  untouched), and update this note + `IDEAS.md`.
 - **HubSpot fetch failures must return `null`, not `[]`, in `worker.js`'s
-  add-on sync.** `runDailyAddonSync` treats `null` as "unknown, skip" and
-  `[]` as "confirmed empty, overwrite." Getting this backwards wipes a
-  client's real add-ons on a transient API error.
+  add-on sync** (relevant again only once the cron above is re-enabled).
+  `runDailyAddonSync` treats `null` as "unknown, skip" and `[]` as
+  "confirmed empty, overwrite." Getting this backwards wipes a client's real
+  add-ons on a transient API error.
 - **Meeting slots only render when a real meeting exists behind them** — a
   ticket property with a date but no matching calendar engagement or Zoom
   link is intentionally hidden rather than shown as a "ghost" upcoming

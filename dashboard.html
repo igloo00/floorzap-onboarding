@@ -378,6 +378,10 @@ body {
   border: 1px solid; font-size: 11px; font-weight: 600;
   padding: 3px 8px; border-radius: 999px; cursor: pointer;
   transition: opacity 0.1s; user-select: none;
+  /* Without these, the flex container shrinks the pill's text before it
+     shrinks the pill's fixed-size dot, so a squeezed pill degrades into
+     what looks like a bare colored circle instead of just clipping. */
+  white-space: nowrap; flex-shrink: 0;
 }
 .kcard-addon-pill:hover { opacity: 0.8; }
 .kcard-addon-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
@@ -540,6 +544,16 @@ body {
   .toolbar { padding: 12px 16px 0; }
   .header { padding: 0 16px; }
 }
+
+/* Below ~1040px the 6-column row runs out of room for the add-ons column
+   before anything else, which is what let those pills get squeezed into
+   circles (see .kcard-addon-pill above). Drop the column outright instead —
+   cleaner than letting it fight for space, and the underlying add-on status
+   is still reachable from the row's "Manage add-ons" menu item. */
+@media (max-width: 1040px) {
+  .office-row { grid-template-columns: minmax(170px,1.3fr) 150px 165px 120px 72px; }
+  .kcard-addons-cell, .addons-col-head { display: none; }
+}
 </style>
 </head>
 <body>
@@ -659,7 +673,7 @@ body {
       <span>STAGE</span>
       <span>NEXT MEETING</span>
       <span>LAST CONTACT</span>
-      <span>ADD-ONS</span>
+      <span class="addons-col-head">ADD-ONS</span>
       <span></span>
     </div>
     <div class="list-container" id="list-container"></div>
@@ -2060,9 +2074,12 @@ function openAddonPopup(e, clientId, product) {
     if (act.indexOf("'" + current + "'") !== -1) btn.classList.add('active');
   });
 
-  // Position near the pill
+  // Position near the pill. The popup is `position: fixed`, so its
+  // coordinates are viewport-relative — same frame as getBoundingClientRect().
+  // Adding window.scrollY here double-counts scroll and drifts the popup
+  // away from the pill on any page that isn't scrolled to the top.
   var rect = e.currentTarget.getBoundingClientRect();
-  popup.style.top  = (rect.bottom + 4 + window.scrollY) + 'px';
+  popup.style.top  = (rect.bottom + 4) + 'px';
   popup.style.left = rect.left + 'px';
   popup.classList.add('open');
 }
